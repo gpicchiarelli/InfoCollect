@@ -8,7 +8,7 @@ use XML::RSS;
 use Time::Piece;
 use threads;
 use Thread::Queue;
-use db;  # Importiamo il modulo db che gestisce la connessione al database
+use db;  # Importiamo il modulo db per la connessione al database
 
 # Funzione per recuperare gli URL dei feed RSS non visitati da almeno 2 ore
 sub get_feed_urls {
@@ -132,8 +132,8 @@ sub run_crawler {
     print "Crawling completato per tutti i feed.\n";
 }
 
-# Esegui il crawler
-run_crawler();
+# Rendi il modulo utilizzabile con l'uso di `run_crawler`
+1;  # Assicurati che il modulo restituisca un valore positivo
 
 
 # Licenza BSD

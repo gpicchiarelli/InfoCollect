@@ -1,4 +1,5 @@
-#!/usr/bin/env perl
+package db;
+
 use strict;
 use warnings;
 use DBI;
@@ -91,52 +92,67 @@ sub get_pages {
     return \@pages;
 }
 
-# Funzione per inserire un nuovo feed con timestamp preciso
+# Inserimento di un nuovo feed RSS nel database
 sub insert_feed {
-    my ($title, $url) = @_;
+    my ($title, $url, $published_at, $source) = @_;
+
     my $dbh = connect_db();
-    my $timestamp = get_timestamp();
-    my $sth = $dbh->prepare("INSERT INTO feeds (title, url, fetched_at) VALUES (?, ?, ?)");
-    $sth->execute($title, $url, $timestamp);
-    $dbh->disconnect;
+    my $sth = $dbh->prepare("INSERT INTO rss_feeds (title, url, published_at, source) VALUES (?, ?, ?, ?)");
+    $sth->execute($title, $url, $published_at, $source);
+    $sth->finish();
+    $dbh->disconnect();
 }
 
-# Funzione per ottenere tutti i feed
-sub get_feeds {
+# Inserimento di un articolo RSS nel database
+sub insert_article {
+    my ($feed_id, $title, $url, $published_at, $content, $author) = @_;
+
     my $dbh = connect_db();
-    my $sth = $dbh->prepare("SELECT title, url, fetched_at FROM feeds");
-    $sth->execute();
+    my $sth = $dbh->prepare("INSERT INTO rss_articles (feed_id, title, url, published_at, content, author) VALUES (?, ?, ?, ?, ?, ?)");
+    $sth->execute($feed_id, $title, $url, $published_at, $content, $author);
+    $sth->finish();
+    $dbh->disconnect();
+}
+
+# Funzione per ottenere gli URL dei feed RSS dal database
+sub get_feeds_from_db {
     my @feeds;
+    
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT id, url FROM rss_feeds");
+    $sth->execute();
+
     while (my @row = $sth->fetchrow_array) {
-        push @feeds, { title => $row[0], url => $row[1], fetched_at => $row[2] };
+        push @feeds, { id => $row[0], url => $row[1] };
     }
-    $dbh->disconnect;
-    return \@feeds;
+
+    $sth->finish();
+    $dbh->disconnect();
+    
+    return @feeds;
+}
+
+# Funzione per ottenere gli articoli di un feed RSS
+sub get_articles_from_feed {
+    my ($feed_id) = @_;
+    
+    my @articles;
+    
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT * FROM rss_articles WHERE feed_id = ?");
+    $sth->execute($feed_id);
+
+    while (my $row = $sth->fetchrow_hashref) {
+        push @articles, $row;
+    }
+
+    $sth->finish();
+    $dbh->disconnect();
+    
+    return @articles;
 }
 
 1;  # Necessario per i moduli Perl
-
-# Esempio utilizzo
-#!/usr/bin/env perl
-#use strict;
-#use warnings;
-
-# Includi il modulo db.pl
-#require 'db.pl';
-
-# Inserisci un feed di esempio
-#insert_feed('Repubblica', 'url feed');
-
-# Ottieni e stampa i feed
-#my $feeds = get_feeds();
-#print "\nFeed RSS:\n";
-#foreach my $feed (@$feeds) {
-#    print "Titolo: $feed->{title}\n";
-#    print "URL: $feed->{url}\n";
-#    print "Data di acquisizione: $feed->{fetched_at}\n";
-#    print "-" x 40 . "\n";
-#}
-
 
 # Licenza BSD
 # -----------------------------------------------------------------------------

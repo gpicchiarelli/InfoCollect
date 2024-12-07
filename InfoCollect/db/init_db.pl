@@ -1,4 +1,5 @@
-#!/usr/bin/env perl
+package init_db;
+
 use strict;
 use warnings;
 use DBI;
@@ -23,11 +24,28 @@ $dbh->do(q{
 
 # Creare la tabella per i feed RSS con timestamp fino al millisecondo
 $dbh->do(q{
-    CREATE TABLE IF NOT EXISTS feeds (
+    CREATE TABLE IF NOT EXISTS rss_feeds (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
-        url TEXT NOT NULL,
-        fetched_at TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now'))
+        url TEXT NOT NULL UNIQUE,
+        published_at DATETIME NOT NULL,
+        source TEXT,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+}) or die $dbh->errstr;
+
+# Creare la tabella per gli articoli RSS
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS rss_articles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        feed_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        url TEXT NOT NULL UNIQUE,
+        published_at DATETIME NOT NULL,
+        content TEXT,
+        author TEXT,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (feed_id) REFERENCES rss_feeds(id) ON DELETE CASCADE
     )
 }) or die $dbh->errstr;
 
@@ -42,7 +60,6 @@ $dbh->do(q{
         visited_at TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now'))
     )
 }) or die $dbh->errstr;
-
 
 print "Database e tabelle creati con successo.\n";
 
