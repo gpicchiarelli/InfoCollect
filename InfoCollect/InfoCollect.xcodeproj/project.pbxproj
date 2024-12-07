@@ -6,10 +6,25 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXFileReference section */
+		526D6FE82D0462FC002D9CFF /* opml.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; path = opml.pl; sourceTree = "<group>"; };
+		526D6FE92D04640B002D9CFF /* start.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; path = start.pl; sourceTree = "<group>"; };
+		526D6FEA2D046466002D9CFF /* modules_installer.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; path = modules_installer.pl; sourceTree = "<group>"; };
+		526D6FEB2D0464BB002D9CFF /* authors.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = authors.md; sourceTree = "<group>"; };
+		526D6FEC2D046657002D9CFF /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = SOURCE_ROOT; };
+		526D6FED2D046657002D9CFF /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
 /* Begin PBXGroup section */
 		526D6FE12D0462AF002D9CFF = {
 			isa = PBXGroup;
 			children = (
+				526D6FEC2D046657002D9CFF /* LICENSE */,
+				526D6FED2D046657002D9CFF /* README.md */,
+				526D6FEB2D0464BB002D9CFF /* authors.md */,
+				526D6FEA2D046466002D9CFF /* modules_installer.pl */,
+				526D6FE92D04640B002D9CFF /* start.pl */,
+				526D6FE82D0462FC002D9CFF /* opml.pl */,
 			);
 			sourceTree = "<group>";
 		};
