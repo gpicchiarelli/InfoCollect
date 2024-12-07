@@ -13,27 +13,13 @@
 		526D6FEB2D0464BB002D9CFF /* authors.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = authors.md; sourceTree = "<group>"; };
 		526D6FEC2D046657002D9CFF /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = SOURCE_ROOT; };
 		526D6FED2D046657002D9CFF /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
+		527A33E72D04CF3300EA9202 /* info_collect.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; path = info_collect.pl; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		526D6FEE2D046896002D9CFF /* db */ = {
+		527A33E92D04D01A00EA9202 /* lib */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = db;
-			sourceTree = "<group>";
-		};
-		526D6FEF2D0468A0002D9CFF /* crawler */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = crawler;
-			sourceTree = "<group>";
-		};
-		526D6FF02D0468B4002D9CFF /* reports */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = reports;
-			sourceTree = "<group>";
-		};
-		527A33E32D04CACF00EA9202 /* configuration */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = configuration;
+			path = lib;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -42,10 +28,8 @@
 		526D6FE12D0462AF002D9CFF = {
 			isa = PBXGroup;
 			children = (
-				527A33E32D04CACF00EA9202 /* configuration */,
-				526D6FF02D0468B4002D9CFF /* reports */,
-				526D6FEF2D0468A0002D9CFF /* crawler */,
-				526D6FEE2D046896002D9CFF /* db */,
+				527A33E92D04D01A00EA9202 /* lib */,
+				527A33E72D04CF3300EA9202 /* info_collect.pl */,
 				526D6FEC2D046657002D9CFF /* LICENSE */,
 				526D6FED2D046657002D9CFF /* README.md */,
 				526D6FEB2D0464BB002D9CFF /* authors.md */,
