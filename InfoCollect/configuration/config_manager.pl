@@ -111,6 +111,33 @@ sub setting_exists {
 # Assicurati che il modulo restituisca un valore positivo
 1;
 
+#use strict;
+#use warnings;
+#use config_manager;
+
+# Aggiungi o aggiorna impostazioni
+#config_manager::add_setting('refresh_interval', '30');
+#config_manager::add_setting('theme', 'dark');
+
+# Recupera una singola impostazione
+#my $theme = config_manager::get_setting('theme');
+#print "Tema attuale: $theme\n" if defined $theme;
+
+# Verifica se una chiave esiste
+#if (config_manager::setting_exists('refresh_interval')) {
+#    print "L'impostazione 'refresh_interval' esiste.\n";
+#}
+
+# Ottieni tutte le impostazioni
+#my $settings = config_manager::get_all_settings();
+#foreach my $key (keys %$settings) {
+#    print "$key => $settings->{$key}\n";
+#}
+
+# Elimina una impostazione
+config_manager::delete_setting('theme');
+
+
 # Licenza BSD
 # -----------------------------------------------------------------------------
 # Copyright (c) 2024, Giacomo Picchiarelli
