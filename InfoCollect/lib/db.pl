@@ -92,6 +92,26 @@ sub get_pages {
     return \@pages;
 }
 
+# Aggiungi un nuovo feed RSS al database
+sub add_rss_feed {
+    my ($title, $url) = @_;
+
+    my $sth = $dbh->prepare(q{
+        INSERT INTO rss_feeds (title, url, published_at)
+        VALUES (?, ?, CURRENT_TIMESTAMP)
+    });
+    $sth->execute($title, $url);
+}
+
+# Ottieni tutti i feed RSS dal database
+sub get_all_rss_feeds {
+    my $sth = $dbh->prepare(q{
+        SELECT title, url FROM rss_feeds
+    });
+    $sth->execute();
+    return $sth->fetchall_arrayref({});
+}
+
 # Inserimento di un nuovo feed RSS nel database
 sub insert_feed {
     my ($title, $url, $published_at, $source) = @_;

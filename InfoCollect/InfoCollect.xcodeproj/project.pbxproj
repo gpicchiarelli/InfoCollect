@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		526D6FE82D0462FC002D9CFF /* opml.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; path = opml.pl; sourceTree = "<group>"; };
 		526D6FE92D04640B002D9CFF /* start.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; path = start.pl; sourceTree = "<group>"; };
 		526D6FEA2D046466002D9CFF /* modules_installer.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; path = modules_installer.pl; sourceTree = "<group>"; };
 		526D6FEB2D0464BB002D9CFF /* authors.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = authors.md; sourceTree = "<group>"; };
@@ -35,7 +34,6 @@
 				526D6FEB2D0464BB002D9CFF /* authors.md */,
 				526D6FEA2D046466002D9CFF /* modules_installer.pl */,
 				526D6FE92D04640B002D9CFF /* start.pl */,
-				526D6FE82D0462FC002D9CFF /* opml.pl */,
 			);
 			sourceTree = "<group>";
 		};

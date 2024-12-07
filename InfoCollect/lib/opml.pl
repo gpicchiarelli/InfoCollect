@@ -1,59 +1,66 @@
-#!/usr/bin/env perl
+package opml;
+
 use strict;
 use warnings;
-use XML::LibXML;
+use XML::Simple;
 use Data::Dumper;
+use File::Slurp;
+use Exporter 'import';
 
-# Controllo e installazione dei moduli necessari
-my @modules = qw(XML::LibXML Data::Dumper);
-foreach my $module (@modules) {
-    eval "use $module";
-    if ($@) {
-        print "Il modulo $module non è installato. Installazione in corso...\n";
-        system("cpan -T $module") == 0 or die "Impossibile installare $module\n";
-    }
-}
+# Modulo DB per interagire con il database
+use db;
 
-# Funzione per parsare il file OPML e inserire i dati in una struttura
-sub parse_opml {
-    my ($filename) = @_;
-    my @feeds;
+# Esporta le funzioni per essere utilizzate nella CLI
+our @EXPORT_OK = qw(import_opml export_opml);
 
-    # Controlla se il file esiste
-    unless (-e $filename) {
-        die "File OPML non trovato: $filename\n";
+# Importa feed da un file OPML
+sub import_opml {
+    my ($file_path) = @_;
+
+    unless (-e $file_path) {
+        die "File OPML non trovato: $file_path\n";
     }
 
-    # Crea un nuovo parser XML
-    my $parser = XML::LibXML->new();
-    my $doc = $parser->parse_file($filename);
+    my $xml = XML::Simple->new;
+    my $data = $xml->XMLin($file_path, KeyAttr => [], ForceArray => ['outline']);
 
-    # Trova tutti i nodi <outline> con attributo xmlUrl (feed RSS)
-    foreach my $outline ($doc->findnodes('//outline[@xmlUrl]')) {
-        my $title = $outline->getAttribute('title') || 'No Title';
-        my $url   = $outline->getAttribute('xmlUrl');
+    foreach my $feed (@{$data->{body}->{outline}}) {
+        my $title = $feed->{title} // 'Senza Titolo';
+        my $url   = $feed->{xmlUrl};
 
-        # Aggiungi il feed alla struttura dati
-        push @feeds, {
-            title => $title,
-            url   => $url,
-        };
+        if ($url) {
+            print "Importazione feed: $title ($url)\n";
+            db::add_rss_feed($title, $url);
+        }
     }
 
-    return \@feeds;
+    print "Importazione completata.\n";
 }
 
-# Esempio di utilizzo se eseguito direttamente
-if (__FILE__ eq $0) {
-    my $opml_file = 'feeds.opml';  # Cambia con il percorso del tuo file OPML
+# Esporta i feed RSS esistenti in un file OPML
+sub export_opml {
+    my ($file_path) = @_;
 
-    my $feeds = parse_opml($opml_file);
+    my $feeds = db::get_all_rss_feeds();
 
-    # Stampa la struttura dati risultante
-    print Dumper($feeds);
+    my $opml_structure = {
+        head => {
+            title => 'Esportazione Feed RSS',
+        },
+        body => {
+            outline => [map { { title => $_->{title}, xmlUrl => $_->{url} } } @$feeds],
+        },
+    };
+
+    my $xml = XML::Simple->new(NoAttr => 1, RootName => 'opml');
+    my $output = $xml->XMLout($opml_structure);
+
+    write_file($file_path, $output);
+    print "Esportazione completata in: $file_path\n";
 }
 
-1;  # Necessario per i moduli Perl
+1;
+
 
 
 

@@ -56,6 +56,22 @@ sub run {
             config_manager::delete_setting($key);
             print colored("Impostazione eliminata: $key\n", 'bold yellow');
         }
+        elsif ($input eq 'import-opml') {
+            my $file_path = shift @args;
+            unless ($file_path) {
+                print colored("Uso: import-opml <file.opml>\n", 'red');
+                next;
+            }
+            import_opml($file_path);
+        }
+        elsif ($input eq 'export-opml') {
+            my $file_path = shift @args;
+            unless ($file_path) {
+                print colored("Uso: export-opml <file.opml>\n", 'red');
+                next;
+            }
+            export_opml($file_path);
+        }
         else {
             print colored("Comando non riconosciuto. Digita 'help' per la lista dei comandi.\n", 'bold red');
         }
@@ -76,7 +92,13 @@ sub print_help {
     print colored("  add-setting <key> <value> ", 'bold yellow'), "Aggiunge o aggiorna una voce di configurazione.\n";
     print colored("  get-setting <key>         ", 'bold yellow'), "Ottiene il valore di una voce di configurazione.\n";
     print colored("  delete-setting <key>      ", 'bold yellow'), "Elimina una voce di configurazione.\n";
-    print colored("\nEsempi:\n", 'bold cyan');
+    print colored("  import-opml <file>  ", 'cyan'), " - Importa feed RSS da un file OPML\n";
+    print colored("  export-opml <file>  ", 'cyan'), " - Esporta i feed RSS in un file OPML\n";
+    print colored("  exit                ", 'cyan'), " - Esce dalla CLI\n";
+    print colored("\nEsempi di utilizzo:\n", 'bold yellow');
+    print colored("  import-opml feeds.opml\n", 'green');
+    print colored("  export-opml export.opml\n", 'green');
+    print colored("\nImpostazioni:\n", 'bold cyan');
     print colored("  add-setting refresh_interval 30\n", 'cyan');
     print colored("  get-setting refresh_interval\n", 'cyan');
     print colored("  delete-setting refresh_interval\n\n", 'cyan');
