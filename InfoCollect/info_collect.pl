@@ -3,7 +3,8 @@
 use strict;
 use warnings;
 use FindBin;
-use lib "$FindBin::Bin";  # Aggiunge la directory corrente alla lista dei percorsi dei moduli
+#use lib "$FindBin::lib";
+use lib './lib';  
 use interactive_cli;
 
 # Esegui la CLI interattiva
