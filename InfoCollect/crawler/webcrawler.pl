@@ -118,19 +118,12 @@ sub start_crawling {
 
 1;  # Il modulo deve restituire un 1 per essere caricato correttamente
 
-#utilizzo del modulo
-#!/usr/bin/env perl
-#
-#use strict;
-#use warnings;
-#use WebCrawler;
+use strict;
+use warnings;
+use rss_crawler;
 
-# Crea un'istanza del crawler con le URL iniziali
-#my $crawler = WebCrawler->new(
-#    start_urls => ['https://www.example.com', 'https://www.wikipedia.org'],
-#    num_threads => 5,
-#);
-
+# Esegui il crawler
+#rss_crawler::run_crawler();
 # Avvia il processo di crawling
 #$crawler->start_crawling();
 #*/
