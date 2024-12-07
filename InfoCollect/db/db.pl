@@ -50,6 +50,28 @@ sub get_feeds {
 
 1;  # Necessario per i moduli Perl
 
+# Esempio utilizzo
+#!/usr/bin/env perl
+#use strict;
+#use warnings;
+
+# Includi il modulo db.pl
+#require 'db.pl';
+
+# Inserisci un feed di esempio
+#insert_feed('Repubblica', 'url feed');
+
+# Ottieni e stampa i feed
+#my $feeds = get_feeds();
+#print "\nFeed RSS:\n";
+#foreach my $feed (@$feeds) {
+#    print "Titolo: $feed->{title}\n";
+#    print "URL: $feed->{url}\n";
+#    print "Data di acquisizione: $feed->{fetched_at}\n";
+#    print "-" x 40 . "\n";
+#}
+
+
 # Licenza BSD
 # -----------------------------------------------------------------------------
 # Copyright (c) 2024, Giacomo Picchiarelli
