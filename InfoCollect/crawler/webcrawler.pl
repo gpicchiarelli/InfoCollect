@@ -1,4 +1,5 @@
-#!/usr/bin/env perl
+package WebCrawler;
+
 use strict;
 use warnings;
 use LWP::UserAgent;
@@ -9,21 +10,24 @@ use Thread::Queue;
 use threads;
 use threads::shared;
 use Time::HiRes qw(gettimeofday);
-use db; # Il modulo db.pl che gestisce il database
+use db;  # Il modulo db.pl che gestisce il database
 
-# URL iniziali per iniziare la scansione
-my @start_urls = ('https://www.example.com', 'https://www.wikipedia.org');
-
-# Coda per i URL da scaricare
-my $queue :shared = Thread::Queue->new();
-
-# Numero di thread di crawling
-my $num_threads = 5;
+# Costruttore del modulo
+sub new {
+    my ($class, %args) = @_;
+    my $self = {
+        start_urls => $args{start_urls} || ['https://www.example.com', 'https://www.wikipedia.org'],
+        num_threads => $args{num_threads} || 5,
+        queue => Thread::Queue->new(),
+    };
+    bless $self, $class;
+    return $self;
+}
 
 # Funzione per scaricare e analizzare la pagina
 sub crawl_page {
-    my ($url) = @_;
-
+    my ($self, $url) = @_;
+    
     # Creare un oggetto UserAgent
     my $ua = LWP::UserAgent->new;
     $ua->timeout(10);  # Timeout di 10 secondi
@@ -59,6 +63,7 @@ sub crawl_page {
 
 # Funzione per recuperare gli URL dal database che non sono stati visitati negli ultimi 2 ore
 sub get_urls_to_crawl {
+    my ($self) = @_;
     my $dbh = db::connect_db();
 
     # Calcola il timestamp di 2 ore fa
@@ -80,37 +85,55 @@ sub get_urls_to_crawl {
 
 # Funzione per scaricare i URL dalla coda (multithreading)
 sub worker {
-    while (my $url = $queue->dequeue()) {
-        crawl_page($url);
+    my ($self) = @_;
+    while (my $url = $self->{queue}->dequeue()) {
+        $self->crawl_page($url);
     }
 }
 
-# Funzione per iniziare il crawling
+# Funzione per avviare il processo di crawling
 sub start_crawling {
+    my ($self) = @_;
+
     # Aggiungi gli URL iniziali alla coda
-    foreach my $url (@start_urls) {
-        $queue->enqueue($url);
+    foreach my $url (@{$self->{start_urls}}) {
+        $self->{queue}->enqueue($url);
     }
 
     # Aggiungi gli URL dal database (che non sono stati visitati nelle ultime 2 ore)
-    my @db_urls = get_urls_to_crawl();
+    my @db_urls = $self->get_urls_to_crawl();
     foreach my $url (@db_urls) {
-        $queue->enqueue($url);
+        $self->{queue}->enqueue($url);
     }
 
     # Creazione dei thread di crawling
     my @threads;
-    for (1..$num_threads) {
-        push @threads, threads->create(\&worker);
+    for (1..$self->{num_threads}) {
+        push @threads, threads->create(sub { $self->worker() });
     }
 
     # Aspetta che tutti i thread finiscano
     $_->join() for @threads;
 }
 
-# Avvia il crawler
-start_crawling();
+1;  # Il modulo deve restituire un 1 per essere caricato correttamente
 
+#utilizzo del modulo
+#!/usr/bin/env perl
+#
+#use strict;
+#use warnings;
+#use WebCrawler;
+
+# Crea un'istanza del crawler con le URL iniziali
+#my $crawler = WebCrawler->new(
+#    start_urls => ['https://www.example.com', 'https://www.wikipedia.org'],
+#    num_threads => 5,
+#);
+
+# Avvia il processo di crawling
+#$crawler->start_crawling();
+#*/
 
 # Licenza BSD
 # -----------------------------------------------------------------------------
