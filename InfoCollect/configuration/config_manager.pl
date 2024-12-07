@@ -135,7 +135,7 @@ sub setting_exists {
 #}
 
 # Elimina una impostazione
-config_manager::delete_setting('theme');
+#config_manager::delete_setting('theme');
 
 
 # Licenza BSD
