@@ -3,9 +3,20 @@
 use strict;
 use warnings;
 use FindBin;
-#use lib "$FindBin::lib";
 use lib './lib';  
 use interactive_cli;
+
+# Lista dei moduli richiesti
+my @modules = qw(LWP::Simple XML::RSS Term::ANSIColor);
+
+# Controlla e installa i moduli mancanti
+foreach my $module (@modules) {
+    eval "use $module";
+    if ($@) {
+        print "Il modulo $module non è installato. Installazione in corso...\n";
+        system("cpan -T $module") == 0 or die "Impossibile installare $module\n";
+    }
+}
 
 # Esegui la CLI interattiva
 interactive_cli::run();
