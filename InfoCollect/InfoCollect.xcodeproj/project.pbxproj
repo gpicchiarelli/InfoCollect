@@ -15,10 +15,31 @@
 		526D6FED2D046657002D9CFF /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		526D6FEE2D046896002D9CFF /* db */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = db;
+			sourceTree = "<group>";
+		};
+		526D6FEF2D0468A0002D9CFF /* crawler */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = crawler;
+			sourceTree = "<group>";
+		};
+		526D6FF02D0468B4002D9CFF /* reports */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = reports;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXGroup section */
 		526D6FE12D0462AF002D9CFF = {
 			isa = PBXGroup;
 			children = (
+				526D6FF02D0468B4002D9CFF /* reports */,
+				526D6FEF2D0468A0002D9CFF /* crawler */,
+				526D6FEE2D046896002D9CFF /* db */,
 				526D6FEC2D046657002D9CFF /* LICENSE */,
 				526D6FED2D046657002D9CFF /* README.md */,
 				526D6FEB2D0464BB002D9CFF /* authors.md */,
