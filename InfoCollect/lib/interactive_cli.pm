@@ -57,7 +57,7 @@ sub run {
             print colored("Impostazione eliminata: $key\n", 'bold yellow');
         }
         elsif ($input eq 'import-opml') {
-            my $file_path = shift @args;
+            my $file_path = $1;
             unless ($file_path) {
                 print colored("Uso: import-opml <file.opml>\n", 'red');
                 next;
@@ -65,7 +65,7 @@ sub run {
             import_opml($file_path);
         }
         elsif ($input eq 'export-opml') {
-            my $file_path = shift @args;
+            my $file_path = $1;
             unless ($file_path) {
                 print colored("Uso: export-opml <file.opml>\n", 'red');
                 next;
