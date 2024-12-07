@@ -31,12 +31,18 @@
 			path = reports;
 			sourceTree = "<group>";
 		};
+		527A33E32D04CACF00EA9202 /* configuration */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = configuration;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXGroup section */
 		526D6FE12D0462AF002D9CFF = {
 			isa = PBXGroup;
 			children = (
+				527A33E32D04CACF00EA9202 /* configuration */,
 				526D6FF02D0468B4002D9CFF /* reports */,
 				526D6FEF2D0468A0002D9CFF /* crawler */,
 				526D6FEE2D046896002D9CFF /* db */,
