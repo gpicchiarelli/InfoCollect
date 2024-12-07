@@ -25,14 +25,50 @@ sub get_timestamp {
                    $year + 1900, $month + 1, $day, $hour, $min, $sec, $milliseconds);
 }
 
-# Funzione per inserire una nuova pagina visitata
+# Funzione per inserire una pagina nel database
 sub insert_page {
     my ($url, $title, $content, $metadata) = @_;
+    
     my $dbh = connect_db();
-    my $timestamp = get_timestamp();
-    my $metadata_json = encode_json($metadata);
+    
+    # Ottieni il timestamp corrente
+    my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
+    my $timestamp = sprintf("%04d-%02d-%02d %02d:%02d:%02d",
+        $year + 1900, $mon + 1, $mday, $hour, $min, $sec);
+
+    # Prepara la query per inserire i dati
     my $sth = $dbh->prepare("INSERT INTO pages (url, title, content, metadata, visited_at) VALUES (?, ?, ?, ?, ?)");
-    $sth->execute($url, $title, $content, $metadata_json, $timestamp);
+    $sth->execute($url, $title, $content, encode_json($metadata), $timestamp);
+
+    $dbh->disconnect;
+}
+
+# Funzione per verificare quante copie di un URL esistono nel database
+sub check_url_count {
+    my ($url) = @_;
+    
+    my $dbh = connect_db();
+    
+    # Query per contare quante righe esistono per questo URL
+    my $sth = $dbh->prepare("SELECT COUNT(*) FROM pages WHERE url = ?");
+    $sth->execute($url);
+    
+    my ($count) = $sth->fetchrow_array;
+    
+    $dbh->disconnect;
+    return $count;
+}
+
+# Funzione per rimuovere la copia più vecchia di un URL, se ce ne sono più di 5
+sub remove_oldest_copy {
+    my ($url) = @_;
+
+    my $dbh = connect_db();
+    
+    # Trova e rimuovi la copia più vecchia di questo URL
+    my $sth = $dbh->prepare("DELETE FROM pages WHERE url = ? ORDER BY visited_at ASC LIMIT 1");
+    $sth->execute($url);
+    
     $dbh->disconnect;
 }
 
