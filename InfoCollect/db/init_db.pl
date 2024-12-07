@@ -31,6 +31,19 @@ $dbh->do(q{
     )
 }) or die $dbh->errstr;
 
+# Creare la tabella per le pagine web visitate
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS pages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        url TEXT NOT NULL,
+        title TEXT,
+        content TEXT,
+        metadata TEXT,
+        visited_at TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now'))
+    )
+}) or die $dbh->errstr;
+
+
 print "Database e tabelle creati con successo.\n";
 
 # Chiudere la connessione

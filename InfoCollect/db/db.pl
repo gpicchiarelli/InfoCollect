@@ -25,6 +25,36 @@ sub get_timestamp {
                    $year + 1900, $month + 1, $day, $hour, $min, $sec, $milliseconds);
 }
 
+# Funzione per inserire una nuova pagina visitata
+sub insert_page {
+    my ($url, $title, $content, $metadata) = @_;
+    my $dbh = connect_db();
+    my $timestamp = get_timestamp();
+    my $metadata_json = encode_json($metadata);
+    my $sth = $dbh->prepare("INSERT INTO pages (url, title, content, metadata, visited_at) VALUES (?, ?, ?, ?, ?)");
+    $sth->execute($url, $title, $content, $metadata_json, $timestamp);
+    $dbh->disconnect;
+}
+
+# Funzione per ottenere tutte le pagine visitate
+sub get_pages {
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT url, title, content, metadata, visited_at FROM pages");
+    $sth->execute();
+    my @pages;
+    while (my @row = $sth->fetchrow_array) {
+        push @pages, {
+            url        => $row[0],
+            title      => $row[1],
+            content    => $row[2],
+            metadata   => decode_json($row[3]),
+            visited_at => $row[4],
+        };
+    }
+    $dbh->disconnect;
+    return \@pages;
+}
+
 # Funzione per inserire un nuovo feed con timestamp preciso
 sub insert_feed {
     my ($title, $url) = @_;
