@@ -5,6 +5,9 @@ use warnings;
 use FindBin;
 use lib './lib';  
 use interactive_cli;
+use init_db;
+
+init_db::Inizializza();
 
 # Lista dei moduli richiesti
 my @modules = qw(LWP::Simple XML::RSS Term::ANSIColor);

@@ -10,6 +10,7 @@ use config_manager;
 
 # Funzione principale per la CLI interattiva
 sub run {
+   
     my $term = Term::ReadLine->new('InfoCollect CLI');
     my $prompt = colored("infocollect> ", 'bold green');
     my $OUT = $term->OUT || \*STDOUT;
