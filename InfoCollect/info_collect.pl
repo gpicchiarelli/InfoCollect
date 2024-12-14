@@ -7,6 +7,8 @@ use lib './lib';
 use interactive_cli;
 use init_db;
 
+$0 = "InfoCollect";
+
 init_db::Inizializza();
 
 # Lista dei moduli richiesti
