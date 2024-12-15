@@ -6,10 +6,12 @@ use FindBin;
 use lib './lib';  
 use interactive_cli;
 use init_db;
+use init_conf;
 
 $0 = "InfoCollect";
 
 init_db::Inizializza();
+init_conf::configuraValoriIniziali();
 
 # Lista dei moduli richiesti
 my @modules = qw(LWP::Simple XML::RSS Term::ANSIColor);

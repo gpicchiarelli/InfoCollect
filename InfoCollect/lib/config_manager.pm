@@ -67,7 +67,7 @@ sub get_all_settings {
     $sth->finish();
     $dbh->disconnect();
 
-    return \%settings;
+    return %settings;
 }
 
 # Funzione per eliminare una impostazione
