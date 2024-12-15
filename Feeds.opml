@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+<head>
+<title>Feeds</title>
+</head>
+<body>
+<outline type="rss" xmlUrl="https://www.adnkronos.com/RSS_PrimaPagina.xml" title="Adnkronos - ultimoratop" text="Adnkronos - ultimoratop" htmlUrl="https://www.adnkronos.com" />
+<outline text="All CISA Advisories" title="All CISA Advisories" htmlUrl="https://www.cisa.gov/" xmlUrl="https://www.cisa.gov/cybersecurity-advisories/all.xml" type="rss" />
+<outline xmlUrl="https://www.apple.com/newsroom/rss-feed.rss/rss" title="Apple Newsroom" text="Apple Newsroom" type="rss" htmlUrl="https://www.apple.com/newsroom/rss-feed.rss" />
+<outline htmlUrl="https://www.csirt.gov.it" type="rss" text="CSIRT" title="CSIRT" xmlUrl="https://www.csirt.gov.it/data/indexer/rss" />
+<outline htmlUrl="http://www.youtube.com/feeds/videos.xml?playlist_id=PLrEnWoR732-BHrPp_Pm8_VleD68f9s14-" type="rss" xmlUrl="https://www.youtube.com/feeds/videos.xml?playlist_id=PLrEnWoR732-BHrPp_Pm8_VleD68f9s14-" title="Popular Right Now" text="Popular Right Now" />
+<outline type="rss" text="Primo piano ANSA - ANSA.it" htmlUrl="https://www.ansa.it" title="Primo piano ANSA - ANSA.it" xmlUrl="https://www.ansa.it/sito/ansait_rss.xml" />
+<outline type="rss" title="Rai.it" text="Rai.it" xmlUrl="https://www.rai.it/dl/portale/html/PublishingBlock-15c2c340-e282-473d-b944-661e818d667b-rss.xml" htmlUrl="http://www.rai.it" />
+<outline text="Rai.it" htmlUrl="http://www.rai.it" xmlUrl="https://www.rai.it/dl/portale/html/PublishingBlock-83fb8a4b-b3bb-461a-a3cb-501cda9811fe-rss.xml" type="rss" title="Rai.it" />
+<outline htmlUrl="https://www.rainews.it" type="rss" title="RaiNews" text="RaiNews" xmlUrl="https://www.rainews.it/rss/tutti" />
+<outline xmlUrl="https://www.ansa.it/umbria/notizie/umbria_rss.xml" type="rss" text="RSS di Regione Umbria - ANSA.it" title="RSS di Regione Umbria - ANSA.it" htmlUrl="https://www.ansa.it/umbria/index.html" />
+<outline xmlUrl="https://www.ansa.it/canale_scienza_tecnica/notizie/scienzaetecnica_rss.xml" text="RSS di Scienza - ANSA.it" title="RSS di Scienza - ANSA.it" htmlUrl="https://www.ansa.it/canalescienza/index.html" type="rss" />
+<outline htmlUrl="https://www.ansa.it/canaletecnologia/index.html" type="rss" text="RSS di Tecnologia - ANSA.it" xmlUrl="https://www.ansa.it/canale_tecnologia/notizie/tecnologia_rss.xml" title="RSS di Tecnologia - ANSA.it" />
+</body>
+</opml>

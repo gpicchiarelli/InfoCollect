@@ -92,27 +92,59 @@ sub get_pages {
     return \@pages;
 }
 
-# Aggiungi un nuovo feed RSS al database
 sub add_rss_feed {
     my ($title, $url) = @_;
+
+    # Verifica che $title e $url non siano vuoti
+    unless ($title && $url) {
+        die "Errore: titolo e URL sono richiesti per aggiungere un feed.\n";
+    }
+
+    # Connessione al database
     my $dbh = connect_db();
+
+    # Prepariamo la query SQL
     my $sth = $dbh->prepare(q{
         INSERT INTO rss_feeds (title, url, published_at)
         VALUES (?, ?, CURRENT_TIMESTAMP)
     });
-    $sth->execute($title, $url);
+
+    # Eseguiamo la query con i parametri
+    eval {
+        $sth->execute($title, $url);
+    };
+    
+    if ($@) {
+        warn "Errore durante l'inserimento del feed RSS: $@";
+        return;
+    }
+
+    # Chiudiamo la connessione al database
     $dbh->disconnect;
+
+    print "Feed RSS aggiunto con successo.\n";
 }
 
 # Ottieni tutti i feed RSS dal database
 sub get_all_rss_feeds {
     my $dbh = connect_db();
+    
+    # Prepariamo la query SQL
     my $sth = $dbh->prepare(q{
         SELECT title, url FROM rss_feeds
     });
+
+    # Eseguiamo la query
     $sth->execute();
+
+    # Recuperiamo tutti i risultati e li restituiamo come una lista di hash
+    my $rss_feeds = $sth->fetchall_arrayref({});
+
+    # Chiudiamo la connessione al database
     $dbh->disconnect;
-    return $sth->fetchall_arrayref({});
+
+    # Restituiamo i feed RSS
+    return $rss_feeds;
 }
 
 # Inserimento di un nuovo feed RSS nel database

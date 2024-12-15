@@ -7,12 +7,13 @@ use Term::ANSIColor;
 use rss_crawler;
 use web_crawler;
 use config_manager;
+use opml;
 
 # Funzione principale per la CLI interattiva
 sub run {
    
     my $term = Term::ReadLine->new('InfoCollect CLI');
-    my $prompt = colored("infocollect>: ", 'bold green');
+    my $prompt = colored("infocollect>:", 'bold green');
     my $OUT = $term->OUT || \*STDOUT;
 
     print colored("\n=== Benvenuto nella CLI interattiva di InfoCollect ===\n", 'bold cyan');
@@ -57,21 +58,19 @@ sub run {
             config_manager::delete_setting($key);
             print colored("Impostazione eliminata: $key\n", 'bold yellow');
         }
-        elsif ($input eq 'import-opml') {
+        elsif ($input =~ /^import-opml\s+(\S+)$/) {
             my $file_path = $1;
             unless ($file_path) {
                 print colored("Uso: import-opml <file.opml>\n", 'red');
-                next;
             }
-            import_opml($file_path);
+            opml::import_opml($file_path);
         }
-        elsif ($input eq 'export-opml') {
+        elsif ($input =~ /^export-opml\s+(\S+)$/) {
             my $file_path = $1;
             unless ($file_path) {
                 print colored("Uso: export-opml <file.opml>\n", 'red');
-                next;
             }
-            export_opml($file_path);
+            opml::export_opml($file_path);
         }
         else {
             print colored("Comando non riconosciuto. Digita 'help' per la lista dei comandi.\n", 'bold red');
