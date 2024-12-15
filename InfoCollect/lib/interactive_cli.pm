@@ -94,7 +94,6 @@ sub print_help {
     print colored("  delete-setting <key>      ", 'bold yellow'), "Elimina una voce di configurazione.\n";
     print colored("  import-opml <file>  ", 'cyan'), " - Importa feed RSS da un file OPML\n";
     print colored("  export-opml <file>  ", 'cyan'), " - Esporta i feed RSS in un file OPML\n";
-    print colored("  exit                ", 'cyan'), " - Esce dalla CLI\n";
     print colored("\nEsempi di utilizzo:\n", 'bold yellow');
     print colored("  import-opml feeds.opml\n", 'green');
     print colored("  export-opml export.opml\n", 'green');
