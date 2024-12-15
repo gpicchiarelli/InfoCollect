@@ -12,7 +12,7 @@ use config_manager;
 sub run {
    
     my $term = Term::ReadLine->new('InfoCollect CLI');
-    my $prompt = colored("infocollect> ", 'bold green');
+    my $prompt = colored("infocollect>: ", 'bold green');
     my $OUT = $term->OUT || \*STDOUT;
 
     print colored("\n=== Benvenuto nella CLI interattiva di InfoCollect ===\n", 'bold cyan');
