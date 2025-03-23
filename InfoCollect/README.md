@@ -1,3 +1,0 @@
-
-# InfoCollect
-Contenuto mancante...
