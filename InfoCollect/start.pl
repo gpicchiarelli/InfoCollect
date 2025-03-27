@@ -4,8 +4,8 @@ use strict;
 use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib"; # Aggiunge la directory lib al percorso dei moduli
-use lib './lib';
-use lib '/lib';
+#use lib './lib';
+
 
 # Importa il modulo per l'installazione dei moduli
 use modules_install;

@@ -5,9 +5,9 @@ use warnings;
 use DBI;
 use db;  # Importiamo il modulo db per la connessione al database
 use IO::Socket::INET;  # Importiamo il modulo IO::Socket::INET per la connessione di rete
-use init_conf; # Importa il modulo init_conf per utilizzare configuraValoriIniziali
 use Exporter 'import'; # Importa Exporter per esportare funzioni
-our @EXPORT_OK = qw(get_all_settings); # Esporta la funzione get_all_settings
+our @EXPORT_OK = qw(get_all_settings get_setting add_setting delete_setting setting_exists sync_settings apply_delta); # Esporta le funzioni
+
 
 # Funzione per aggiungere una nuova impostazione
 sub add_setting {
@@ -153,39 +153,7 @@ sub apply_delta {
     }
 }
 
-# Definizione della subroutine configuraValoriIniziali
-sub configuraValoriIniziali {
-    return init_conf::configuraValoriIniziali(); # Richiamo alla funzione in init_conf.pm
-}
-
 1;
-
-#use strict;
-#use warnings;
-#use config_manager;
-
-# Aggiungi o aggiorna impostazioni
-#config_manager::add_setting('refresh_interval', '30');
-#config_manager::add_setting('theme', 'dark');
-
-# Recupera una singola impostazione
-#my $theme = config_manager::get_setting('theme');
-#print "Tema attuale: $theme\n" if defined $theme;
-
-# Verifica se una chiave esiste
-#if (config_manager::setting_exists('refresh_interval')) {
-#    print "L'impostazione 'refresh_interval' esiste.\n";
-#}
-
-# Ottieni tutte le impostazioni
-#my $settings = config_manager::get_all_settings();
-#foreach my $key (keys %$settings) {
-#    print "$key => $settings->{$key}\n";
-#}
-
-# Elimina una impostazione
-#config_manager::delete_setting('theme');
-
 
 # Licenza BSD
 # -----------------------------------------------------------------------------

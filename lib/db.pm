@@ -7,27 +7,20 @@ use JSON;
 use Time::HiRes qw(gettimeofday);
 use Crypt::AuthEnc::GCM;
 use Digest::SHA qw(sha256);
+use init_db;
 
 # Nome del database SQLite
 my $db_file = 'infocollect.db';
 
 # Funzione per connettersi al database
 sub connect_db {
-    unless (-e $db_file) {
-        die "Errore: il database '$db_file' non esiste. Esegui init_db.pm per inizializzarlo.\n";
+    my $dbh;
+    eval {
+        $dbh = init_db::createDB();
+    };
+    if ($@ || !$dbh) {
+        die "Errore durante l'inizializzazione del database: $@";
     }
-    my $dbh = DBI->connect("dbi:SQLite:dbname=$db_file", "", "", {
-        RaiseError => 1,
-        AutoCommit => 1,
-    }) or die $DBI::errstr;
-    $dbh->do(q{
-        CREATE TABLE IF NOT EXISTS tags (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            content_id INTEGER NOT NULL,
-            tag TEXT NOT NULL,
-            FOREIGN KEY(content_id) REFERENCES summaries(id) ON DELETE CASCADE
-        )
-    });
     return $dbh;
 }
 
@@ -502,89 +495,6 @@ sub get_template_by_name {
     $sth->finish();
     $dbh->disconnect();
     return $row ? $row->{content} : undef;
-}
-
-# Funzione per generare dinamicamente procedure e salvarle nel database
-sub generate_and_save_procedures {
-    my ($procedures) = @_;
-
-    unless (ref $procedures eq 'HASH') {
-        die "Errore: le procedure devono essere fornite come hash.\n";
-    }
-
-    my $dbh = connect_db();
-    foreach my $name (keys %$procedures) {
-        my $code = $procedures->{$name};
-        my $sth = $dbh->prepare("INSERT INTO procedures (name, code) VALUES (?, ?) ON CONFLICT(name) DO UPDATE SET code = excluded.code");
-        eval {
-            $sth->execute($name, $code);
-        };
-        if ($@) {
-            warn "Errore durante il salvataggio della procedura $name: $@";
-        } else {
-            print "Procedura salvata con successo: $name\n";
-        }
-        $sth->finish();
-    }
-    $dbh->disconnect();
-}
-
-# Funzione per rigenerare le procedure da zero
-sub regenerate_procedures {
-    my $dbh = connect_db();
-    my $sth = $dbh->prepare("SELECT name, code FROM procedures");
-    $sth->execute();
-
-    while (my $row = $sth->fetchrow_hashref) {
-        my $name = $row->{name};
-        my $code = $row->{code};
-        eval $code;
-        if ($@) {
-            warn "Errore durante la rigenerazione della procedura $name: $@";
-        } else {
-            print "Procedura rigenerata con successo: $name\n";
-        }
-    }
-
-    $sth->finish();
-    $dbh->disconnect();
-}
-
-# Funzione per inizializzare le procedure predefinite
-sub initialize_default_procedures {
-    my %default_procedures = (
-        'add_summary' => q{
-            sub add_summary {
-                my ($page_id, $summary) = @_;
-                unless ($page_id && $summary) {
-                    die "Errore: page_id e summary sono richiesti per aggiungere un riassunto.\n";
-                }
-                my $dbh = connect_db();
-                my $sth = $dbh->prepare("INSERT INTO summaries (page_id, summary) VALUES (?, ?)");
-                eval {
-                    $sth->execute($page_id, $summary);
-                };
-                if ($@) {
-                    warn "Errore durante l'aggiunta del riassunto: $@";
-                } else {
-                    print "Riassunto aggiunto con successo.\n";
-                }
-                $sth->finish();
-                $dbh->disconnect();
-            }
-        },
-        'share_summary' => q{
-            sub share_summary {
-                my ($summary_id, $recipient) = @_;
-                unless ($summary_id && $recipient) {
-                    die "Errore: summary_id e recipient sono richiesti per condividere un riassunto.\n";
-                }
-                print "Riassunto $summary_id condiviso con $recipient.\n";
-            }
-        },
-    );
-
-    generate_and_save_procedures(\%default_procedures);
 }
 
 1;

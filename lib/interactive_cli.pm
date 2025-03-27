@@ -11,11 +11,12 @@ use db;
 use rss_crawler;
 use web_crawler;
 use config_manager;
+use init_conf;
 
 
 # Funzione principale per avviare l'interfaccia CLI
 sub avvia_cli {
-    config_manager::configuraValoriIniziali();
+    init_conf::configuraValoriIniziali();
 
     my $term = Term::ReadLine->new('InfoCollect CLI');
     print "Benvenuto in InfoCollect CLI! Digita 'help' per vedere i comandi disponibili.\n";

@@ -56,7 +56,6 @@ sub configuraValoriIniziali{
         configuraChiaveCrittografia();
     }
     %settings = get_all_settings();
-    db::initialize_default_procedures();
 }
 
 sub impostaValoriInizialiForzatamente {
@@ -79,8 +78,7 @@ sub impostaValoriInizialiForzatamente {
     # Aggiorna la variabile globale delle impostazioni
     %settings = get_all_settings();
 
-    # Inizializza le procedure predefinite
-    db::initialize_default_procedures();
+    # db::initialize_default_procedures() rimosso: tabella procedures eliminata
 }
 
 sub generaChiaveCrittografia {

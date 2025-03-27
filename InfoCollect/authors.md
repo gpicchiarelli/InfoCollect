@@ -2,8 +2,8 @@
 
 ## Autori
 
-- **[Giacomo Picchiarelli]**  
-  GitHub: [gpicchiarelli](https://github.com/gpicchiarelli)
+- **Giacomo Picchiarelli**  
+  GitHub: **[gpicchiarelli](https://github.com/gpicchiarelli)**
 
 ## Crediti
 
@@ -14,10 +14,10 @@
 
 ## Come Contribuire
 
-Se vuoi contribuire al progetto **InfoCollect**, segui queste linee guida:
+Se vuoi contribuire al progetto **InfoCollect**, segui queste istruzioni:
 
 1. **Fork del Repository** su GitHub.
-2. Crea un branch con il nome della funzionalità o correzione (`feature/nuova-funzionalita`).
+2. Crea un branch con il nome della funzionalità o correzione (`feature/new-feature`).
 3. Fai una **Pull Request** con una descrizione chiara delle modifiche.
 4. Contatta gli autori per ulteriori informazioni.
 
