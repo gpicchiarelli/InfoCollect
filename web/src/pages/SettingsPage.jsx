@@ -10,12 +10,16 @@ function SettingsPage() {
   const [newSender, setNewSender] = useState({ name: "", type: "", config: "", active: true });
   const [recipients, setRecipients] = useState([]);
   const [newRecipient, setNewRecipient] = useState({ name: "", contact: "" });
+  const [peerRequests, setPeerRequests] = useState([]);
+  const [acceptedPeers, setAcceptedPeers] = useState([]);
 
   useEffect(() => {
     fetchSettings();
     fetchChannels();
     fetchSenders();
     fetchRecipients();
+    fetchPeerRequests();
+    fetchAcceptedPeers();
   }, []);
 
   const fetchSettings = async () => {
@@ -80,6 +84,29 @@ function SettingsPage() {
     });
     setNewRecipient({ name: "", contact: "" });
     fetchRecipients();
+  };
+
+  const fetchPeerRequests = async () => {
+    const res = await fetch("/api/peerRequests");
+    const data = await res.json();
+    setPeerRequests(data);
+  };
+
+  const fetchAcceptedPeers = async () => {
+    const res = await fetch("/api/acceptedPeers");
+    const data = await res.json();
+    setAcceptedPeers(data);
+  };
+
+  const acceptPeer = async (peerId) => {
+    await fetch(`/api/acceptPeer/${peerId}`, { method: "POST" });
+    fetchPeerRequests();
+    fetchAcceptedPeers();
+  };
+
+  const rejectPeer = async (peerId) => {
+    await fetch(`/api/rejectPeer/${peerId}`, { method: "POST" });
+    fetchPeerRequests();
   };
 
   return (
@@ -157,6 +184,25 @@ function SettingsPage() {
                 <strong>{recipient.name}</strong> - {recipient.contact}
               </div>
             </Card>
+          ))}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Gestione Peer</h3>
+        <div>
+          <h4>Richieste di Peer</h4>
+          {peerRequests.map((peer) => (
+            <div key={peer.id}>
+              <span>{peer.id}</span>
+              <button onClick={() => acceptPeer(peer.id)}>Accetta</button>
+              <button onClick={() => rejectPeer(peer.id)}>Rifiuta</button>
+            </div>
+          ))}
+        </div>
+        <div>
+          <h4>Peer Accettati</h4>
+          {acceptedPeers.map((peer) => (
+            <div key={peer.id}>{peer.id}</div>
           ))}
         </div>
       </div>

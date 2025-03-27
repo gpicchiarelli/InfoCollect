@@ -22,4 +22,11 @@ InfoCollect utilizza un protocollo P2P per sincronizzare dati e impostazioni tra
 2. Utilizza connessioni TCP per sincronizzare dati e impostazioni.
 3. **Algoritmi di Delta**: Durante la sincronizzazione, vengono trasferite solo le differenze tra le impostazioni locali e quelle ricevute, riducendo il carico di rete.
 
+InfoCollect utilizza un database SQLite per gestire le richieste di peer e i peer accettati. Lo schema del database è definito in `db/schema.sql`.
+
+### Tabelle principali
+
+- `peer_requests`: Memorizza le richieste di peer in attesa di approvazione.
+- `accepted_peers`: Memorizza i peer accettati.
+
 Questo approccio riduce il carico di lavoro duplicato e garantisce coerenza tra le istanze.

@@ -26,6 +26,10 @@ my @modules = qw(
 
 print "Verifica e installazione dei moduli Perl richiesti...\n";
 
+print "Verifica della presenza di cpan...\n";
+my $cpan_exists = `which cpan` || `where cpan`;
+die "Errore: cpan non trovato. Installalo prima di procedere.\n" unless $cpan_exists;
+
 foreach my $module (@modules) {
     eval "use $module";
     if ($@) {

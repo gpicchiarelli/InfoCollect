@@ -29,6 +29,15 @@ under sub {
     return 1;
 };
 
+# Configurazione per servire file statici
+app->static->paths->[0] = './web/dist';
+
+# Endpoint per servire l'applicazione React
+get '/*any' => { any => '' } => sub {
+    my $c = shift;
+    $c->reply->static('index.html');
+};
+
 # Funzione per registrare log
 sub log_activity {
     my ($level, $message) = @_;
@@ -152,6 +161,53 @@ post '/api/senders' => sub {
     my $data = $c->req->json;
     db::add_sender($data->{name}, $data->{type}, $data->{config});
     $c->render(json => { success => 1 });
+};
+
+# Endpoint per ottenere tutti i template
+get '/api/templates' => sub {
+    my $c = shift;
+    my $templates = db::get_all_templates();
+    $c->render(json => $templates);
+};
+
+# Endpoint per aggiungere un template
+post '/api/templates' => sub {
+    my $c = shift;
+    my $data = $c->req->json;
+    db::add_template($data->{name}, $data->{content});
+    $c->render(json => { success => 1 });
+};
+
+# Endpoint per aggiornare un template
+put '/api/templates/:id' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    my $data = $c->req->json;
+    db::update_template($id, $data->{name}, $data->{content});
+    $c->render(json => { success => 1 });
+};
+
+# Endpoint per eliminare un template
+delete '/api/templates/:id' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    db::delete_template($id);
+    $c->render(json => { success => 1 });
+};
+
+# Endpoint per ottenere i dati di latenza
+get '/api/latency' => sub {
+    my $c = shift;
+    my $dbh = db::connect_db();
+    my $sth = $dbh->prepare("SELECT host, latency_ms, last_updated FROM latency_monitor ORDER BY last_updated DESC");
+    $sth->execute();
+    my @latency_data;
+    while (my $row = $sth->fetchrow_hashref) {
+        push @latency_data, $row;
+    }
+    $sth->finish();
+    $dbh->disconnect();
+    $c->render(json => \@latency_data);
 };
 
 app->start;

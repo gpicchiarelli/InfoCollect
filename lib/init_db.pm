@@ -3,8 +3,9 @@
 use strict;
 use warnings;
 use DBI;
+use File::Spec;
 
-my $db_file = "infocollect.db";
+my $db_file = File::Spec->catfile(File::Spec->curdir(), "infocollect.db");
 
 if (-e $db_file) {
     print "Il database '$db_file' esiste già. Nessuna modifica effettuata.\n";
@@ -140,6 +141,26 @@ $dbh->do(q{
     )
 });
 $dbh->do(q{CREATE INDEX IF NOT EXISTS idx_senders_type ON senders (type)});
+
+# Tabella per i template
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS templates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        content TEXT NOT NULL
+    )
+});
+
+# Tabella per monitorare latenza e host connessi
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS latency_monitor (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        host TEXT NOT NULL,
+        latency_ms INTEGER NOT NULL,
+        last_updated TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+});
+$dbh->do(q{CREATE INDEX IF NOT EXISTS idx_latency_monitor_host ON latency_monitor (host)});
 
 print "Database inizializzato correttamente.\n";
 

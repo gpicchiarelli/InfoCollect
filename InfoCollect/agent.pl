@@ -9,10 +9,37 @@ use web_crawler;
 use Time::HiRes qw(sleep);
 use IO::Socket::INET;
 use threads;
+use Crypt::PK::RSA;
+use Digest::SHA qw(sha256_hex);
+use Sys::Hostname;
+use p2p;
+use config_manager;
+use DBI;
 
 my $intervallo = shift @ARGV || 30; # default ogni 30 minuti
 
+if ($ARGV[0] && $ARGV[0] eq 'show-latency') {
+    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, AutoCommit => 1 });
+    my $sth = $dbh->prepare("SELECT host, latency_ms, last_updated FROM latency_monitor ORDER BY last_updated DESC");
+    $sth->execute();
+    while (my $row = $sth->fetchrow_hashref) {
+        print "Host: $row->{host}, Latenza: $row->{latency_ms} ms, Ultimo aggiornamento: $row->{last_updated}\n";
+    }
+    $sth->finish();
+    $dbh->disconnect();
+    exit;
+}
+
 print "[Agent] Avvio in modalità automatica. Intervallo: $intervallo minuti\n";
+
+# Generazione chiavi RSA
+my $rsa = Crypt::PK::RSA->new();
+$rsa->generate_key(2048);
+my $private_key = $rsa->export_key_pem('private');
+my $public_key = $rsa->export_key_pem('public');
+
+# Identificatore univoco della macchina
+my $machine_id = sha256_hex(hostname());
 
 # Avvia il notification agent in un processo figlio
 my $pid = fork();
@@ -22,17 +49,14 @@ if (!defined $pid) {
     exec("$FindBin::Bin/notification_agent.pl") or die "[Agent] Errore durante l'avvio del Notification Agent: $!\n";
 }
 
-# Porta per il discovery UDP
-my $udp_port = 5000;
+# Porta per il discovery UDP e TCP (lettura da configurazione)
+my %settings = config_manager::get_all_settings();
+my $udp_port = $settings{UDP_DISCOVERY_PORT} || 5000;
+my $tcp_port = $settings{TCP_SYNC_PORT} || 5001;
 
-# Porta per la sincronizzazione TCP
-my $tcp_port = 5001;
-
-# Thread per il discovery UDP
-threads->create(\&udp_discovery);
-
-# Thread per il server TCP
-threads->create(\&tcp_server);
+# Avvia il discovery UDP e il server TCP utilizzando il modulo P2P
+p2p::start_udp_discovery($udp_port, $tcp_port);
+p2p::start_tcp_server($tcp_port, \&config_manager);
 
 while (1) {
     eval {
@@ -45,46 +69,6 @@ while (1) {
         warn "[Agent] Errore durante l'esecuzione: $@\n";
     }
     sleep($intervallo * 60);
-}
-
-# Funzione per il discovery UDP
-sub udp_discovery {
-    my $socket = IO::Socket::INET->new(
-        LocalPort => $udp_port,
-        Proto     => 'udp',
-        Broadcast => 1,
-    ) or die "Errore nella creazione del socket UDP: $!\n";
-
-    while (1) {
-        my $message = "InfoCollect:$tcp_port";
-        $socket->send($message, 0, sockaddr_in($udp_port, inet_aton('255.255.255.255')));
-        sleep(5); # Invia messaggi ogni 5 secondi
-    }
-}
-
-# Funzione per il server TCP
-sub tcp_server {
-    my $server = IO::Socket::INET->new(
-        LocalPort => $tcp_port,
-        Proto     => 'tcp',
-        Listen    => 5,
-        Reuse     => 1,
-    ) or die "Errore nella creazione del server TCP: $!\n";
-
-    while (my $client = $server->accept()) {
-        my $data = <$client>;
-        if ($data =~ /^SYNC_REQUEST$/) {
-            # Invia solo le impostazioni locali
-            my %local_settings = config_manager::get_all_settings();
-            my $settings = join("\n", map { "$_=$local_settings{$_}" } keys %local_settings);
-            print $client "SYNC_RESPONSE\n$settings\n";
-        } elsif ($data =~ /^SYNC_RESPONSE\n(.+)/s) {
-            # Ricevi e applica solo i delta
-            my $received_settings = $1;
-            config_manager::apply_delta($received_settings);
-        }
-        close($client);
-    }
 }
 
 # Licenza BSD

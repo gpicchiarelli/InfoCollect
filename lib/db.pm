@@ -399,6 +399,65 @@ sub register_user {
     $dbh->disconnect();
 }
 
+# Funzione per aggiungere un template
+sub add_template {
+    my ($name, $content) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("INSERT INTO templates (name, content) VALUES (?, ?)");
+    $sth->execute($name, $content);
+    $sth->finish();
+    $dbh->disconnect();
+}
+
+# Funzione per ottenere tutti i template
+sub get_all_templates {
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT id, name, content FROM templates");
+    $sth->execute();
+
+    my @templates;
+    while (my $row = $sth->fetchrow_hashref) {
+        push @templates, $row;
+    }
+
+    $sth->finish();
+    $dbh->disconnect();
+    return \@templates;
+}
+
+# Funzione per aggiornare un template
+sub update_template {
+    my ($id, $name, $content) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("UPDATE templates SET name = ?, content = ? WHERE id = ?");
+    $sth->execute($name, $content, $id);
+    $sth->finish();
+    $dbh->disconnect();
+}
+
+# Funzione per eliminare un template
+sub delete_template {
+    my ($id) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("DELETE FROM templates WHERE id = ?");
+    $sth->execute($id);
+    $sth->finish();
+    $dbh->disconnect();
+}
+
+# Funzione per ottenere un template per nome
+sub get_template_by_name {
+    my ($name) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT content FROM templates WHERE name = ?");
+    $sth->execute($name);
+
+    my $row = $sth->fetchrow_hashref;
+    $sth->finish();
+    $dbh->disconnect();
+    return $row ? $row->{content} : undef;
+}
+
 1;
 
 # Licenza BSD
