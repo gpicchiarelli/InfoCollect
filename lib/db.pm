@@ -5,9 +5,14 @@ use warnings;
 use DBI;
 use JSON;
 use Time::HiRes qw(gettimeofday);
+use Crypt::CBC;
+use Digest::SHA qw(sha256);
 
 # Nome del database SQLite
 my $db_file = 'infocollect.db';
+
+# Chiave di crittografia (da configurare come variabile d'ambiente)
+my $encryption_key = $ENV{'INFOCOLLECT_ENCRYPTION_KEY'} || die "Chiave di crittografia non configurata.\n";
 
 # Funzione per connettersi al database
 sub connect_db {
@@ -19,6 +24,20 @@ sub connect_db {
         AutoCommit => 1,
     }) or die $DBI::errstr;
     return $dbh;
+}
+
+# Funzione per crittografare i dati
+sub encrypt_data {
+    my ($data) = @_;
+    my $cipher = Crypt::CBC->new(-key => sha256($encryption_key), -cipher => 'Rijndael');
+    return $cipher->encrypt_hex($data);
+}
+
+# Funzione per decrittografare i dati
+sub decrypt_data {
+    my ($encrypted_data) = @_;
+    my $cipher = Crypt::CBC->new(-key => sha256($encryption_key), -cipher => 'Rijndael');
+    return $cipher->decrypt_hex($encrypted_data);
 }
 
 # Funzione per aggiungere un feed RSS

@@ -19,6 +19,9 @@ sub configuraValoriIniziali{
     if(!defined config_manager::get_setting("PRUNING_GENERICO_GIORNI")){
         config_manager::add_setting("PRUNING_GENERICO_GIORNI", "7");
     }
+    if(!defined config_manager::get_setting("NOTIFICATION_INTERVAL_MINUTI")){
+        config_manager::add_setting("NOTIFICATION_INTERVAL_MINUTI", "10");
+    }
     %settings = config_manager::get_all_settings();
 }
 

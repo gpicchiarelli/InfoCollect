@@ -12,6 +12,14 @@ my $intervallo = shift @ARGV || 30; # default ogni 30 minuti
 
 print "[Agent] Avvio in modalità automatica. Intervallo: $intervallo minuti\n";
 
+# Avvia il notification agent in un processo figlio
+my $pid = fork();
+if (!defined $pid) {
+    die "[Agent] Errore durante il fork per il Notification Agent.\n";
+} elsif ($pid == 0) {
+    exec("$FindBin::Bin/notification_agent.pl") or die "[Agent] Errore durante l'avvio del Notification Agent: $!\n";
+}
+
 while (1) {
     eval {
         print "[Agent] Avvio dei crawler...\n";
