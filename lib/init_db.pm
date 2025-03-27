@@ -91,6 +91,50 @@ $dbh->do(q{
 });
 $dbh->do(q{CREATE INDEX IF NOT EXISTS idx_web_url ON web (url)});
 
+# Tabella interessi per il filtraggio dei contenuti
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS interessi (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tema TEXT NOT NULL UNIQUE
+    )
+});
+$dbh->do(q{CREATE INDEX IF NOT EXISTS idx_interessi_tema ON interessi (tema)});
+
+# Tabella log per registrare errori e attività
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+        level TEXT NOT NULL,
+        message TEXT NOT NULL
+    )
+});
+$dbh->do(q{CREATE INDEX IF NOT EXISTS idx_logs_level ON logs (level)});
+
 print "Database inizializzato correttamente.\n";
 
 $dbh->disconnect or warn "Errore durante la disconnessione dal database: $DBI::errstr";
+
+1;
+
+# Licenza BSD
+# -----------------------------------------------------------------------------
+# Copyright (c) 2024, Giacomo Picchiarelli
+# All rights reserved.
+#
+# Ridistribuzione e uso nel formato sorgente e binario, con o senza modifiche,
+# sono consentiti purché siano soddisfatte le seguenti condizioni:
+#
+# 1. Le ridistribuzioni del codice sorgente devono conservare l'avviso di copyright
+#    di cui sopra, questo elenco di condizioni e il seguente disclaimer.
+# 2. Le ridistribuzioni in formato binario devono riprodurre l'avviso di copyright,
+#    questo elenco di condizioni e il seguente disclaimer nella documentazione
+#    e/o nei materiali forniti con la distribuzione.
+# 3. Né il nome dell'autore né i nomi dei suoi collaboratori possono essere utilizzati
+#    per promuovere prodotti derivati da questo software senza un'autorizzazione
+#    specifica scritta.
+#
+# QUESTO SOFTWARE È FORNITO "COSÌ COM'È" E QUALSIASI GARANZIA ESPRESSA O IMPLICITA
+# È ESCLUSA. IN NESSUN CASO L'AUTORE SARÀ RESPONSABILE PER DANNI DERIVANTI
+# DALL'USO DEL SOFTWARE.
+# -----------------------------------------------------------------------------
