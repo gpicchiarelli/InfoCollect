@@ -31,9 +31,11 @@ sub riassumi_contenuto {
     };
 
     if ($@ or !$sommario) {
+        warn "Errore durante il riassunto: $@" if $@;
+
         # Fallback semplice se il modulo fallisce
         my @frasi = split(/(?<=[.!?])\s+/, $testo);
-        $sommario = join(" ", @frasi[0..$#frasi > 2 ? 2 : $#frasi]);
+        $sommario = join(" ", @frasi[0 .. ($#frasi > 2 ? 2 : $#frasi)]);
     }
 
     return ($sommario, $lingua);
@@ -46,6 +48,8 @@ sub rilevanza_per_interessi {
 
     foreach my $interesse (@$interessi_ref) {
         my $i = lc($interesse);
+
+        # Usa una regex robusta per evitare falsi positivi
         return 1 if $testo_lower =~ /\b\Q$i\E\b/;
     }
 

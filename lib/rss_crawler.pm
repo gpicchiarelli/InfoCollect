@@ -1,84 +1,95 @@
-package rss_crawler;
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
-use utf8;
-use LWP::UserAgent;
-use XML::RSS;
 use DBI;
-use Parallel::ForkManager;
-use HTML::Strip;
-use Encode qw(decode);
-use open ':std', ':encoding(UTF-8)';
+use File::Spec;
 
-use lib './lib';
-use nlp qw(riassumi_contenuto rilevanza_per_interessi);
-use config_manager;
+# Nome del file del database
+my $db_file = "infocollect.db";
 
-my $MAX_PROCESSES = 10;
-
-sub esegui_crawler_rss {
-    my $config = config_manager::carica_configurazione();
-    my $db_path = $config->{database};
-
-    my $dbh = DBI->connect("dbi:SQLite:dbname=$db_path", "", "", { RaiseError => 1, sqlite_unicode => 1 });
-
-    my $sth = $dbh->prepare("SELECT id, url, fonte FROM rss WHERE attivo = 1");
-    $sth->execute();
-
-    my $ua = LWP::UserAgent->new(timeout => 10);
-    my $pm = Parallel::ForkManager->new($MAX_PROCESSES);
-
-    while (my $row = $sth->fetchrow_hashref) {
-        $pm->start and next;
-
-        my $rss_url = $row->{url};
-        my $fonte   = $row->{fonte};
-        my $rss_id  = $row->{id};
-
-        my $res = $ua->get($rss_url);
-        if ($res->is_success) {
-            my $rss = XML::RSS->new();
-            eval { $rss->parse($res->decoded_content); };
-            if ($@) {
-                warn "Errore parsing RSS $rss_url: $@";
-                $pm->finish;
-            }
-
-            my $interessi_sth = $dbh->prepare("SELECT tema FROM interessi");
-            $interessi_sth->execute();
-            my @interessi = map { $_->[0] } @{$interessi_sth->fetchall_arrayref};
-
-            foreach my $item (@{ $rss->{items} }) {
-                my $titolo = decode('utf-8', $item->{title} // '');
-                my $link   = $item->{link} // '';
-                my $descr  = decode('utf-8', $item->{description} // '');
-                my $autore = $item->{author} // '';
-                my $data   = $item->{pubDate} // '';
-
-                my $hs = HTML::Strip->new();
-                my $testo_pulito = $hs->parse($descr);
-                $hs->eof;
-
-                my ($riassunto, $lingua) = riassumi_contenuto($testo_pulito);
-
-                if (rilevanza_per_interessi($riassunto, \@interessi)) {
-                    my $ins = $dbh->prepare("INSERT INTO riassunti (titolo, url, autore, data_pubblicazione, lingua, fonte, riassunto, testo_originale) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                    $ins->execute($titolo, $link, $autore, $data, $lingua, $fonte, $riassunto, $testo_pulito);
-                }
-            }
-        } else {
-            warn "Errore fetching RSS $rss_url: " . $res->status_line;
-        }
-
-        $pm->finish;
-    }
-
-    $pm->wait_all_children;
-    $dbh->disconnect;
+# Controlla se il database esiste già
+if (-e $db_file) {
+    print "Il database '$db_file' esiste già. Nessuna modifica sarà apportata.\n";
+    exit;
 }
 
-1;
+# Connessione al database
+my $dbh = DBI->connect("dbi:SQLite:dbname=$db_file", "", "", {
+    RaiseError => 1,
+    AutoCommit => 1,
+}) or die "Errore di connessione al database: $DBI::errstr";
+
+print "Inizializzazione database '$db_file'...\n";
+
+# Tabella feed RSS
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS feeds (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        url TEXT NOT NULL UNIQUE,
+        added_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+});
+$dbh->do(q{CREATE INDEX IF NOT EXISTS idx_feeds_url ON feeds (url)});
+
+# Tabella pagine raccolte
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS pages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        url TEXT NOT NULL UNIQUE,
+        title TEXT,
+        content TEXT,
+        metadata TEXT,
+        visited_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+});
+$dbh->do(q{CREATE INDEX IF NOT EXISTS idx_pages_url ON pages (url)});
+
+# Tabella impostazioni
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+    )
+});
+
+# Tabella riassunti associati a pagine
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS summaries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        page_id INTEGER NOT NULL,
+        summary TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(page_id) REFERENCES pages(id) ON DELETE CASCADE
+    )
+});
+$dbh->do(q{CREATE INDEX IF NOT EXISTS idx_summaries_page_id ON summaries (page_id)});
+
+# Tabella autori (opzionale per metadati estesi)
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS authors (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT,
+        affiliation TEXT
+    )
+});
+
+# Tabella web per gestire crawling diretto su siti
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS web (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        url TEXT NOT NULL UNIQUE,
+        attivo INTEGER DEFAULT 1
+    )
+});
+$dbh->do(q{CREATE INDEX IF NOT EXISTS idx_web_url ON web (url)});
+
+print "Database inizializzato correttamente.\n";
+
+# Disconnessione dal database
+$dbh->disconnect or warn "Errore durante la disconnessione dal database: $DBI::errstr";
 
 # Licenza BSD
 # -----------------------------------------------------------------------------
