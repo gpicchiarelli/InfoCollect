@@ -42,6 +42,10 @@ sub avvia_cli {
         $input = decode('utf-8', $input // '');
         chomp($input);
 
+        # Normalizza l'input: rimuove spazi iniziali/finali e multipli
+        $input =~ s/^\s+|\s+$//g;  # Rimuove spazi iniziali e finali
+        $input =~ s/\s+/ /g;       # Sostituisce spazi multipli con uno singolo
+
         next unless $input;  # Salta input vuoti
         my ($comando, @args) = split(/\s+/, $input);
 
