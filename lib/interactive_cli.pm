@@ -19,7 +19,23 @@ sub avvia_cli {
     init_conf::configuraValoriIniziali();
 
     my $term = Term::ReadLine->new('InfoCollect CLI');
+    system("clear"); # Pulisce lo schermo
+
+    # Banner in ASCII art
+    print "========================================================================\n";
+    print "  ___        __        _      _      _      _     \n";
+    print " |_ _|  ___ / _|  ___ | |__  (_)  __| |  __| | ___ \n";
+    print "  | |  / _ \\ |_  / _ \\| '_ \\ | | / _` | / _` |/ _ \\\n";
+    print "  | | |  __/  _||  __/| | | || || (_| || (_| |  __/\n";
+    print " |___| \\___|_|   \\___||_| |_||_| \\__,_| \\__,_|\\___|\n";
+    print "\n";
+    print "          Progetto InfoCollect - https://github.com/gpicchiarelli/InfoCollect\n";
+    print "========================================================================\n";
+    print "\n";
+
     print "Benvenuto in InfoCollect CLI! Digita 'help' per vedere i comandi disponibili.\n";
+    print "------------------------------------------------------------------------\n";
+
     while (1) {
         my $input = $term->readline('InfoCollect> ');
         $input = decode('utf-8', $input // '');
@@ -29,9 +45,13 @@ sub avvia_cli {
         my ($comando, @args) = split(/\s+/, $input);
 
         if ($comando eq 'help') {
+            print "------------------------------------------------------------------------\n";
             mostra_aiuto();
+            print "------------------------------------------------------------------------\n";
         } elsif ($comando eq 'exit') {
+            print "------------------------------------------------------------------------\n";
             print "Uscita da InfoCollect CLI. Arrivederci!\n";
+            print "------------------------------------------------------------------------\n";
             last;
         } elsif ($comando eq 'add_rss_feed') {
             aggiungi_feed_rss(@args);
