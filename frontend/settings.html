@@ -1,0 +1,21 @@
+<!-- ...existing code... -->
+<div>
+    <label for="p2p-toggle">Abilita modalità P2P:</label>
+    <input type="checkbox" id="p2p-toggle" onchange="toggleP2P(this.checked)">
+</div>
+<script>
+    function toggleP2P(enable) {
+        fetch('/api/setP2P', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enableP2P: enable })
+        }).then(response => {
+            if (response.ok) {
+                alert(`Modalità P2P ${enable ? 'abilitata' : 'disabilitata'}.`);
+            } else {
+                alert('Errore durante l\'aggiornamento della modalità P2P.');
+            }
+        });
+    }
+</script>
+<!-- ...existing code... -->

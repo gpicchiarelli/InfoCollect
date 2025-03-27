@@ -5,6 +5,7 @@ use lib './lib';
 use db;
 use rss_crawler;
 use web_crawler;
+use POSIX qw(getpwuid);
 
 # Token API (da configurare come variabile d'ambiente)
 my $api_token = $ENV{'INFOCOLLECT_API_TOKEN'} || die "Token API non configurato.\n";
@@ -13,7 +14,18 @@ my $api_token = $ENV{'INFOCOLLECT_API_TOKEN'} || die "Token API non configurato.
 under sub {
     my $c = shift;
     my $token = $c->req->headers->header('Authorization');
-    return $c->render(json => { error => 'Accesso negato' }, status => 401) unless $token && $token eq "Bearer $api_token";
+
+    # Controllo autenticazione locale
+    my $local_user = getpwuid($<);  # Ottiene l'utente corrente
+    my $allowed_user = getpwuid($>);  # Ottiene l'utente effettivo
+    if ($local_user eq $allowed_user) {
+        return 1;
+    }
+
+    # Controllo token API
+    return $c->render(json => { error => 'Accesso negato' }, status => 401)
+        unless $token && $token eq "Bearer $api_token";
+
     return 1;
 };
 

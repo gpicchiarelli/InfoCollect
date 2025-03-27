@@ -7,6 +7,8 @@ use lib "$FindBin::Bin/../lib";
 use rss_crawler;
 use web_crawler;
 use Time::HiRes qw(sleep);
+use IO::Socket::INET;
+use threads;
 
 my $intervallo = shift @ARGV || 30; # default ogni 30 minuti
 
@@ -20,6 +22,18 @@ if (!defined $pid) {
     exec("$FindBin::Bin/notification_agent.pl") or die "[Agent] Errore durante l'avvio del Notification Agent: $!\n";
 }
 
+# Porta per il discovery UDP
+my $udp_port = 5000;
+
+# Porta per la sincronizzazione TCP
+my $tcp_port = 5001;
+
+# Thread per il discovery UDP
+threads->create(\&udp_discovery);
+
+# Thread per il server TCP
+threads->create(\&tcp_server);
+
 while (1) {
     eval {
         print "[Agent] Avvio dei crawler...\n";
@@ -32,6 +46,47 @@ while (1) {
     }
     sleep($intervallo * 60);
 }
+
+# Funzione per il discovery UDP
+sub udp_discovery {
+    my $socket = IO::Socket::INET->new(
+        LocalPort => $udp_port,
+        Proto     => 'udp',
+        Broadcast => 1,
+    ) or die "Errore nella creazione del socket UDP: $!\n";
+
+    while (1) {
+        my $message = "InfoCollect:$tcp_port";
+        $socket->send($message, 0, sockaddr_in($udp_port, inet_aton('255.255.255.255')));
+        sleep(5); # Invia messaggi ogni 5 secondi
+    }
+}
+
+# Funzione per il server TCP
+sub tcp_server {
+    my $server = IO::Socket::INET->new(
+        LocalPort => $tcp_port,
+        Proto     => 'tcp',
+        Listen    => 5,
+        Reuse     => 1,
+    ) or die "Errore nella creazione del server TCP: $!\n";
+
+    while (my $client = $server->accept()) {
+        my $data = <$client>;
+        if ($data =~ /^SYNC_REQUEST$/) {
+            # Invia solo le impostazioni locali
+            my %local_settings = config_manager::get_all_settings();
+            my $settings = join("\n", map { "$_=$local_settings{$_}" } keys %local_settings);
+            print $client "SYNC_RESPONSE\n$settings\n";
+        } elsif ($data =~ /^SYNC_RESPONSE\n(.+)/s) {
+            # Ricevi e applica solo i delta
+            my $received_settings = $1;
+            config_manager::apply_delta($received_settings);
+        }
+        close($client);
+    }
+}
+
 # Licenza BSD
 # -----------------------------------------------------------------------------
 # Copyright (c) 2024, Giacomo Picchiarelli

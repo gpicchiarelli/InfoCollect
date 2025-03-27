@@ -23,6 +23,14 @@ sub connect_db {
         RaiseError => 1,
         AutoCommit => 1,
     }) or die $DBI::errstr;
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS tags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content_id INTEGER NOT NULL,
+            tag TEXT NOT NULL,
+            FOREIGN KEY(content_id) REFERENCES summaries(id) ON DELETE CASCADE
+        )
+    });
     return $dbh;
 }
 
@@ -365,6 +373,28 @@ sub delete_sender {
     my $dbh = connect_db();
     my $sth = $dbh->prepare("DELETE FROM senders WHERE id = ?");
     $sth->execute($id);
+    $sth->finish();
+    $dbh->disconnect();
+}
+
+# Funzione per registrare un nuovo utente
+sub register_user {
+    my ($username, $password) = @_;
+
+    unless ($username && $password) {
+        die "Errore: username e password sono richiesti per registrare un utente.\n";
+    }
+
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+    eval {
+        $sth->execute($username, encrypt_data($password));
+    };
+    if ($@) {
+        warn "Errore durante la registrazione dell'utente: $@";
+    } else {
+        print "Utente registrato con successo: $username\n";
+    }
     $sth->finish();
     $dbh->disconnect();
 }

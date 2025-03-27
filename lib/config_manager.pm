@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use DBI;
 use db;  # Importiamo il modulo db per la connessione al database
+use IO::Socket::INET;  # Importiamo il modulo IO::Socket::INET per la connessione di rete
 
 # Funzione per aggiungere una nuova impostazione
 sub add_setting {
@@ -47,10 +48,13 @@ sub get_setting {
 # Funzione per ottenere tutte le impostazioni con valori predefiniti
 sub get_all_settings {
     my %defaults = (
-        RSS_INTERVALLO_MINUTI => 15,
-        WEB_INTERVALLO_MINUTI => 15,
-        CRAWLER_TIMEOUT       => 10,
-        MAX_PROCESSES         => 5,
+        RSS_INTERVALLO_MINUTI       => 15,
+        WEB_INTERVALLO_MINUTI       => 15,
+        CRAWLER_TIMEOUT             => 10,
+        MAX_PROCESSES               => 5,
+        UDP_DISCOVERY_INTERVAL_SEC  => 5,  # Intervallo per il discovery UDP
+        TCP_SYNC_PORT               => 5001,  # Porta per la sincronizzazione TCP
+        UDP_DISCOVERY_PORT          => 5000,  # Porta per il discovery UDP
     );
 
     my $dbh = db::connect_db();
@@ -107,6 +111,43 @@ sub setting_exists {
     $dbh->disconnect();
 
     return $exists;
+}
+
+# Funzione per sincronizzare le impostazioni
+sub sync_settings {
+    my ($peer_ip, $peer_port) = @_;
+
+    my $socket = IO::Socket::INET->new(
+        PeerAddr => $peer_ip,
+        PeerPort => $peer_port,
+        Proto    => 'tcp',
+    ) or warn "Impossibile connettersi a $peer_ip:$peer_port: $!\n" and return;
+
+    print $socket "SYNC_REQUEST\n";
+    my $response = <$socket>;
+    if ($response =~ /^SYNC_RESPONSE\n(.+)/s) {
+        my $received_settings = $1;
+        foreach my $line (split("\n", $received_settings)) {
+            my ($key, $value) = split('=', $line, 2);
+            add_setting($key, $value);
+        }
+    }
+    close($socket);
+}
+
+# Funzione per applicare i delta alle impostazioni
+sub apply_delta {
+    my ($received_settings) = @_;
+
+    my %local_settings = get_all_settings();
+    my %remote_settings = map { split('=', $_, 2) } split("\n", $received_settings);
+
+    foreach my $key (keys %remote_settings) {
+        if (!exists $local_settings{$key} || $local_settings{$key} ne $remote_settings{$key}) {
+            add_setting($key, $remote_settings{$key});
+            print "Impostazione aggiornata: $key = $remote_settings{$key}\n";
+        }
+    }
 }
 
 1;

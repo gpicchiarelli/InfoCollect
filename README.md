@@ -1,4 +1,3 @@
-
 # InfoCollect
 
 **InfoCollect** è un sistema avanzato di raccolta automatica di notizie da fonti RSS e Web, scritto interamente in Perl. Utilizza una pipeline NLP multilingua per analizzare, riassumere e filtrare le notizie in base a interessi predefiniti. È pensato per funzionare in modo asincrono, efficiente e configurabile sia da terminale che in modalità automatica (daemon).
@@ -9,6 +8,7 @@
 
 - 📥 Crawling parallelo da fonti RSS e siti web
 - 🧾 Riassunto automatico dei contenuti tramite NLP (IT/EN)
+- 🔒 Autenticazione locale basata sull'utente del sistema operativo
 - 🧠 Filtraggio intelligente in base a "interessi" personalizzati
 - 🗃️ Archiviazione con metadati completi in SQLite
 - 🧪 CLI interattiva per test ed esecuzione manuale
@@ -88,6 +88,15 @@ InfoCollect/
 ├── Feeds.opml (opzionale)
 └── README.md
 ```
+
+---
+
+## 🔒 Autenticazione
+
+InfoCollect supporta due metodi di autenticazione:
+
+1. **Token API**: Configurabile tramite la variabile d'ambiente `INFOCOLLECT_API_TOKEN`.
+2. **Autenticazione locale**: L'accesso è consentito all'utente locale che esegue lo script, determinato dinamicamente tramite le funzioni del sistema operativo.
 
 ---
 

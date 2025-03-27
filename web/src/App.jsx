@@ -4,8 +4,20 @@ import PagesPage from "./pages/PagesPage";
 import SettingsPage from "./pages/SettingsPage";
 import LogsPage from "./pages/LogsPage";
 import SummariesPage from "./pages/SummariesPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import { useEffect } from "react";
 
 function App() {
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:8080");
+    socket.onmessage = (event) => {
+      const notification = JSON.parse(event.data);
+      alert(`Notifica: ${notification.message}`);
+    };
+    return () => socket.close();
+  }, []);
+
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 text-gray-800">
@@ -28,6 +40,8 @@ function App() {
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/logs" element={<LogsPage />} />
             <Route path="/summaries" element={<SummariesPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
           </Routes>
         </main>
       </div>
