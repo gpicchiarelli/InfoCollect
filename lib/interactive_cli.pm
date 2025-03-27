@@ -82,6 +82,12 @@ sub avvia_cli {
             elimina_mittente(@args);
         } elsif ($comando eq 'regenerate_procedures') {
             rigenera_procedure();
+        } elsif ($comando eq 'add_setting') {
+            aggiungi_setting(@args);
+        } elsif ($comando eq 'del_setting') {
+            rimuovi_setting(@args);
+        } elsif ($comando eq 'mod_setting') {
+            modifica_setting(@args);
         } else {
             print "Comando non riconosciuto: '$comando'. Digita 'help' per vedere i comandi disponibili.\n";
         }
@@ -124,6 +130,12 @@ Comandi disponibili:
                         Aggiorna un mittente.
   delete_sender <id>    Elimina un mittente.
   regenerate_procedures Rigenera tutte le procedure.
+  add_setting <chiave> <valore>
+                        Aggiunge o aggiorna una impostazione.
+  del_setting <chiave>
+                        Elimina una impostazione.
+  mod_setting <chiave> <nuovo_valore>
+                        Modifica una impostazione.
 END_HELP
 }
 
@@ -392,6 +404,37 @@ sub rigenera_procedure {
     if ($@) {
         print "Errore durante la rigenerazione delle procedure: $@\n";
     }
+}
+
+# Aggiungi o aggiorna una impostazione
+sub aggiungi_setting {
+    my ($chiave, $valore) = @_;
+    unless ($chiave && defined $valore) {
+        print "Utilizzo: add_setting <chiave> <valore>\n";
+        return;
+    }
+    config_manager::add_setting($chiave, $valore);
+}
+
+# Elimina una impostazione
+sub rimuovi_setting {
+    my ($chiave) = @_;
+    unless ($chiave) {
+        print "Utilizzo: del_setting <chiave>\n";
+        return;
+    }
+    config_manager::delete_setting($chiave);
+}
+
+# Modifica una impostazione
+sub modifica_setting {
+    my ($chiave, $nuovo_valore) = @_;
+    unless ($chiave && defined $nuovo_valore) {
+        print "Utilizzo: mod_setting <chiave> <nuovo_valore>\n";
+        return;
+    }
+    # Utilizza add_setting che aggiorna se la chiave esiste
+    config_manager::add_setting($chiave, $nuovo_valore);
 }
 
 1;

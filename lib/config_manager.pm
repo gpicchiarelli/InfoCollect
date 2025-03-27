@@ -26,7 +26,7 @@ sub add_setting {
     print "Impostazione aggiunta o aggiornata: $key = $value\n";
 
     $sth->finish();
-    $dbh->disconnect();
+    # $dbh->disconnect();  # Rimosso per mantenere l'handler attivo
 }
 
 # Funzione per ottenere una singola impostazione
@@ -43,7 +43,7 @@ sub get_setting {
 
     my $row = $sth->fetchrow_arrayref;
     $sth->finish();
-    $dbh->disconnect();
+    # $dbh->disconnect();  # Rimosso
 
     return $row ? $row->[0] : undef;
 }
@@ -73,7 +73,7 @@ sub get_all_settings {
     }
 
     $sth->finish();
-    $dbh->disconnect();
+    # $dbh->disconnect();  # Rimosso
 
     return %defaults;
 }
@@ -93,7 +93,7 @@ sub delete_setting {
     print "Impostazione eliminata: $key\n";
 
     $sth->finish();
-    $dbh->disconnect();
+    # $dbh->disconnect();  # Rimosso
 }
 
 # Funzione per verificare se una chiave esiste
@@ -111,7 +111,7 @@ sub setting_exists {
     my $exists = $sth->fetchrow_arrayref ? 1 : 0;
 
     $sth->finish();
-    $dbh->disconnect();
+    # $dbh->disconnect();  # Rimosso
 
     return $exists;
 }
