@@ -16,19 +16,29 @@ use nlp qw(riassumi_contenuto rilevanza_per_interessi);
 use config_manager;
 
 sub esegui_crawler_web {
-    my %config = config_manager::get_all_settings();
-    my $max_processes = $config{MAX_PROCESSES};
-    my $timeout = $config{CRAWLER_TIMEOUT};
+    my %config = eval { config_manager::get_all_settings() };
+    if ($@) {
+        warn "Errore durante il recupero delle impostazioni: $@";
+        return;
+    }
 
-    # Connessione al database
-    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, sqlite_unicode => 1, AutoCommit => 1 })
-        or die "Errore di connessione al database: $DBI::errstr";
+    my $max_processes = $config{MAX_PROCESSES} // 4;  # Valore predefinito
+    my $timeout = $config{CRAWLER_TIMEOUT} // 10;    # Valore predefinito
 
-    # Prepara la query per ottenere gli URL da processare
-    my $sth = $dbh->prepare("SELECT id, url FROM web WHERE attivo = 1");
+    my $dbh = eval {
+        DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, sqlite_unicode => 1, AutoCommit => 1 });
+    };
+    if ($@) {
+        die "Errore di connessione al database: $@";
+    }
+
+    my $sth = eval { $dbh->prepare("SELECT id, url FROM web WHERE attivo = 1") };
+    if ($@) {
+        warn "Errore durante la preparazione della query: $@";
+        return;
+    }
+
     $sth->execute();
-
-    # Configura l'UserAgent e il gestore dei processi paralleli
     my $ua = LWP::UserAgent->new(timeout => $timeout);
     my $pm = Parallel::ForkManager->new($max_processes);
 
@@ -45,32 +55,20 @@ sub esegui_crawler_web {
 
                 # Analizza il contenuto HTML
                 my $tree = HTML::TreeBuilder->new_from_content($content);
-
-                # Estrai il titolo della pagina
                 my $title = decode('utf-8', $tree->look_down(_tag => 'title') ? $tree->look_down(_tag => 'title')->as_text : '');
 
-                # Rimuovi i tag HTML per ottenere il testo semplice
-                my $hs = HTML::Strip->new();
-                my $plain_text = $hs->parse($content);
-                $hs->eof;
-
-                # Genera un riassunto e identifica la lingua
-                my ($riassunto, $lingua) = riassumi_contenuto($plain_text);
-
-                # Recupera gli interessi dal database
-                my $interessi_sth = $dbh->prepare("SELECT tema FROM interessi");
-                $interessi_sth->execute();
-                my @interessi = map { $_->[0] } @{$interessi_sth->fetchall_arrayref};
-
-                # Verifica la rilevanza del contenuto rispetto agli interessi
-                if (rilevanza_per_interessi($riassunto, \@interessi)) {
-                    my $ins = $dbh->prepare("INSERT INTO riassunti (titolo, url, autore, data_pubblicazione, lingua, fonte, riassunto, testo_originale) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                    $ins->execute($title, $url, undef, undef, $lingua, 'web', $riassunto, $plain_text);
+                # Riassunto tramite NLP
+                my $summary = eval { nlp::riassumi_contenuto($content) };
+                if ($@) {
+                    warn "Errore durante il riassunto del contenuto: $@";
+                    $summary = "Riassunto non disponibile";
                 }
 
-                $tree->delete;
+                # Salva i dati nel database
+                my $insert_sth = $dbh->prepare("INSERT INTO pages (url, title, content, summary) VALUES (?, ?, ?, ?)");
+                $insert_sth->execute($url, $title, $content, $summary);
             } else {
-                warn "Errore fetching $url: " . $res->status_line;
+                warn "Errore durante il download dell'URL $url: " . $res->status_line;
             }
         };
         if ($@) {
@@ -81,9 +79,8 @@ sub esegui_crawler_web {
     }
 
     $pm->wait_all_children;
-
     $sth->finish();
-    $dbh->disconnect or warn "Errore durante la disconnessione dal database: $DBI::errstr";
+    $dbh->disconnect();
 }
 
 1;

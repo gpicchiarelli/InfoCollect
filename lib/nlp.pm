@@ -22,27 +22,17 @@ my $tagger_en = Lingua::EN::Tagger->new();
 
 # Riassume un testo in base alla lingua
 sub riassumi_contenuto {
-    my ($testo) = @_;
-    return ('', '') unless $testo;  # Gestione di input vuoto
+    my ($content) = @_;
+    die "Errore: contenuto vuoto o non definito" unless $content;
 
-    # Identifica la lingua del testo
-    my $lingua = eval { langof($testo) } || 'unknown';
-
-    my $sommario;
-    eval {
-        my $summarizer = Text::Summarizer->new();
-        $sommario = $summarizer->summary($testo);
-    };
-
-    if ($@ or !$sommario) {
-        warn "Errore durante il riassunto: $@" if $@;
-
-        # Fallback semplice se il modulo fallisce
-        my @frasi = split(/(?<=[.!?])\s+/, $testo);
-        $sommario = join(" ", @frasi[0 .. ($#frasi > 2 ? 2 : $#frasi)]);
+    my $summarizer = Text::Summarizer->new();
+    my $summary = eval { $summarizer->generate_summary($content) };
+    if ($@) {
+        warn "Errore durante la generazione del riassunto: $@";
+        return "Riassunto non disponibile";
     }
 
-    return ($sommario, $lingua);
+    return $summary;
 }
 
 # Valuta se il testo è rilevante in base agli interessi
