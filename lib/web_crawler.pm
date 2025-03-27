@@ -15,15 +15,13 @@ use lib './lib';
 use nlp qw(riassumi_contenuto rilevanza_per_interessi);
 use config_manager;
 
-my $MAX_PROCESSES = 10;
-
 sub esegui_crawler_web {
-    # Carica configurazione
-    my $config = config_manager::carica_configurazione();
-    my $db_path = $config->{database};
+    my %config = config_manager::get_all_settings();
+    my $max_processes = $config{MAX_PROCESSES};
+    my $timeout = $config{CRAWLER_TIMEOUT};
 
     # Connessione al database
-    my $dbh = DBI->connect("dbi:SQLite:dbname=$db_path", "", "", { RaiseError => 1, sqlite_unicode => 1, AutoCommit => 1 })
+    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, sqlite_unicode => 1, AutoCommit => 1 })
         or die "Errore di connessione al database: $DBI::errstr";
 
     # Prepara la query per ottenere gli URL da processare
@@ -31,17 +29,16 @@ sub esegui_crawler_web {
     $sth->execute();
 
     # Configura l'UserAgent e il gestore dei processi paralleli
-    my $ua = LWP::UserAgent->new(timeout => 10);
-    my $pm = Parallel::ForkManager->new($MAX_PROCESSES);
+    my $ua = LWP::UserAgent->new(timeout => $timeout);
+    my $pm = Parallel::ForkManager->new($max_processes);
 
     while (my $row = $sth->fetchrow_hashref) {
-        $pm->start and next;  # Avvia un processo figlio
+        $pm->start and next;
 
         eval {
             my $url = $row->{url};
-            next unless $url;  # Salta se l'URL è vuoto o non valido
+            next unless $url;
 
-            # Effettua la richiesta HTTP
             my $res = $ua->get($url);
             if ($res->is_success) {
                 my $content = $res->decoded_content;
@@ -67,16 +64,10 @@ sub esegui_crawler_web {
 
                 # Verifica la rilevanza del contenuto rispetto agli interessi
                 if (rilevanza_per_interessi($riassunto, \@interessi)) {
-                    # Inserisce il riassunto nel database
                     my $ins = $dbh->prepare("INSERT INTO riassunti (titolo, url, autore, data_pubblicazione, lingua, fonte, riassunto, testo_originale) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                     $ins->execute($title, $url, undef, undef, $lingua, 'web', $riassunto, $plain_text);
                 }
 
-                # Inserisce i metadati della pagina nel database
-                my $meta_sth = $dbh->prepare("INSERT INTO pages (url, title, content, metadata) VALUES (?, ?, ?, ?)");
-                $meta_sth->execute($url, $title, $plain_text, '');
-
-                # Pulisce l'albero HTML
                 $tree->delete;
             } else {
                 warn "Errore fetching $url: " . $res->status_line;
@@ -86,36 +77,13 @@ sub esegui_crawler_web {
             warn "Errore durante l'elaborazione dell'URL: $@";
         }
 
-        $pm->finish;  # Termina il processo figlio
+        $pm->finish;
     }
 
-    $pm->wait_all_children;  # Aspetta che tutti i processi figli terminino
+    $pm->wait_all_children;
 
-    # Chiude il cursore e la connessione al database
     $sth->finish();
     $dbh->disconnect or warn "Errore durante la disconnessione dal database: $DBI::errstr";
 }
 
 1;
-
-# Licenza BSD
-# -----------------------------------------------------------------------------
-# Copyright (c) 2024, Giacomo Picchiarelli
-# All rights reserved.
-#
-# Ridistribuzione e uso nel formato sorgente e binario, con o senza modifiche,
-# sono consentiti purché siano soddisfatte le seguenti condizioni:
-#
-# 1. Le ridistribuzioni del codice sorgente devono conservare l'avviso di copyright
-#    di cui sopra, questo elenco di condizioni e il seguente disclaimer.
-# 2. Le ridistribuzioni in formato binario devono riprodurre l'avviso di copyright,
-#    questo elenco di condizioni e il seguente disclaimer nella documentazione
-#    e/o nei materiali forniti con la distribuzione.
-# 3. Né il nome dell'autore né i nomi dei suoi collaboratori possono essere utilizzati
-#    per promuovere prodotti derivati da questo software senza un'autorizzazione
-#    specifica scritta.
-#
-# QUESTO SOFTWARE È FORNITO "COSÌ COM'È" E QUALSIASI GARANZIA ESPRESSA O IMPLICITA
-# È ESCLUSA. IN NESSUN CASO L'AUTORE SARÀ RESPONSABILE PER DANNI DERIVANTI
-# DALL'USO DEL SOFTWARE.
-# -----------------------------------------------------------------------------

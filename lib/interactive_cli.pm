@@ -2,108 +2,195 @@ package interactive_cli;
 
 use strict;
 use warnings;
+use utf8;
 use Term::ReadLine;
-use Term::ANSIColor;
+use Encode qw(decode);
+use lib './lib';
+
+use db;
 use rss_crawler;
 use web_crawler;
 use config_manager;
-use opml;
 
-# Funzione principale per la CLI interattiva
-sub run {
-   
+# Funzione principale per avviare l'interfaccia CLI
+sub avvia_cli {
     my $term = Term::ReadLine->new('InfoCollect CLI');
-    my $prompt = colored("infocollect>:", 'bold green');
-    my $OUT = $term->OUT || \*STDOUT;
+    print "Benvenuto in InfoCollect CLI! Digita 'help' per vedere i comandi disponibili.\n";
 
-    print colored("\n=== Benvenuto nella CLI interattiva di InfoCollect ===\n", 'bold cyan');
-    print colored("Digita 'help' per la lista dei comandi.\n\n", 'cyan');
+    while (1) {
+        my $input = $term->readline('InfoCollect> ');
+        $input = decode('utf-8', $input // '');
+        chomp($input);
 
-    while (defined (my $input = $term->readline($prompt))) {
-        chomp $input;
-        $input =~ s/^\s+|\s+$//g;  # Rimuove spazi iniziali e finali
+        next unless $input;  # Salta input vuoti
+        my ($comando, @args) = split(/\s+/, $input);
 
-        # Gestione dei comandi
-        if ($input eq 'help') {
-            print_help($OUT);
-        }
-        elsif ($input eq 'exit' || $input eq 'quit') {
-            print colored("\nUscita dalla CLI. Arrivederci!\n", 'bold yellow');
+        if ($comando eq 'help') {
+            mostra_aiuto();
+        } elsif ($comando eq 'exit') {
+            print "Uscita da InfoCollect CLI. Arrivederci!\n";
             last;
+        } elsif ($comando eq 'add_rss_feed') {
+            aggiungi_feed_rss(@args);
+        } elsif ($comando eq 'list_rss_feeds') {
+            lista_feed_rss();
+        } elsif ($comando eq 'run_rss_crawler') {
+            esegui_crawler_rss();
+        } elsif ($comando eq 'add_web_url') {
+            aggiungi_url_web(@args);
+        } elsif ($comando eq 'list_web_urls') {
+            lista_url_web();
+        } elsif ($comando eq 'run_web_crawler') {
+            esegui_crawler_web();
+        } elsif ($comando eq 'show_config') {
+            mostra_configurazione();
+        } elsif ($comando eq 'set_config') {
+            imposta_configurazione(@args);
+        } else {
+            print "Comando non riconosciuto: '$comando'. Digita 'help' per vedere i comandi disponibili.\n";
         }
-        elsif ($input eq 'rss-crawl') {
-            print colored("\nAvvio del crawler RSS...\n", 'bold magenta');
-            rss_crawler::run();
-        }
-        elsif ($input eq 'web-crawl') {
-            print colored("\nAvvio del web crawler...\n", 'bold magenta');
-            web_crawler::run();
-        }
-        elsif ($input =~ /^add-setting\s+(\S+)\s+(.+)$/) {
-            my ($key, $value) = ($1, $2);
-            config_manager::add_setting($key, $value);
-            print colored("Impostazione aggiunta o aggiornata: $key = $value\n", 'bold green');
-        }
-        elsif ($input =~ /^get-setting\s+(\S+)$/) {
-            my $key = $1;
-            my $value = config_manager::get_setting($key);
-            if (defined $value) {
-                print colored("Valore per '$key': $value\n", 'bold blue');
-            } else {
-                print colored("Chiave '$key' non trovata.\n", 'bold red');
-            }
-        }
-        elsif ($input =~ /^delete-setting\s+(\S+)$/) {
-            my $key = $1;
-            config_manager::delete_setting($key);
-            print colored("Impostazione eliminata: $key\n", 'bold yellow');
-        }
-        elsif ($input =~ /^import-opml\s+(\S+)$/) {
-            my $file_path = $1;
-            unless ($file_path) {
-                print colored("Uso: import-opml <file.opml>\n", 'red');
-            }
-            opml::import_opml($file_path);
-        }
-        elsif ($input =~ /^export-opml\s+(\S+)$/) {
-            my $file_path = $1;
-            unless ($file_path) {
-                print colored("Uso: export-opml <file.opml>\n", 'red');
-            }
-            opml::export_opml($file_path);
-        }
-        else {
-            print colored("Comando non riconosciuto. Digita 'help' per la lista dei comandi.\n", 'bold red');
-        }
-
-        # Aggiunge l'input alla cronologia
-        $term->addhistory($input) if $input;
     }
 }
 
-# Funzione per stampare l'help
-sub print_help {
-    my ($OUT) = @_;
-    print colored("\n=== Comandi disponibili ===\n", 'bold cyan');
-    print colored("  help                      ", 'bold yellow'), "Mostra questo messaggio di aiuto.\n";
-    print colored("  exit | quit               ", 'bold yellow'), "Esce dalla CLI.\n";
-    print colored("  rss-crawl                 ", 'bold yellow'), "Esegue il crawler RSS.\n";
-    print colored("  web-crawl                 ", 'bold yellow'), "Esegue il web crawler.\n";
-    print colored("  add-setting <key> <value> ", 'bold yellow'), "Aggiunge o aggiorna una voce di configurazione.\n";
-    print colored("  get-setting <key>         ", 'bold yellow'), "Ottiene il valore di una voce di configurazione.\n";
-    print colored("  delete-setting <key>      ", 'bold yellow'), "Elimina una voce di configurazione.\n";
-    print colored("  import-opml <file>  ", 'cyan'), " - Importa feed RSS da un file OPML\n";
-    print colored("  export-opml <file>  ", 'cyan'), " - Esporta i feed RSS in un file OPML\n";
-    print colored("\nEsempi di utilizzo:\n", 'bold yellow');
-    print colored("  import-opml feeds.opml\n", 'green');
-    print colored("  export-opml export.opml\n", 'green');
-    print colored("\nImpostazioni:\n", 'bold cyan');
-    print colored("  add-setting refresh_interval 30\n", 'cyan');
-    print colored("  get-setting refresh_interval\n", 'cyan');
-    print colored("  delete-setting refresh_interval\n\n", 'cyan');
+# Mostra l'elenco dei comandi disponibili
+sub mostra_aiuto {
+    print <<'END_HELP';
+Comandi disponibili:
+  help                  Mostra questo messaggio di aiuto.
+  exit                  Esci dall'interfaccia CLI.
+  add_rss_feed <titolo> <url>
+                        Aggiungi un nuovo feed RSS.
+  list_rss_feeds        Mostra l'elenco dei feed RSS salvati.
+  run_rss_crawler       Esegui il crawler per i feed RSS.
+  add_web_url <url>     Aggiungi un nuovo URL per il crawling web.
+  list_web_urls         Mostra l'elenco degli URL per il crawling web.
+  run_web_crawler       Esegui il crawler per gli URL web.
+  show_config           Mostra la configurazione attuale.
+  set_config <chiave> <valore>
+                        Imposta un valore nella configurazione.
+END_HELP
 }
 
-# Assicurati che il modulo restituisca un valore positivo
+# Aggiungi un nuovo feed RSS
+sub aggiungi_feed_rss {
+    my ($titolo, $url) = @_;
+    unless ($titolo && $url) {
+        print "Errore: devi specificare un titolo e un URL.\n";
+        return;
+    }
+    eval {
+        db::add_rss_feed($titolo, $url);
+        print "Feed RSS aggiunto con successo: $titolo ($url)\n";
+    };
+    if ($@) {
+        print "Errore durante l'aggiunta del feed RSS: $@\n";
+    }
+}
+
+# Mostra l'elenco dei feed RSS
+sub lista_feed_rss {
+    eval {
+        my $feeds = db::get_all_rss_feeds();
+        if (@$feeds) {
+            print "Feed RSS salvati:\n";
+            foreach my $feed (@$feeds) {
+                print "  [$feed->{id}] $feed->{title} - $feed->{url}\n";
+            }
+        } else {
+            print "Nessun feed RSS salvato.\n";
+        }
+    };
+    if ($@) {
+        print "Errore durante il recupero dei feed RSS: $@\n";
+    }
+}
+
+# Esegui il crawler RSS
+sub esegui_crawler_rss {
+    eval {
+        rss_crawler::esegui_crawler_rss();
+        print "Crawler RSS completato con successo.\n";
+    };
+    if ($@) {
+        print "Errore durante l'esecuzione del crawler RSS: $@\n";
+    }
+}
+
+# Aggiungi un nuovo URL per il crawling web
+sub aggiungi_url_web {
+    my ($url) = @_;
+    unless ($url) {
+        print "Errore: devi specificare un URL.\n";
+        return;
+    }
+    eval {
+        db::add_web_url($url);
+        print "URL aggiunto con successo: $url\n";
+    };
+    if ($@) {
+        print "Errore durante l'aggiunta dell'URL: $@\n";
+    }
+}
+
+# Mostra l'elenco degli URL per il crawling web
+sub lista_url_web {
+    eval {
+        my $urls = db::get_all_web_urls();
+        if (@$urls) {
+            print "URL per il crawling web:\n";
+            foreach my $url (@$urls) {
+                print "  [$url->{id}] $url->{url} (Attivo: $url->{attivo})\n";
+            }
+        } else {
+            print "Nessun URL salvato per il crawling web.\n";
+        }
+    };
+    if ($@) {
+        print "Errore durante il recupero degli URL: $@\n";
+    }
+}
+
+# Esegui il crawler web
+sub esegui_crawler_web {
+    eval {
+        web_crawler::esegui_crawler_web();
+        print "Crawler web completato con successo.\n";
+    };
+    if ($@) {
+        print "Errore durante l'esecuzione del crawler web: $@\n";
+    }
+}
+
+# Mostra la configurazione attuale
+sub mostra_configurazione {
+    eval {
+        my %config = config_manager::get_all_settings();
+        print "Configurazione attuale:\n";
+        foreach my $chiave (keys %config) {
+            print "  $chiave: $config{$chiave}\n";
+        }
+    };
+    if ($@) {
+        print "Errore durante il caricamento della configurazione: $@\n";
+    }
+}
+
+# Imposta un valore nella configurazione
+sub imposta_configurazione {
+    my ($chiave, $valore) = @_;
+    unless ($chiave && $valore) {
+        print "Errore: devi specificare una chiave e un valore.\n";
+        return;
+    }
+    eval {
+        config_manager::add_setting($chiave, $valore);
+        print "Configurazione aggiornata: $chiave = $valore\n";
+    };
+    if ($@) {
+        print "Errore durante l'aggiornamento della configurazione: $@\n";
+    }
+}
+
 1;
 
 # Licenza BSD

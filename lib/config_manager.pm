@@ -41,16 +41,18 @@ sub get_setting {
     $sth->finish();
     $dbh->disconnect();
 
-    if ($row) {
-        return $row->[0];
-    } else {
-        warn "Chiave '$key' non trovata.\n";
-        return undef;
-    }
+    return $row ? $row->[0] : undef;
 }
 
-# Funzione per ottenere tutte le impostazioni
+# Funzione per ottenere tutte le impostazioni con valori predefiniti
 sub get_all_settings {
+    my %defaults = (
+        RSS_INTERVALLO_MINUTI => 15,
+        WEB_INTERVALLO_MINUTI => 15,
+        CRAWLER_TIMEOUT       => 10,
+        MAX_PROCESSES         => 5,
+    );
+
     my $dbh = db::connect_db();
     my $sql = q{
         SELECT key, value FROM settings
@@ -59,15 +61,14 @@ sub get_all_settings {
     my $sth = $dbh->prepare($sql);
     $sth->execute() or die $dbh->errstr;
 
-    my %settings;
     while (my $row = $sth->fetchrow_hashref) {
-        $settings{$row->{key}} = $row->{value};
+        $defaults{$row->{key}} = $row->{value};
     }
 
     $sth->finish();
     $dbh->disconnect();
 
-    return %settings;
+    return %defaults;
 }
 
 # Funzione per eliminare una impostazione
@@ -108,7 +109,6 @@ sub setting_exists {
     return $exists;
 }
 
-# Assicurati che il modulo restituisca un valore positivo
 1;
 
 #use strict;
