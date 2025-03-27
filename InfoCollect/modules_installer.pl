@@ -1,37 +1,75 @@
 #!/usr/bin/env perl
+
 use strict;
 use warnings;
 
-# Lista dei moduli richiesti
-my @modules = qw(LWP::Simple XML::RSS Term::ANSIColor);
+my @modules = (
+    # --- Database ---
+    'DBI',
+    'DBD::SQLite',
 
-# Controlla e installa i moduli mancanti
-foreach my $module (@modules) {
-    eval "use $module";
-    if ($@) {
-        print "Il modulo $module non è installato. Installazione in corso...\n";
-        system("cpan -T $module") == 0 or die "Impossibile installare $module\n";
+    # --- Web & parsing ---
+    'LWP::UserAgent',
+    'HTML::TreeBuilder',
+    'HTML::Strip',
+    'XML::RSS',
+
+    # --- NLP & linguistica ---
+    'Text::Summarizer',
+    'Lingua::Identify',
+    'Lingua::Stem::IT',
+    'Lingua::EN::Tagger',
+
+    # --- CLI interattiva ---
+    'Term::ReadLine',
+    'Term::ANSIColor',
+
+    # --- Esecuzione parallela ---
+    'Parallel::ForkManager',
+
+    # --- Interfaccia web Mojolicious ---
+    'Mojolicious',
+);
+
+my @ok;
+my @failed;
+
+sub check_cpanm {
+    print "Controllo cpanm...\n";
+    my $exists = `which cpanm`;
+    chomp $exists;
+    if (!$exists) {
+        print "Installo cpanm...\n";
+        system("curl -L https://cpanmin.us | perl - App::cpanminus") == 0
+            or die "Installazione di cpanm fallita.";
     }
 }
 
-# Licenza BSD
-# -----------------------------------------------------------------------------
-# Copyright (c) 2024, Giacomo Picchiarelli
-# All rights reserved.
-#
-# Ridistribuzione e uso nel formato sorgente e binario, con o senza modifiche,
-# sono consentiti purché siano soddisfatte le seguenti condizioni:
-#
-# 1. Le ridistribuzioni del codice sorgente devono conservare l'avviso di copyright
-#    di cui sopra, questo elenco di condizioni e il seguente disclaimer.
-# 2. Le ridistribuzioni in formato binario devono riprodurre l'avviso di copyright,
-#    questo elenco di condizioni e il seguente disclaimer nella documentazione
-#    e/o nei materiali forniti con la distribuzione.
-# 3. Né il nome dell'autore né i nomi dei suoi collaboratori possono essere utilizzati
-#    per promuovere prodotti derivati da questo software senza un'autorizzazione
-#    specifica scritta.
-#
-# QUESTO SOFTWARE È FORNITO "COSÌ COM'È" E QUALSIASI GARANZIA ESPRESSA O IMPLICITA
-# È ESCLUSA. IN NESSUN CASO L'AUTORE SARÀ RESPONSABILE PER DANNI DERIVANTI
-# DALL'USO DEL SOFTWARE.
-# -----------------------------------------------------------------------------
+sub install_modules {
+    foreach my $mod (@modules) {
+        print "\n▶ Verifica: $mod\n";
+        eval "use $mod";
+        if ($@) {
+            print "  ↳ Non trovato. Provo installazione...\n";
+            system("cpanm --force $mod") == 0 ? push(@ok, $mod) : push(@failed, $mod);
+        } else {
+            print "  ↳ Già installato.\n";
+            push @ok, $mod;
+        }
+    }
+}
+
+check_cpanm();
+install_modules();
+
+# Riepilogo
+print "\n📦 Moduli installati correttamente:\n";
+print " - $_\n" for @ok;
+
+if (@failed) {
+    print "\n❌ Moduli che NON sono stati installati correttamente:\n";
+    print " - $_\n" for @failed;
+    print "\n⚠️ Controlla la connessione o i permessi di installazione.\n";
+} else {
+    print "\n✅ Tutti i moduli richiesti sono stati installati o erano già presenti.\n";
+}

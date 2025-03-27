@@ -1,28 +1,12 @@
 #!/usr/bin/env perl
+
 use strict;
 use warnings;
-use LWP::Simple;
-use XML::RSS;
-use Term::ANSIColor;
+use lib "../lib";
+use interactive_cli;
 
-# URL del feed RSS di esempio
-my $url = 'https://www.repubblica.it/rss/homepage/rss2.0.xml';
-
-# Scarica il contenuto del feed
-my $content = get($url) or die "Impossibile scaricare il feed: $url\n";
-
-# Crea un nuovo parser RSS
-my $rss = XML::RSS->new;
-$rss->parse($content);
-
-# Mostra i titoli delle news
-foreach my $item (@{$rss->{items}}) {
-    print colored("Titolo: ", 'bold green'), $item->{title}, "\n";
-    print colored("Link: ", 'bold blue'), $item->{link}, "\n";
-    print "-" x 40, "\n";
-}
-
-__END__
+print "Avvio dell'interfaccia CLI interattiva...\n";
+interactive_cli::run();
 
 # Licenza BSD
 # -----------------------------------------------------------------------------
@@ -45,4 +29,3 @@ __END__
 # È ESCLUSA. IN NESSUN CASO L'AUTORE SARÀ RESPONSABILE PER DANNI DERIVANTI
 # DALL'USO DEL SOFTWARE.
 # -----------------------------------------------------------------------------
-

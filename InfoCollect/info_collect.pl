@@ -2,31 +2,15 @@
 
 use strict;
 use warnings;
-use FindBin;
-use lib './lib';  
-use interactive_cli;
-use init_db;
-use init_conf;
+use lib "../lib";
+use rss_crawler;
+use web_crawler;
 
-$0 = "InfoCollect";
+print "Esecuzione combinata RSS + Web...\n";
+rss_crawler::esegui_crawler_rss();
+web_crawler::esegui_crawler_web();
 
-init_db::Inizializza();
-init_conf::configuraValoriIniziali();
-
-# Lista dei moduli richiesti
-my @modules = qw(LWP::Simple XML::RSS Term::ANSIColor);
-
-# Controlla e installa i moduli mancanti
-foreach my $module (@modules) {
-    eval "use $module";
-    if ($@) {
-        print "Il modulo $module non è installato. Installazione in corso...\n";
-        system("cpan -T $module") == 0 or die "Impossibile installare $module\n";
-    }
-}
-
-# Esegui la CLI interattiva
-interactive_cli::run();
+print "Operazione completata.\n";
 
 # Licenza BSD
 # -----------------------------------------------------------------------------
