@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoCollect</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>InfoCollect - Dashboard</h1>
+        <nav>
+            <a href="/feeds">Feed RSS</a>
+            <a href="/pages">Pagine</a>
+            <a href="/settings">Impostazioni</a>
+            <a href="/logs">Log</a>
+            <a href="/notification_channels">Notifiche</a>
+            <a href="/senders">Mittenti</a>
+            <a href="/templates">Template</a>
+            <a href="/latency">Latenza</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Benvenuto in InfoCollect</h2>
+        <p>Seleziona una sezione dal menu per iniziare.</p>
+    </main>
+    <footer>
+        <p>&copy; 2024 Giacomo Picchiarelli</p>
+    </footer>
+</body>
+</html>

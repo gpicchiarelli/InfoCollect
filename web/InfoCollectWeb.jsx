@@ -1,108 +1,84 @@
-
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 
 export default function InfoCollectWeb() {
-  const [feeds, setFeeds] = useState([]);
-  const [pages, setPages] = useState([]);
-  const [settings, setSettings] = useState({});
-  const [newFeed, setNewFeed] = useState({ title: "", url: "" });
-  const [newSetting, setNewSetting] = useState({ key: "", value: "" });
+  const [rssData, setRssData] = useState([]);
+  const [webData, setWebData] = useState([]);
+  const [settings, setSettings] = useState([]);
+  const [p2pStatus, setP2pStatus] = useState([]);
 
   useEffect(() => {
-    fetchFeeds();
-    fetchPages();
+    fetchRssData();
+    fetchWebData();
     fetchSettings();
+    fetchP2pStatus();
   }, []);
 
-  const fetchFeeds = async () => {
-    const res = await fetch("/api/feeds");
+  const fetchRssData = async () => {
+    const res = await fetch("/api/rss_data");
     const data = await res.json();
-    setFeeds(data);
+    setRssData(data);
   };
 
-  const fetchPages = async () => {
-    const res = await fetch("/api/pages");
+  const fetchWebData = async () => {
+    const res = await fetch("/api/web_data");
     const data = await res.json();
-    setPages(data);
+    setWebData(data);
   };
 
   const fetchSettings = async () => {
     const res = await fetch("/api/settings");
     const data = await res.json();
-    const settingsObj = Object.fromEntries(data.map(s => [s.key, s.value]));
-    setSettings(settingsObj);
+    setSettings(data);
   };
 
-  const addFeed = async () => {
-    await fetch("/api/feeds", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newFeed),
-    });
-    setNewFeed({ title: "", url: "" });
-    fetchFeeds();
+  const fetchP2pStatus = async () => {
+    const res = await fetch("/api/p2p_status");
+    const data = await res.json();
+    setP2pStatus(data);
   };
 
-  const addSetting = async () => {
+  const updateSetting = async (key, value) => {
     await fetch("/api/settings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newSetting),
+      body: JSON.stringify({ key, value }),
     });
-    setNewSetting({ key: "", value: "" });
     fetchSettings();
   };
 
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">InfoCollect - Interfaccia Web</h1>
-      <Tabs defaultValue="feeds">
+      <h1 className="text-2xl font-bold">InfoCollect - Dashboard</h1>
+      <Tabs defaultValue="rss">
         <TabsList>
-          <TabsTrigger value="feeds">Feed RSS</TabsTrigger>
-          <TabsTrigger value="pages">Pagine Raccolte</TabsTrigger>
+          <TabsTrigger value="rss">Dati RSS</TabsTrigger>
+          <TabsTrigger value="web">Dati Web</TabsTrigger>
           <TabsTrigger value="settings">Impostazioni</TabsTrigger>
+          <TabsTrigger value="p2p">Sincronizzazione P2P</TabsTrigger>
         </TabsList>
-        <TabsContent value="feeds">
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <Input placeholder="Titolo" value={newFeed.title} onChange={e => setNewFeed({ ...newFeed, title: e.target.value })} />
-              <Input placeholder="URL" value={newFeed.url} onChange={e => setNewFeed({ ...newFeed, url: e.target.value })} />
-              <Button onClick={addFeed}>Aggiungi</Button>
-            </div>
-            {feeds.map(feed => (
-              <Card key={feed.id}><CardContent className="p-2">[{feed.title}] {feed.url}</CardContent></Card>
-            ))}
-          </div>
+        <TabsContent value="rss">
+          <h2>Dati RSS</h2>
+          <ul>{rssData.map((item, idx) => <li key={idx}>{item.title}</li>)}</ul>
         </TabsContent>
-        <TabsContent value="pages">
-          <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-            {pages.map(page => (
-              <Card key={page.url}>
-                <CardContent className="p-2">
-                  <div className="font-semibold">{page.title}</div>
-                  <div className="text-sm text-gray-600">{page.url}</div>
-                  <div className="text-xs mt-1">{page.content?.slice(0, 200)}...</div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+        <TabsContent value="web">
+          <h2>Dati Web</h2>
+          <ul>{webData.map((item, idx) => <li key={idx}>{item.url}</li>)}</ul>
         </TabsContent>
         <TabsContent value="settings">
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <Input placeholder="Chiave" value={newSetting.key} onChange={e => setNewSetting({ ...newSetting, key: e.target.value })} />
-              <Input placeholder="Valore" value={newSetting.value} onChange={e => setNewSetting({ ...newSetting, value: e.target.value })} />
-              <Button onClick={addSetting}>Salva</Button>
-            </div>
-            {Object.entries(settings).map(([k, v]) => (
-              <Card key={k}><CardContent className="p-2 font-mono">{k} = {v}</CardContent></Card>
+          <h2>Impostazioni</h2>
+          <ul>
+            {settings.map((setting, idx) => (
+              <li key={idx}>
+                {setting.key}: {setting.value}
+                <button onClick={() => updateSetting(setting.key, "newValue")}>Aggiorna</button>
+              </li>
             ))}
-          </div>
+          </ul>
+        </TabsContent>
+        <TabsContent value="p2p">
+          <h2>Sincronizzazione P2P</h2>
+          <pre>{JSON.stringify(p2pStatus, null, 2)}</pre>
         </TabsContent>
       </Tabs>
     </div>

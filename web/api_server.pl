@@ -210,4 +210,40 @@ get '/api/latency' => sub {
     $c->render(json => \@latency_data);
 };
 
+# Endpoint per ottenere i dati RSS raccolti
+get '/api/rss_data' => sub {
+    my $c = shift;
+    my $rss_data = db::get_all_rss_data();
+    $c->render(json => $rss_data);
+};
+
+# Endpoint per ottenere i dati delle pagine web raccolte
+get '/api/web_data' => sub {
+    my $c = shift;
+    my $web_data = db::get_all_web_data();
+    $c->render(json => $web_data);
+};
+
+# Endpoint per ottenere lo stato della sincronizzazione P2P
+get '/api/p2p_status' => sub {
+    my $c = shift;
+    my $p2p_status = p2p::get_status();  # Funzione da implementare
+    $c->render(json => $p2p_status);
+};
+
+# Endpoint per aggiungere o aggiornare un'impostazione
+post '/api/settings' => sub {
+    my $c = shift;
+    my $data = $c->req->json;
+    db::add_or_update_setting($data->{key}, $data->{value});
+    $c->render(json => { success => 1 });
+};
+
+# Endpoint per ottenere tutte le impostazioni
+get '/api/settings' => sub {
+    my $c = shift;
+    my $settings = db::get_all_settings();
+    $c->render(json => $settings);
+};
+
 app->start;

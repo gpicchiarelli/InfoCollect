@@ -86,6 +86,16 @@ sub get_all_rss_feeds {
     return \@feeds;
 }
 
+# Funzione per ottenere tutti i dati RSS
+sub get_all_rss_data {
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT * FROM rss_articles");
+    $sth->execute();
+    my $data = $sth->fetchall_arrayref({});
+    $sth->finish();
+    return $data;
+}
+
 # Funzione per aggiungere un URL web
 sub add_web_url {
     my ($url) = @_;
@@ -122,6 +132,16 @@ sub get_all_web_urls {
     $sth->finish();
     $dbh->disconnect();
     return \@urls;
+}
+
+# Funzione per ottenere tutti i dati web
+sub get_all_web_data {
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT * FROM pages");
+    $sth->execute();
+    my $data = $sth->fetchall_arrayref({});
+    $sth->finish();
+    return $data;
 }
 
 # Funzione per aggiornare lo stato di un URL web (attivo/inattivo)
@@ -166,6 +186,13 @@ sub add_setting {
     }
     $sth->finish();
     $dbh->disconnect();
+}
+
+# Funzione per aggiungere o aggiornare una impostazione
+sub add_or_update_setting {
+    my ($key, $value) = @_;
+    my $dbh = connect_db();
+    $dbh->do("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?", undef, $key, $value, $value);
 }
 
 # Funzione per ottenere tutte le impostazioni

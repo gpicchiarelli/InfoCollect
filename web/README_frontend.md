@@ -21,6 +21,13 @@
 
 Questa è l'interfaccia web scritta in React con TypeScript per InfoCollect.
 
+## Funzionalità
+
+- Visualizzazione dei dati RSS raccolti.
+- Visualizzazione dei dati delle pagine web raccolte.
+- Gestione delle impostazioni.
+- Visualizzazione dello stato della sincronizzazione P2P.
+
 ## Installazione e Avvio
 
 1. Assicurati di avere `Node.js` e `npm` installati.

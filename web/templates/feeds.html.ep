@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed RSS</title>
+</head>
+<body>
+    <h1>Gestione Feed RSS</h1>
+    <form id="add-feed-form">
+        <input type="text" name="title" placeholder="Titolo" required>
+        <input type="url" name="url" placeholder="URL" required>
+        <button type="submit">Aggiungi Feed</button>
+    </form>
+    <ul id="feed-list">
+        <!-- I feed saranno caricati dinamicamente -->
+    </ul>
+    <script>
+        document.getElementById('add-feed-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/feeds', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+            if (response.ok) {
+                alert('Feed aggiunto con successo!');
+                location.reload();
+            } else {
+                alert('Errore durante l\'aggiunta del feed.');
+            }
+        });
+
+        async function loadFeeds() {
+            const response = await fetch('/api/feeds');
+            const feeds = await response.json();
+            const feedList = document.getElementById('feed-list');
+            feedList.innerHTML = feeds.map(feed => `<li>${feed.title} - <a href="${feed.url}" target="_blank">${feed.url}</a></li>`).join('');
+        }
+
+        loadFeeds();
+    </script>
+</body>
+</html>
