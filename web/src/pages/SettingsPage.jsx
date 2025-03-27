@@ -6,10 +6,16 @@ function SettingsPage() {
   const [newSetting, setNewSetting] = useState({ key: "", value: "" });
   const [channels, setChannels] = useState([]);
   const [newChannel, setNewChannel] = useState({ name: "", type: "", config: "" });
+  const [senders, setSenders] = useState([]);
+  const [newSender, setNewSender] = useState({ name: "", type: "", config: "", active: true });
+  const [recipients, setRecipients] = useState([]);
+  const [newRecipient, setNewRecipient] = useState({ name: "", contact: "" });
 
   useEffect(() => {
     fetchSettings();
     fetchChannels();
+    fetchSenders();
+    fetchRecipients();
   }, []);
 
   const fetchSettings = async () => {
@@ -42,6 +48,38 @@ function SettingsPage() {
     });
     setNewChannel({ name: "", type: "", config: "" });
     fetchChannels();
+  };
+
+  const fetchSenders = async () => {
+    const res = await fetch("/api/senders");
+    const data = await res.json();
+    setSenders(data);
+  };
+
+  const addSender = async () => {
+    await fetch("/api/senders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newSender),
+    });
+    setNewSender({ name: "", type: "", config: "", active: true });
+    fetchSenders();
+  };
+
+  const fetchRecipients = async () => {
+    const res = await fetch("/api/recipients");
+    const data = await res.json();
+    setRecipients(data);
+  };
+
+  const addRecipient = async () => {
+    await fetch("/api/recipients", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newRecipient),
+    });
+    setNewRecipient({ name: "", contact: "" });
+    fetchRecipients();
   };
 
   return (
@@ -82,6 +120,41 @@ function SettingsPage() {
             <Card key={channel.id}>
               <div className="p-2">
                 <strong>{channel.name}</strong> - {channel.type}
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Mittenti</h3>
+        <div className="flex gap-2">
+          <Input placeholder="Nome" value={newSender.name} onChange={(e) => setNewSender({ ...newSender, name: e.target.value })} />
+          <Input placeholder="Tipo (Mail/RSS/WhatsApp/IRC)" value={newSender.type} onChange={(e) => setNewSender({ ...newSender, type: e.target.value })} />
+          <Input placeholder="Config (JSON)" value={newSender.config} onChange={(e) => setNewSender({ ...newSender, config: e.target.value })} />
+          <Button onClick={addSender}>Aggiungi</Button>
+        </div>
+        <div className="space-y-2">
+          {senders.map((sender) => (
+            <Card key={sender.id}>
+              <div className="p-2">
+                <strong>{sender.name}</strong> - {sender.type} (Attivo: {sender.active ? "Sì" : "No"})
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Destinatari</h3>
+        <div className="flex gap-2">
+          <Input placeholder="Nome" value={newRecipient.name} onChange={(e) => setNewRecipient({ ...newRecipient, name: e.target.value })} />
+          <Input placeholder="Contatto (Email/Telefono)" value={newRecipient.contact} onChange={(e) => setNewRecipient({ ...newRecipient, contact: e.target.value })} />
+          <Button onClick={addRecipient}>Aggiungi</Button>
+        </div>
+        <div className="space-y-2">
+          {recipients.map((recipient) => (
+            <Card key={recipient.id}>
+              <div className="p-2">
+                <strong>{recipient.name}</strong> - {recipient.contact}
               </div>
             </Card>
           ))}

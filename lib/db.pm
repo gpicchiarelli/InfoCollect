@@ -317,6 +317,58 @@ sub deactivate_notification_channel {
     $dbh->disconnect();
 }
 
+# Funzione per aggiungere un mittente
+sub add_sender {
+    my ($name, $type, $config) = @_;
+    my $encrypted_config = encrypt_data($config);
+
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("INSERT INTO senders (name, type, config) VALUES (?, ?, ?)");
+    $sth->execute($name, $type, $encrypted_config);
+    $sth->finish();
+    $dbh->disconnect();
+}
+
+# Funzione per ottenere tutti i mittenti
+sub get_all_senders {
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT id, name, type, config, active FROM senders");
+    $sth->execute();
+
+    my @senders;
+    while (my $row = $sth->fetchrow_hashref) {
+        $row->{config} = decrypt_data($row->{config});
+        push @senders, $row;
+    }
+
+    $sth->finish();
+    $dbh->disconnect();
+    return \@senders;
+}
+
+# Funzione per aggiornare un mittente
+sub update_sender {
+    my ($id, $name, $type, $config, $active) = @_;
+    my $encrypted_config = encrypt_data($config);
+
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("UPDATE senders SET name = ?, type = ?, config = ?, active = ? WHERE id = ?");
+    $sth->execute($name, $type, $encrypted_config, $active, $id);
+    $sth->finish();
+    $dbh->disconnect();
+}
+
+# Funzione per eliminare un mittente
+sub delete_sender {
+    my ($id) = @_;
+
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("DELETE FROM senders WHERE id = ?");
+    $sth->execute($id);
+    $sth->finish();
+    $dbh->disconnect();
+}
+
 1;
 
 # Licenza BSD

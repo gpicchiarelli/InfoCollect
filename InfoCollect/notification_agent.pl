@@ -8,6 +8,8 @@ use Time::HiRes qw(sleep);
 use db;
 use notification;
 use config_manager;
+use rss_crawler;
+use web_crawler;
 
 print "[Notification Agent] Avvio del thread di notifiche...\n";
 
@@ -27,6 +29,26 @@ while (1) {
             my $message = "Notifica automatica inviata alle " . localtime();
             notification::send_notification($channel, $message);
             print "[Notification Agent] Notifica inviata tramite $channel->{type} ($channel->{name})\n";
+        }
+
+        # Rilancio dei contenuti RSS
+        print "[Notification Agent] Rilancio dei contenuti RSS...\n";
+        eval {
+            rss_crawler::esegui_crawler_rss();
+            print "[Notification Agent] Rilancio RSS completato.\n";
+        };
+        if ($@) {
+            warn "[Notification Agent] Errore durante il rilancio RSS: $@\n";
+        }
+
+        # Rilancio dei contenuti delle pagine web
+        print "[Notification Agent] Rilancio dei contenuti delle pagine web...\n";
+        eval {
+            web_crawler::esegui_crawler_web();
+            print "[Notification Agent] Rilancio Web completato.\n";
+        };
+        if ($@) {
+            warn "[Notification Agent] Errore durante il rilancio Web: $@\n";
         }
 
         print "[Notification Agent] Attesa $interval minuti prima del prossimo ciclo...\n";

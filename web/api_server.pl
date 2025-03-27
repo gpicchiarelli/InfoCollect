@@ -127,4 +127,19 @@ post '/api/notification_channels/:id/deactivate' => sub {
     $c->render(json => { success => 1 });
 };
 
+# Endpoint per ottenere i mittenti
+get '/api/senders' => sub {
+    my $c = shift;
+    my $senders = db::get_all_senders();
+    $c->render(json => $senders);
+};
+
+# Endpoint per aggiungere un mittente
+post '/api/senders' => sub {
+    my $c = shift;
+    my $data = $c->req->json;
+    db::add_sender($data->{name}, $data->{type}, $data->{config});
+    $c->render(json => { success => 1 });
+};
+
 app->start;

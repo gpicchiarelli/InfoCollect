@@ -129,6 +129,18 @@ $dbh->do(q{
 });
 $dbh->do(q{CREATE INDEX IF NOT EXISTS idx_notification_channels_type ON notification_channels (type)});
 
+# Tabella mittenti (senders)
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS senders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        type TEXT NOT NULL, -- Mail, RSS, WhatsApp, IRC, ecc.
+        config TEXT NOT NULL, -- JSON crittografato con le credenziali
+        active INTEGER DEFAULT 1
+    )
+});
+$dbh->do(q{CREATE INDEX IF NOT EXISTS idx_senders_type ON senders (type)});
+
 print "Database inizializzato correttamente.\n";
 
 $dbh->disconnect or warn "Errore durante la disconnessione dal database: $DBI::errstr";

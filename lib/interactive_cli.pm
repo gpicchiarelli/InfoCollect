@@ -65,6 +65,18 @@ sub avvia_cli {
             my ($id) = @args;
             db::deactivate_notification_channel($id);
             print "Canale di notifica disattivato: ID=$id\n";
+        } elsif ($comando eq 'relaunch_rss') {
+            rilancia_rss();
+        } elsif ($comando eq 'relaunch_web') {
+            rilancia_web();
+        } elsif ($comando eq 'add_sender') {
+            aggiungi_mittente(@args);
+        } elsif ($comando eq 'list_senders') {
+            lista_mittenti();
+        } elsif ($comando eq 'update_sender') {
+            aggiorna_mittente(@args);
+        } elsif ($comando eq 'delete_sender') {
+            elimina_mittente(@args);
         } else {
             print "Comando non riconosciuto: '$comando'. Digita 'help' per vedere i comandi disponibili.\n";
         }
@@ -98,6 +110,14 @@ Comandi disponibili:
                         Mostra l'elenco dei canali di notifica.
   deactivate_notification_channel <id>
                         Disattiva un canale di notifica.
+  relaunch_rss          Rilancia i contenuti RSS.
+  relaunch_web          Rilancia i contenuti delle pagine web.
+  add_sender <name> <type> <config>
+                        Aggiungi un nuovo mittente.
+  list_senders          Mostra l'elenco dei mittenti configurati.
+  update_sender <id> <name> <type> <config> <active>
+                        Aggiorna un mittente.
+  delete_sender <id>    Elimina un mittente.
 END_HELP
 }
 
@@ -146,6 +166,17 @@ sub esegui_crawler_rss {
     }
 }
 
+# Funzione per rilanciare i contenuti RSS
+sub rilancia_rss {
+    eval {
+        rss_crawler::esegui_crawler_rss();
+        print "Rilancio dei contenuti RSS completato con successo.\n";
+    };
+    if ($@) {
+        print "Errore durante il rilancio dei contenuti RSS: $@\n";
+    }
+}
+
 # Aggiungi un nuovo URL per il crawling web
 sub aggiungi_url_web {
     my ($url) = @_;
@@ -188,6 +219,17 @@ sub esegui_crawler_web {
     };
     if ($@) {
         print "Errore durante l'esecuzione del crawler web: $@\n";
+    }
+}
+
+# Funzione per rilanciare i contenuti delle pagine web
+sub rilancia_web {
+    eval {
+        web_crawler::esegui_crawler_web();
+        print "Rilancio dei contenuti delle pagine web completato con successo.\n";
+    };
+    if ($@) {
+        print "Errore durante il rilancio dei contenuti delle pagine web: $@\n";
     }
 }
 
@@ -266,6 +308,72 @@ sub condividi_riassunto {
     };
     if ($@) {
         print "Errore durante la condivisione del riassunto: $@\n";
+    }
+}
+
+# Funzione per aggiungere un mittente
+sub aggiungi_mittente {
+    my ($name, $type, $config) = @_;
+    unless ($name && $type && $config) {
+        print "Errore: devi specificare un nome, un tipo e una configurazione.\n";
+        return;
+    }
+    eval {
+        db::add_sender($name, $type, $config);
+        print "Mittente aggiunto con successo: $name ($type)\n";
+    };
+    if ($@) {
+        print "Errore durante l'aggiunta del mittente: $@\n";
+    }
+}
+
+# Funzione per elencare i mittenti
+sub lista_mittenti {
+    eval {
+        my $senders = db::get_all_senders();
+        if (@$senders) {
+            print "Mittenti configurati:\n";
+            foreach my $sender (@$senders) {
+                print "  [$sender->{id}] $sender->{name} - $sender->{type} (Attivo: $sender->{active})\n";
+            }
+        } else {
+            print "Nessun mittente configurato.\n";
+        }
+    };
+    if ($@) {
+        print "Errore durante il recupero dei mittenti: $@\n";
+    }
+}
+
+# Funzione per aggiornare un mittente
+sub aggiorna_mittente {
+    my ($id, $name, $type, $config, $active) = @_;
+    unless ($id && $name && $type && $config && defined $active) {
+        print "Errore: devi specificare un ID, un nome, un tipo, una configurazione e lo stato attivo.\n";
+        return;
+    }
+    eval {
+        db::update_sender($id, $name, $type, $config, $active);
+        print "Mittente aggiornato con successo: $name ($type)\n";
+    };
+    if ($@) {
+        print "Errore durante l'aggiornamento del mittente: $@\n";
+    }
+}
+
+# Funzione per eliminare un mittente
+sub elimina_mittente {
+    my ($id) = @_;
+    unless ($id) {
+        print "Errore: devi specificare un ID.\n";
+        return;
+    }
+    eval {
+        db::delete_sender($id);
+        print "Mittente eliminato con successo: ID=$id\n";
+    };
+    if ($@) {
+        print "Errore durante l'eliminazione del mittente: $@\n";
     }
 }
 
