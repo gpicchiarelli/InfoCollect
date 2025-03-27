@@ -161,6 +161,18 @@ print "Database inizializzato correttamente.\n";
 
 $dbh->disconnect or warn "Errore durante la disconnessione dal database: $DBI::errstr";
 
+sub initialize_database {
+    my $dbh = db::connect_db();
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS procedures (
+            name TEXT PRIMARY KEY,
+            code TEXT NOT NULL
+        )
+    });
+    $dbh->disconnect();
+    print "Tabella 'procedures' creata con successo.\n";
+}
+
 1;
 
 # Licenza BSD

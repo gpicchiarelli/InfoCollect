@@ -5,6 +5,7 @@ use warnings;
 use DBI;
 use db;
 use config_manager;
+use Digest::SHA qw(sha256_hex);
 
 our %settings = config_manager::get_all_settings();
 
@@ -22,16 +23,85 @@ sub configuraValoriIniziali{
     if(!defined config_manager::get_setting("NOTIFICATION_INTERVAL_MINUTI")){
         config_manager::add_setting("NOTIFICATION_INTERVAL_MINUTI", "10");
     }
+    if(!defined config_manager::get_setting("LOG_LEVEL")){
+        config_manager::add_setting("LOG_LEVEL", "INFO");
+    }
+    if(!defined config_manager::get_setting("MAX_CONNECTIONS")){
+        config_manager::add_setting("MAX_CONNECTIONS", "100");
+    }
+    if(!defined config_manager::get_setting("CACHE_EXPIRATION_MINUTI")){
+        config_manager::add_setting("CACHE_EXPIRATION_MINUTI", "30");
+    }
+    if(!defined config_manager::get_setting("CRAWLER_TIMEOUT")){
+        config_manager::add_setting("CRAWLER_TIMEOUT", "10");
+    }
+    if(!defined config_manager::get_setting("MAX_PROCESSES")){
+        config_manager::add_setting("MAX_PROCESSES", "5");
+    }
+    if(!defined config_manager::get_setting("UDP_DISCOVERY_INTERVAL_SEC")){
+        config_manager::add_setting("UDP_DISCOVERY_INTERVAL_SEC", "5");
+    }
+    if(!defined config_manager::get_setting("TCP_SYNC_PORT")){
+        config_manager::add_setting("TCP_SYNC_PORT", "5001");
+    }
+    if(!defined config_manager::get_setting("UDP_DISCOVERY_PORT")){
+        config_manager::add_setting("UDP_DISCOVERY_PORT", "5000");
+    }
+    if(!defined config_manager::get_setting("INFOCOLLECT_ENCRYPTION_KEY")){
+        configuraChiaveCrittografia();
+    }
     %settings = config_manager::get_all_settings();
+    db::initialize_default_procedures();
 }
 
-sub impostaValoriInizialiForzatamente{
-        config_manager::add_setting("RSS_INTERVALLO_MINUTI", "1");
-        config_manager::add_setting("WEB_INTERVALLO_MINUTI", "1");
-        config_manager::add_setting("PRUNING_GENERICO_GIORNI", "7");
+sub impostaValoriInizialiForzatamente {
+    # Imposta i parametri di configurazione richiesti
+    config_manager::add_setting("RSS_INTERVALLO_MINUTI", "1");
+    config_manager::add_setting("WEB_INTERVALLO_MINUTI", "1");
+    config_manager::add_setting("PRUNING_GENERICO_GIORNI", "7");
+    config_manager::add_setting("NOTIFICATION_INTERVAL_MINUTI", "10");
+    config_manager::add_setting("CRAWLER_TIMEOUT", "10");
+    config_manager::add_setting("MAX_PROCESSES", "5");
+    config_manager::add_setting("UDP_DISCOVERY_INTERVAL_SEC", "5");
+    config_manager::add_setting("TCP_SYNC_PORT", "5001");
+    config_manager::add_setting("UDP_DISCOVERY_PORT", "5000");
+
+    # Genera e imposta la chiave di crittografia
+    if (!config_manager::setting_exists("INFOCOLLECT_ENCRYPTION_KEY")) {
+        generaChiaveCrittografia();
+    }
+
+    # Aggiorna la variabile globale delle impostazioni
     %settings = config_manager::get_all_settings();
+
+    # Inizializza le procedure predefinite
+    db::initialize_default_procedures();
 }
 
+sub generaChiaveCrittografia {
+    my $chiave = sha256_hex(time . rand());
+    config_manager::add_setting("INFOCOLLECT_ENCRYPTION_KEY", $chiave);
+    print "Chiave di crittografia generata: $chiave\n";
+}
+
+sub configuraChiaveCrittografia {
+    if (!defined config_manager::get_setting("INFOCOLLECT_ENCRYPTION_KEY")) {
+        generaChiaveCrittografia();
+    } else {
+        my $chiave = config_manager::get_setting("INFOCOLLECT_ENCRYPTION_KEY");
+        if (!$chiave || length($chiave) != 64) {  # Verifica che la chiave sia valida
+            print "Chiave di crittografia non valida, rigenerazione in corso...\n";
+            rigeneraChiaveCrittografia();
+        }
+    }
+}
+
+sub rigeneraChiaveCrittografia {
+    config_manager::delete_setting("INFOCOLLECT_ENCRYPTION_KEY");
+    generaChiaveCrittografia();
+}
+
+configuraChiaveCrittografia();
 
 1;
 

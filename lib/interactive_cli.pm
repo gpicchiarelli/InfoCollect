@@ -12,11 +12,13 @@ use rss_crawler;
 use web_crawler;
 use config_manager;
 
+
 # Funzione principale per avviare l'interfaccia CLI
 sub avvia_cli {
+    config_manager::configuraValoriIniziali();
+
     my $term = Term::ReadLine->new('InfoCollect CLI');
     print "Benvenuto in InfoCollect CLI! Digita 'help' per vedere i comandi disponibili.\n";
-
     while (1) {
         my $input = $term->readline('InfoCollect> ');
         $input = decode('utf-8', $input // '');
@@ -77,6 +79,8 @@ sub avvia_cli {
             aggiorna_mittente(@args);
         } elsif ($comando eq 'delete_sender') {
             elimina_mittente(@args);
+        } elsif ($comando eq 'regenerate_procedures') {
+            rigenera_procedure();
         } else {
             print "Comando non riconosciuto: '$comando'. Digita 'help' per vedere i comandi disponibili.\n";
         }
@@ -118,6 +122,7 @@ Comandi disponibili:
   update_sender <id> <name> <type> <config> <active>
                         Aggiorna un mittente.
   delete_sender <id>    Elimina un mittente.
+  regenerate_procedures Rigenera tutte le procedure.
 END_HELP
 }
 
@@ -374,6 +379,17 @@ sub elimina_mittente {
     };
     if ($@) {
         print "Errore durante l'eliminazione del mittente: $@\n";
+    }
+}
+
+# Funzione per rigenerare le procedure
+sub rigenera_procedure {
+    eval {
+        db::regenerate_procedures();
+        print "Tutte le procedure sono state rigenerate con successo.\n";
+    };
+    if ($@) {
+        print "Errore durante la rigenerazione delle procedure: $@\n";
     }
 }
 

@@ -5,14 +5,11 @@ use warnings;
 use DBI;
 use JSON;
 use Time::HiRes qw(gettimeofday);
-use Crypt::CBC;
+use Crypt::AuthEnc::GCM;
 use Digest::SHA qw(sha256);
 
 # Nome del database SQLite
 my $db_file = 'infocollect.db';
-
-# Chiave di crittografia (da configurare come variabile d'ambiente)
-my $encryption_key = $ENV{'INFOCOLLECT_ENCRYPTION_KEY'} || die "Chiave di crittografia non configurata.\n";
 
 # Funzione per connettersi al database
 sub connect_db {
@@ -34,18 +31,40 @@ sub connect_db {
     return $dbh;
 }
 
+# Ottieni la chiave di crittografia dal database
+sub get_encryption_key {
+    my $key = config_manager::get_setting("INFOCOLLECT_ENCRYPTION_KEY");
+    die "Chiave di crittografia non configurata nel database.\n" unless $key;
+    return $key;
+}
+
 # Funzione per crittografare i dati
 sub encrypt_data {
     my ($data) = @_;
-    my $cipher = Crypt::CBC->new(-key => sha256($encryption_key), -cipher => 'Rijndael');
-    return $cipher->encrypt_hex($data);
+    my $encryption_key = get_encryption_key();
+    my $key = sha256($encryption_key); # Chiave a 256 bit
+    my $iv = substr(sha256(time . $$), 0, 12); # IV unico per ogni crittografia
+    my $cipher = Crypt::AuthEnc::GCM->new('AES', $key, $iv);
+    $cipher->aad(""); # Nessun dato aggiuntivo
+    my $ciphertext = $cipher->encrypt_add($data);
+    $ciphertext .= $cipher->encrypt_done();
+    return unpack("H*", $iv . $ciphertext . $cipher->tag());
 }
 
 # Funzione per decrittografare i dati
 sub decrypt_data {
     my ($encrypted_data) = @_;
-    my $cipher = Crypt::CBC->new(-key => sha256($encryption_key), -cipher => 'Rijndael');
-    return $cipher->decrypt_hex($encrypted_data);
+    my $encryption_key = get_encryption_key();
+    my $key = sha256($encryption_key); # Chiave a 256 bit
+    my $binary_data = pack("H*", $encrypted_data);
+    my $iv = substr($binary_data, 0, 12); # Estrai IV
+    my $tag = substr($binary_data, -16); # Estrai tag
+    my $ciphertext = substr($binary_data, 12, -16); # Estrai testo cifrato
+    my $cipher = Crypt::AuthEnc::GCM->new('AES', $key, $iv);
+    $cipher->aad(""); # Nessun dato aggiuntivo
+    $cipher->decrypt_add($ciphertext);
+    die "Errore nella decrittografia: tag non valido\n" unless $cipher->decrypt_done($tag);
+    return $cipher->decrypt_add($ciphertext);
 }
 
 # Funzione per aggiungere un feed RSS
@@ -483,6 +502,89 @@ sub get_template_by_name {
     $sth->finish();
     $dbh->disconnect();
     return $row ? $row->{content} : undef;
+}
+
+# Funzione per generare dinamicamente procedure e salvarle nel database
+sub generate_and_save_procedures {
+    my ($procedures) = @_;
+
+    unless (ref $procedures eq 'HASH') {
+        die "Errore: le procedure devono essere fornite come hash.\n";
+    }
+
+    my $dbh = connect_db();
+    foreach my $name (keys %$procedures) {
+        my $code = $procedures->{$name};
+        my $sth = $dbh->prepare("INSERT INTO procedures (name, code) VALUES (?, ?) ON CONFLICT(name) DO UPDATE SET code = excluded.code");
+        eval {
+            $sth->execute($name, $code);
+        };
+        if ($@) {
+            warn "Errore durante il salvataggio della procedura $name: $@";
+        } else {
+            print "Procedura salvata con successo: $name\n";
+        }
+        $sth->finish();
+    }
+    $dbh->disconnect();
+}
+
+# Funzione per rigenerare le procedure da zero
+sub regenerate_procedures {
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT name, code FROM procedures");
+    $sth->execute();
+
+    while (my $row = $sth->fetchrow_hashref) {
+        my $name = $row->{name};
+        my $code = $row->{code};
+        eval $code;
+        if ($@) {
+            warn "Errore durante la rigenerazione della procedura $name: $@";
+        } else {
+            print "Procedura rigenerata con successo: $name\n";
+        }
+    }
+
+    $sth->finish();
+    $dbh->disconnect();
+}
+
+# Funzione per inizializzare le procedure predefinite
+sub initialize_default_procedures {
+    my %default_procedures = (
+        'add_summary' => q{
+            sub add_summary {
+                my ($page_id, $summary) = @_;
+                unless ($page_id && $summary) {
+                    die "Errore: page_id e summary sono richiesti per aggiungere un riassunto.\n";
+                }
+                my $dbh = connect_db();
+                my $sth = $dbh->prepare("INSERT INTO summaries (page_id, summary) VALUES (?, ?)");
+                eval {
+                    $sth->execute($page_id, $summary);
+                };
+                if ($@) {
+                    warn "Errore durante l'aggiunta del riassunto: $@";
+                } else {
+                    print "Riassunto aggiunto con successo.\n";
+                }
+                $sth->finish();
+                $dbh->disconnect();
+            }
+        },
+        'share_summary' => q{
+            sub share_summary {
+                my ($summary_id, $recipient) = @_;
+                unless ($summary_id && $recipient) {
+                    die "Errore: summary_id e recipient sono richiesti per condividere un riassunto.\n";
+                }
+                print "Riassunto $summary_id condiviso con $recipient.\n";
+            }
+        },
+    );
+
+    generate_and_save_procedures(\%default_procedures);
 }
 
 1;

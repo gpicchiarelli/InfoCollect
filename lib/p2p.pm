@@ -9,6 +9,7 @@ use Sys::Hostname;
 use threads;
 use DBI;
 use Time::HiRes qw(gettimeofday tv_interval);
+use db;
 
 # Variabili globali
 my $rsa = Crypt::PK::RSA->new();
@@ -111,15 +112,17 @@ sub verify_peer {
 # Funzione per crittografare i dati con la chiave pubblica
 sub encrypt_with_public_key {
     my ($data, $public_key) = @_;
-    my $rsa = Crypt::PK::RSA->new(\$public_key);
-    return $rsa->encrypt($data);
+    my $encryption_key = config_manager::get_setting("INFOCOLLECT_ENCRYPTION_KEY");
+    my $encrypted_data = db::encrypt_data($data);
+    return $encrypted_data;
 }
 
 # Funzione per decrittografare i dati con la chiave privata
 sub decrypt_with_private_key {
     my ($data) = @_;
-    my $rsa = Crypt::PK::RSA->new(\$private_key);
-    return $rsa->decrypt($data);
+    my $encryption_key = config_manager::get_setting("INFOCOLLECT_ENCRYPTION_KEY");
+    my $decrypted_data = db::decrypt_data($data);
+    return $decrypted_data;
 }
 
 # Funzione per ottenere la chiave pubblica
