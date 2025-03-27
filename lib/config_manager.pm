@@ -5,6 +5,9 @@ use warnings;
 use DBI;
 use db;  # Importiamo il modulo db per la connessione al database
 use IO::Socket::INET;  # Importiamo il modulo IO::Socket::INET per la connessione di rete
+use init_conf; # Importa il modulo init_conf per utilizzare configuraValoriIniziali
+use Exporter 'import'; # Importa Exporter per esportare funzioni
+our @EXPORT_OK = qw(get_all_settings); # Esporta la funzione get_all_settings
 
 # Funzione per aggiungere una nuova impostazione
 sub add_setting {
@@ -148,6 +151,11 @@ sub apply_delta {
             print "Impostazione aggiornata: $key = $remote_settings{$key}\n";
         }
     }
+}
+
+# Definizione della subroutine configuraValoriIniziali
+sub configuraValoriIniziali {
+    return init_conf::configuraValoriIniziali(); # Richiamo alla funzione in init_conf.pm
 }
 
 1;

@@ -13,6 +13,13 @@ sub ensure_modules_installed {
         FindBin
         JSON
         Time::HiRes
+        Lingua::Identify
+        Lingua::Stem::It
+        Lingua::EN::Tagger
+        Text::Extract::Word
+        LWP::UserAgent
+        Encode
+        Exporter    
     );
 
     foreach my $module (@required_modules) {

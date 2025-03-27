@@ -3,36 +3,47 @@ package nlp;
 use strict;
 use warnings;
 use utf8;
-
-use Text::Summarizer;
+use LWP::UserAgent;
+use JSON;
 use Lingua::Identify qw/langof/;
-use Lingua::IT::Stemmer;
+use Lingua::Stem::It; # Sostituito Lingua::IT::Stemmer
 use Lingua::EN::Tagger;
-use Text::Extract::Words;
+use Text::Extract::Word;
 use Encode qw(decode);
 use Exporter 'import';
 
 our @EXPORT_OK = qw(riassumi_contenuto rilevanza_per_interessi estrai_parole_chiave);
 
 # Istanza per stemming italiano
-my $stem_it = Lingua::IT::Stemmer->new();
+# Rimosso: Lingua::Stem::It non ha un metodo new
 
 # Istanza per tagging inglese
 my $tagger_en = Lingua::EN::Tagger->new();
+
+# Configurazione API per il riassunto
+my $api_url = 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn';
+my $api_token = 'YOUR_HUGGINGFACE_API_TOKEN'; # Sostituisci con il tuo token API
 
 # Riassume un testo in base alla lingua
 sub riassumi_contenuto {
     my ($content) = @_;
     die "Errore: contenuto vuoto o non definito" unless $content;
 
-    my $summarizer = Text::Summarizer->new();
-    my $summary = eval { $summarizer->generate_summary($content) };
-    if ($@) {
-        warn "Errore durante la generazione del riassunto: $@";
+    my $ua = LWP::UserAgent->new;
+    my $response = $ua->post(
+        $api_url,
+        'Content-Type'  => 'application/json',
+        'Authorization' => "Bearer $api_token",
+        Content         => encode_json({ inputs => $content })
+    );
+
+    if ($response->is_success) {
+        my $result = decode_json($response->decoded_content);
+        return $result->{summary_text} || "Riassunto non disponibile";
+    } else {
+        warn "Errore durante la richiesta di riassunto: " . $response->status_line;
         return "Riassunto non disponibile";
     }
-
-    return $summary;
 }
 
 # Valuta se il testo è rilevante in base agli interessi
@@ -60,9 +71,9 @@ sub estrai_parole_chiave {
     my @parole_chiave;
 
     if ($lingua && $lingua eq 'it') {
-        # Stemming per l'italiano
+        # Stemming per l'italiano con Lingua::Stem::It
         my @parole = Text::Extract::Words::extract($testo);
-        @parole_chiave = map { $stem_it->stem($_) } @parole;
+        @parole_chiave = Lingua::Stem::It::stem(@parole);
     } elsif ($lingua && $lingua eq 'en') {
         # Tagging per l'inglese
         my $tagged_text = $tagger_en->add_tags($testo);

@@ -4,10 +4,10 @@ use strict;
 use warnings;
 use DBI;
 use db;
-use config_manager;
+use config_manager qw(get_all_settings); # Importa esplicitamente get_all_settings
 use Digest::SHA qw(sha256_hex);
 
-our %settings = config_manager::get_all_settings();
+our %settings = config_manager::get_all_settings(); # Richiamo corretto della funzione
 
 sub configuraValoriIniziali{
     
@@ -50,7 +50,7 @@ sub configuraValoriIniziali{
     if(!defined config_manager::get_setting("INFOCOLLECT_ENCRYPTION_KEY")){
         configuraChiaveCrittografia();
     }
-    %settings = config_manager::get_all_settings();
+    %settings = get_all_settings();
     db::initialize_default_procedures();
 }
 
@@ -72,7 +72,7 @@ sub impostaValoriInizialiForzatamente {
     }
 
     # Aggiorna la variabile globale delle impostazioni
-    %settings = config_manager::get_all_settings();
+    %settings = get_all_settings();
 
     # Inizializza le procedure predefinite
     db::initialize_default_procedures();
