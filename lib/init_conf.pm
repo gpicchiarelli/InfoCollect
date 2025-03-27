@@ -9,6 +9,11 @@ use Digest::SHA qw(sha256_hex);
 
 our %settings = config_manager::get_all_settings(); # Richiamo corretto della funzione
 
+# Verifica che %settings sia stato popolato correttamente
+if (!%settings) {
+    die "Errore: impossibile inizializzare le impostazioni da config_manager::get_all_settings()";
+}
+
 sub configuraValoriIniziali{
     
     if(!defined config_manager::get_setting("RSS_INTERVALLO_MINUTI")){
