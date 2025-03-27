@@ -21,15 +21,16 @@ sub avvia_cli {
     my $term = Term::ReadLine->new('InfoCollect CLI');
     system("clear"); # Pulisce lo schermo
 
-    # Banner in ASCII art
+    # Banner in ASCII art statico
     print "========================================================================\n";
-    print "  ___        __        _      _      _      _     \n";
-    print " |_ _|  ___ / _|  ___ | |__  (_)  __| |  __| | ___ \n";
-    print "  | |  / _ \\ |_  / _ \\| '_ \\ | | / _` | / _` |/ _ \\\n";
-    print "  | | |  __/  _||  __/| | | || || (_| || (_| |  __/\n";
-    print " |___| \\___|_|   \\___||_| |_||_| \\__,_| \\__,_|\\___|\n";
+    print ".___        _____      _________        .__  .__                 __    \n";
+    print "|   | _____/ ____\____ \_   ___ \  ____ |  | |  |   ____   _____/  |_  \n";
+    print "|   |/    \   __\/  _ \/    \  \/ /  _ \|  | |  | _/ __ \_/ ___\   __\ \n";
+    print "|   |   |  \  | (  <_> )     \___(  <_> )  |_|  |_\  ___/\  \___|  |   \n";
+    print "|___|___|  /__|  \____/ \______  /\____/|____/____/\___  >\___  >__|   \n";
+    print "         \/                    \/                      \/     \/       \n";
     print "\n";
-    print "          Progetto InfoCollect - https://github.com/gpicchiarelli/InfoCollect\n";
+    print "  Progetto InfoCollect - https://github.com/gpicchiarelli/InfoCollect\n";
     print "========================================================================\n";
     print "\n";
 
