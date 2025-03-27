@@ -72,4 +72,27 @@ get '/api/logs' => sub {
     $c->render(json => $logs);
 };
 
+# Endpoint per ottenere i canali di notifica
+get '/api/notification_channels' => sub {
+    my $c = shift;
+    my $channels = db::get_notification_channels();
+    $c->render(json => $channels);
+};
+
+# Endpoint per aggiungere un canale di notifica
+post '/api/notification_channels' => sub {
+    my $c = shift;
+    my $data = $c->req->json;
+    db::add_notification_channel($data->{name}, $data->{type}, $data->{config});
+    $c->render(json => { success => 1 });
+};
+
+# Endpoint per disattivare un canale di notifica
+post '/api/notification_channels/:id/deactivate' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    db::deactivate_notification_channel($id);
+    $c->render(json => { success => 1 });
+};
+
 app->start;

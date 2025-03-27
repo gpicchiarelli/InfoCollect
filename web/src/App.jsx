@@ -3,6 +3,7 @@ import FeedsPage from "./pages/FeedsPage";
 import PagesPage from "./pages/PagesPage";
 import SettingsPage from "./pages/SettingsPage";
 import LogsPage from "./pages/LogsPage";
+import SummariesPage from "./pages/SummariesPage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
               <Link to="/pages" className="hover:text-blue-500">Pagine</Link>
               <Link to="/settings" className="hover:text-blue-500">Impostazioni</Link>
               <Link to="/logs" className="hover:text-blue-500">Log</Link>
+              <Link to="/summaries" className="hover:text-blue-500">Riassunti</Link>
             </nav>
           </div>
         </header>
@@ -25,6 +27,7 @@ function App() {
             <Route path="/pages" element={<PagesPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/logs" element={<LogsPage />} />
+            <Route path="/summaries" element={<SummariesPage />} />
           </Routes>
         </main>
       </div>

@@ -214,6 +214,90 @@ sub get_logs {
     return \@logs;
 }
 
+# Funzione per ottenere tutti i riassunti
+sub get_all_summaries {
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT * FROM summaries ORDER BY created_at DESC");
+    $sth->execute();
+
+    my @summaries;
+    while (my $row = $sth->fetchrow_hashref) {
+        push @summaries, $row;
+    }
+
+    $sth->finish();
+    $dbh->disconnect();
+    return \@summaries;
+}
+
+# Funzione per aggiungere un nuovo riassunto
+sub add_summary {
+    my ($page_id, $summary) = @_;
+
+    unless ($page_id && $summary) {
+        die "Errore: page_id e summary sono richiesti per aggiungere un riassunto.\n";
+    }
+
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("INSERT INTO summaries (page_id, summary) VALUES (?, ?)");
+    eval {
+        $sth->execute($page_id, $summary);
+    };
+    if ($@) {
+        warn "Errore durante l'aggiunta del riassunto: $@";
+    } else {
+        print "Riassunto aggiunto con successo.\n";
+    }
+    $sth->finish();
+    $dbh->disconnect();
+}
+
+# Funzione per condividere un riassunto
+sub share_summary {
+    my ($summary_id, $recipient) = @_;
+
+    unless ($summary_id && $recipient) {
+        die "Errore: summary_id e recipient sono richiesti per condividere un riassunto.\n";
+    }
+
+    # Simulazione di condivisione (es. invio email o API esterna)
+    print "Riassunto $summary_id condiviso con $recipient.\n";
+}
+
+# Aggiunge un canale di notifica
+sub add_notification_channel {
+    my ($name, $type, $config) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("INSERT INTO notification_channels (name, type, config) VALUES (?, ?, ?)");
+    $sth->execute($name, $type, $config);
+    $sth->finish();
+    $dbh->disconnect();
+}
+
+# Ottiene tutti i canali di notifica
+sub get_notification_channels {
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT * FROM notification_channels WHERE active = 1");
+    $sth->execute();
+    my @channels;
+    while (my $row = $sth->fetchrow_hashref) {
+        push @channels, $row;
+    }
+    $sth->finish();
+    $dbh->disconnect();
+    return \@channels;
+}
+
+# Disattiva un canale di notifica
+sub deactivate_notification_channel {
+    my ($id) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("UPDATE notification_channels SET active = 0 WHERE id = ?");
+    $sth->execute($id);
+    $sth->finish();
+    $dbh->disconnect();
+}
+
 1;
 
 # Licenza BSD

@@ -117,6 +117,18 @@ $dbh->do(q{
 });
 $dbh->do(q{CREATE INDEX IF NOT EXISTS idx_logs_level ON logs (level)});
 
+# Tabella canali di notifica
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS notification_channels (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        type TEXT NOT NULL, -- RSS, Mail, Teams, IRC
+        config TEXT NOT NULL, -- JSON con le credenziali e configurazioni
+        active INTEGER DEFAULT 1
+    )
+});
+$dbh->do(q{CREATE INDEX IF NOT EXISTS idx_notification_channels_type ON notification_channels (type)});
+
 print "Database inizializzato correttamente.\n";
 
 $dbh->disconnect or warn "Errore durante la disconnessione dal database: $DBI::errstr";

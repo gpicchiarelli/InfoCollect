@@ -46,6 +46,25 @@ sub avvia_cli {
             mostra_configurazione();
         } elsif ($comando eq 'set_config') {
             imposta_configurazione(@args);
+        } elsif ($comando eq 'list_summaries') {
+            lista_riassunti();
+        } elsif ($comando eq 'add_summary') {
+            aggiungi_riassunto(@args);
+        } elsif ($comando eq 'share_summary') {
+            condividi_riassunto(@args);
+        } elsif ($comando eq 'add_notification_channel') {
+            my ($name, $type, $config) = @args;
+            db::add_notification_channel($name, $type, $config);
+            print "Canale di notifica aggiunto: $name ($type)\n";
+        } elsif ($comando eq 'list_notification_channels') {
+            my $channels = db::get_notification_channels();
+            foreach my $channel (@$channels) {
+                print "[$channel->{id}] $channel->{name} - $channel->{type}\n";
+            }
+        } elsif ($comando eq 'deactivate_notification_channel') {
+            my ($id) = @args;
+            db::deactivate_notification_channel($id);
+            print "Canale di notifica disattivato: ID=$id\n";
         } else {
             print "Comando non riconosciuto: '$comando'. Digita 'help' per vedere i comandi disponibili.\n";
         }
@@ -68,6 +87,17 @@ Comandi disponibili:
   show_config           Mostra la configurazione attuale.
   set_config <chiave> <valore>
                         Imposta un valore nella configurazione.
+  list_summaries        Mostra l'elenco dei riassunti salvati.
+  add_summary <page_id> <summary>
+                        Aggiungi un nuovo riassunto.
+  share_summary <summary_id> <recipient>
+                        Condividi un riassunto con un destinatario.
+  add_notification_channel <name> <type> <config>
+                        Aggiungi un nuovo canale di notifica.
+  list_notification_channels
+                        Mostra l'elenco dei canali di notifica.
+  deactivate_notification_channel <id>
+                        Disattiva un canale di notifica.
 END_HELP
 }
 
@@ -188,6 +218,54 @@ sub imposta_configurazione {
     };
     if ($@) {
         print "Errore durante l'aggiornamento della configurazione: $@\n";
+    }
+}
+
+# Mostra l'elenco dei riassunti
+sub lista_riassunti {
+    eval {
+        my $summaries = db::get_all_summaries();
+        if (@$summaries) {
+            print "Riassunti salvati:\n";
+            foreach my $summary (@$summaries) {
+                print "  [$summary->{id}] $summary->{summary} (Creato: $summary->{created_at})\n";
+            }
+        } else {
+            print "Nessun riassunto salvato.\n";
+        }
+    };
+    if ($@) {
+        print "Errore durante il recupero dei riassunti: $@\n";
+    }
+}
+
+# Aggiungi un nuovo riassunto
+sub aggiungi_riassunto {
+    my ($page_id, $summary) = @_;
+    unless ($page_id && $summary) {
+        print "Errore: devi specificare un page_id e un riassunto.\n";
+        return;
+    }
+    eval {
+        db::add_summary($page_id, $summary);
+    };
+    if ($@) {
+        print "Errore durante l'aggiunta del riassunto: $@\n";
+    }
+}
+
+# Condividi un riassunto
+sub condividi_riassunto {
+    my ($summary_id, $recipient) = @_;
+    unless ($summary_id && $recipient) {
+        print "Errore: devi specificare un summary_id e un destinatario.\n";
+        return;
+    }
+    eval {
+        db::share_summary($summary_id, $recipient);
+    };
+    if ($@) {
+        print "Errore durante la condivisione del riassunto: $@\n";
     }
 }
 

@@ -4,9 +4,12 @@ import { Input, Button, Card } from "../components/ui";
 function SettingsPage() {
   const [settings, setSettings] = useState([]);
   const [newSetting, setNewSetting] = useState({ key: "", value: "" });
+  const [channels, setChannels] = useState([]);
+  const [newChannel, setNewChannel] = useState({ name: "", type: "", config: "" });
 
   useEffect(() => {
     fetchSettings();
+    fetchChannels();
   }, []);
 
   const fetchSettings = async () => {
@@ -23,6 +26,22 @@ function SettingsPage() {
     });
     setNewSetting({ key: "", value: "" });
     fetchSettings();
+  };
+
+  const fetchChannels = async () => {
+    const res = await fetch("/api/notification_channels");
+    const data = await res.json();
+    setChannels(data);
+  };
+
+  const addChannel = async () => {
+    await fetch("/api/notification_channels", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newChannel),
+    });
+    setNewChannel({ name: "", type: "", config: "" });
+    fetchChannels();
   };
 
   return (
@@ -49,6 +68,24 @@ function SettingsPage() {
             </div>
           </Card>
         ))}
+      </div>
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Canali di Notifica</h3>
+        <div className="flex gap-2">
+          <Input placeholder="Nome" value={newChannel.name} onChange={(e) => setNewChannel({ ...newChannel, name: e.target.value })} />
+          <Input placeholder="Tipo (RSS/Mail/Teams/IRC)" value={newChannel.type} onChange={(e) => setNewChannel({ ...newChannel, type: e.target.value })} />
+          <Input placeholder="Config (JSON)" value={newChannel.config} onChange={(e) => setNewChannel({ ...newChannel, config: e.target.value })} />
+          <Button onClick={addChannel}>Aggiungi</Button>
+        </div>
+        <div className="space-y-2">
+          {channels.map((channel) => (
+            <Card key={channel.id}>
+              <div className="p-2">
+                <strong>{channel.name}</strong> - {channel.type}
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
