@@ -19,18 +19,19 @@ sub avvia_cli {
     init_conf::configuraValoriIniziali();
 
     my $term = Term::ReadLine->new('InfoCollect CLI');
+    $term->Attribs->{autohistory} = 1 if $term->Attribs; # Abilita la cronologia automatica se supportata
     system("clear"); # Pulisce lo schermo
 
     # Banner in ASCII art statico
     print "========================================================================\n";
-    print ".___        _____      _________        .__  .__                 __    \n";
+    print ".___        _____      _________        .__  .__                 __   \n";
     print "|   | _____/ ____\____ \_   ___ \  ____ |  | |  |   ____   _____/  |_  \n";
     print "|   |/    \   __\/  _ \/    \  \/ /  _ \|  | |  | _/ __ \_/ ___\   __\ \n";
-    print "|   |   |  \  | (  <_> )     \___(  <_> )  |_|  |_\  ___/\  \___|  |   \n";
-    print "|___|___|  /__|  \____/ \______  /\____/|____/____/\___  >\___  >__|   \n";
-    print "         \/                    \/                      \/     \/       \n";
+    print "|   |   |  \  | (  <_> )     \___(  <_> )  |_|  |_\  ___/\  \___|  |  \n";
+    print "|___|___|  /__|  \____/ \______  /\____/|____/____/\___  >\___  >__|  \n";
+    print "         \/                    \/                      \/     \/      \n";
     print "\n";
-    print "  Progetto InfoCollect - https://github.com/gpicchiarelli/InfoCollect\n";
+    print "          Progetto InfoCollect - https://github.com/gpicchiarelli/InfoCollect\n";
     print "========================================================================\n";
     print "\n";
 

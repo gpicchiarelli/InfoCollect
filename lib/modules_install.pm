@@ -19,7 +19,7 @@ sub ensure_modules_installed {
         Text::Extract::Word
         LWP::UserAgent
         Encode
-        Exporter    
+        Exporter
     );
 
     foreach my $module (@required_modules) {
