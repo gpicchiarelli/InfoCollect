@@ -6,7 +6,12 @@ use db;
 
 get '/' => sub {
     my $c = shift;
-    $c->render(template => 'index');
+    eval {
+        $c->render(template => 'index');
+    };
+    if ($@) {
+        $c->render(text => "Errore interno del server: $@", status => 500);
+    }
 };
 
 app->start;

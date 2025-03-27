@@ -4,7 +4,7 @@ module.exports = {
   coverageDirectory: 'coverage',
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx|js|jsx)$': 'ts-jest',
   },
-  testMatch: ['**/__tests__/**/*.(ts|tsx)'],
+  testMatch: ['**/__tests__/**/*.(ts|tsx|js|jsx)'],
 };

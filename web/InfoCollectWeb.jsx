@@ -8,34 +8,64 @@ export default function InfoCollectWeb() {
   const [p2pStatus, setP2pStatus] = useState([]);
 
   useEffect(() => {
-    fetchRssData();
-    fetchWebData();
-    fetchSettings();
-    fetchP2pStatus();
+    fetchData();
   }, []);
 
+  const fetchData = async () => {
+    try {
+      await Promise.all([
+        fetchRssData(),
+        fetchWebData(),
+        fetchSettings(),
+        fetchP2pStatus(),
+      ]);
+    } catch (error) {
+      console.error("Errore durante il fetch dei dati:", error);
+    }
+  };
+
   const fetchRssData = async () => {
-    const res = await fetch("/api/rss_data");
-    const data = await res.json();
-    setRssData(data);
+    try {
+      const res = await fetch("/api/rss_data");
+      if (!res.ok) throw new Error("Errore nel fetch RSS");
+      const data = await res.json();
+      setRssData(data);
+    } catch (error) {
+      console.error("Errore nel fetch RSS:", error);
+    }
   };
 
   const fetchWebData = async () => {
-    const res = await fetch("/api/web_data");
-    const data = await res.json();
-    setWebData(data);
+    try {
+      const res = await fetch("/api/web_data");
+      if (!res.ok) throw new Error("Errore nel fetch Web");
+      const data = await res.json();
+      setWebData(data);
+    } catch (error) {
+      console.error("Errore nel fetch Web:", error);
+    }
   };
 
   const fetchSettings = async () => {
-    const res = await fetch("/api/settings");
-    const data = await res.json();
-    setSettings(data);
+    try {
+      const res = await fetch("/api/settings");
+      if (!res.ok) throw new Error("Errore nel fetch Settings");
+      const data = await res.json();
+      setSettings(data);
+    } catch (error) {
+      console.error("Errore nel fetch Settings:", error);
+    }
   };
 
   const fetchP2pStatus = async () => {
-    const res = await fetch("/api/p2p_status");
-    const data = await res.json();
-    setP2pStatus(data);
+    try {
+      const res = await fetch("/api/p2p_status");
+      if (!res.ok) throw new Error("Errore nel fetch P2P Status");
+      const data = await res.json();
+      setP2pStatus(data);
+    } catch (error) {
+      console.error("Errore nel fetch P2P Status:", error);
+    }
   };
 
   const updateSetting = async (key, value) => {
