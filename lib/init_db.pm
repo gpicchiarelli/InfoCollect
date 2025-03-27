@@ -1,37 +1,76 @@
-package init_db;
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
 use DBI;
 
-sub inizializza_db {
-    my ($db_path) = @_;
-    my $dbh = DBI->connect("dbi:SQLite:dbname=$db_path", "", "", { RaiseError => 1, sqlite_unicode => 1 });
+my $db_file = "infocollect.db";
+my $dbh = DBI->connect("dbi:SQLite:dbname=$db_file", "", "", {
+    RaiseError => 1,
+    AutoCommit => 1,
+});
 
-    # Tabella per interessi (temi chiave)
-    $dbh->do(qq{
-        CREATE TABLE IF NOT EXISTS interessi (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            tema TEXT NOT NULL UNIQUE
-        )
-    });
+print "Inizializzazione database '$db_file'...\n";
 
-    # Tabella per riassunti con metadati
-    $dbh->do(qq{
-        CREATE TABLE IF NOT EXISTS riassunti (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            titolo TEXT,
-            url TEXT,
-            autore TEXT,
-            data_pubblicazione TEXT,
-            lingua TEXT,
-            fonte TEXT,
-            riassunto TEXT,
-            testo_originale TEXT
-        )
-    });
+# Tabella feed RSS
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS feeds (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        url TEXT NOT NULL,
+        added_at TEXT
+    )
+});
 
-    $dbh->disconnect;
-}
+# Tabella pagine raccolte
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS pages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        url TEXT NOT NULL,
+        title TEXT,
+        content TEXT,
+        metadata TEXT,
+        visited_at TEXT
+    )
+});
 
-1;
+# Tabella impostazioni
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+    )
+});
+
+# Tabella riassunti associati a pagine
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS summaries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        page_id INTEGER,
+        summary TEXT,
+        created_at TEXT,
+        FOREIGN KEY(page_id) REFERENCES pages(id)
+    )
+});
+
+# Tabella autori (opzionale per metadati estesi)
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS authors (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT,
+        affiliation TEXT
+    )
+});
+
+# Tabella web se si vuole gestire crawling diretto su siti
+$dbh->do(q{
+    CREATE TABLE IF NOT EXISTS web (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        url TEXT NOT NULL,
+        attivo INTEGER DEFAULT 1
+    )
+});
+
+print "Database inizializzato correttamente.\n";
+$dbh->disconnect;
