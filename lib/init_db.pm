@@ -66,7 +66,7 @@ $dbh->do(q{
     )
 });
 
-# Tabella riassunti associati a pagine
+# Consolidamento dello schema del database
 $dbh->do(q{
     CREATE TABLE IF NOT EXISTS summaries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,7 +78,6 @@ $dbh->do(q{
 });
 $dbh->do(q{CREATE INDEX IF NOT EXISTS idx_summaries_page_id ON summaries (page_id)});
 
-# Tabella autori (opzionale per metadati estesi)
 $dbh->do(q{
     CREATE TABLE IF NOT EXISTS authors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -88,7 +87,6 @@ $dbh->do(q{
     )
 });
 
-# Tabella web per gestire crawling diretto su siti
 $dbh->do(q{
     CREATE TABLE IF NOT EXISTS web (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,7 +96,6 @@ $dbh->do(q{
 });
 $dbh->do(q{CREATE INDEX IF NOT EXISTS idx_web_url ON web (url)});
 
-# Tabella interessi per il filtraggio dei contenuti
 $dbh->do(q{
     CREATE TABLE IF NOT EXISTS interessi (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -107,7 +104,6 @@ $dbh->do(q{
 });
 $dbh->do(q{CREATE INDEX IF NOT EXISTS idx_interessi_tema ON interessi (tema)});
 
-# Tabella log per registrare errori e attività
 $dbh->do(q{
     CREATE TABLE IF NOT EXISTS logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -118,13 +114,12 @@ $dbh->do(q{
 });
 $dbh->do(q{CREATE INDEX IF NOT EXISTS idx_logs_level ON logs (level)});
 
-# Tabella canali di notifica
 $dbh->do(q{
     CREATE TABLE IF NOT EXISTS notification_channels (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
-        type TEXT NOT NULL, -- RSS, Mail, Teams, IRC
-        config TEXT NOT NULL, -- JSON con le credenziali e configurazioni
+        type TEXT NOT NULL,
+        config TEXT NOT NULL,
         active INTEGER DEFAULT 1
     )
 });
