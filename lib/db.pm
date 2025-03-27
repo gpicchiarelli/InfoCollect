@@ -11,6 +11,9 @@ my $db_file = 'infocollect.db';
 
 # Funzione per connettersi al database
 sub connect_db {
+    unless (-e $db_file) {
+        die "Errore: il database '$db_file' non esiste. Esegui init_db.pm per inizializzarlo.\n";
+    }
     my $dbh = DBI->connect("dbi:SQLite:dbname=$db_file", "", "", {
         RaiseError => 1,
         AutoCommit => 1,

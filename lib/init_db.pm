@@ -5,6 +5,12 @@ use warnings;
 use DBI;
 
 my $db_file = "infocollect.db";
+
+if (-e $db_file) {
+    print "Il database '$db_file' esiste già. Nessuna modifica effettuata.\n";
+    exit;
+}
+
 my $dbh = DBI->connect("dbi:SQLite:dbname=$db_file", "", "", {
     RaiseError => 1,
     AutoCommit => 1,

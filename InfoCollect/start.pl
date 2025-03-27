@@ -2,11 +2,12 @@
 
 use strict;
 use warnings;
-use lib "../lib";
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use interactive_cli;
 
 print "Avvio dell'interfaccia CLI interattiva...\n";
-interactive_cli::run();
+interactive_cli::avvia_cli();
 
 # Licenza BSD
 # -----------------------------------------------------------------------------
