@@ -17,7 +17,7 @@ my @modules = (
     # --- NLP & linguistica ---
     'Text::Summarizer',
     'Lingua::Identify',
-    'Lingua::IT::Stemmer',
+    'Lingua::Stem::IT',
     'Lingua::EN::Tagger',
 
     # --- CLI interattiva ---
@@ -51,7 +51,7 @@ sub install_modules {
         eval "use $mod";
         if ($@) {
             print "  ↳ Non trovato. Provo installazione...\n";
-            system("cpanm $mod") == 0 ? push(@ok, $mod) : push(@failed, $mod);
+            system("cpanm --force $mod") == 0 ? push(@ok, $mod) : push(@failed, $mod);
         } else {
             print "  ↳ Già installato.\n";
             push @ok, $mod;
