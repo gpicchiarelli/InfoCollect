@@ -246,4 +246,19 @@ get '/api/settings' => sub {
     $c->render(json => $settings);
 };
 
+# Endpoint per inviare un task a un peer
+post '/api/send_task' => sub {
+    my $c = shift;
+    my $data = $c->req->json;
+    my $peer_id = $data->{peer_id};
+    my $task_data = $data->{task_data};
+
+    eval {
+        p2p::send_task($peer_id, $task_data);
+        $c->render(json => { success => 1 });
+    } or do {
+        $c->render(json => { success => 0, error => $@ });
+    };
+};
+
 app->start;

@@ -75,6 +75,13 @@ sub start_tcp_server {
                 my ($peer_id, $peer_public_key) = ($1, $2);
                 add_peer_request($peer_id, $peer_public_key);
                 print $client "PEER_REQUEST_RECEIVED\n";
+            } elsif ($data =~ /^TASK:(.+)$/) {
+                my $task_data = $1;
+                my $result = execute_task($task_data);
+                print $client "RESULT:$result\n";
+            } elsif ($data =~ /^RESULT:(.+)$/) {
+                my $result = $1;
+                collect_results($client->peerhost, $result);
             }
             close($client);
         }
@@ -211,6 +218,51 @@ sub get_peer_requests {
     $sth->finish();
     $dbh->disconnect();
     return \@requests;
+}
+
+# Funzione per inviare un task a un peer
+sub send_task {
+    my ($peer_id, $task_data) = @_;
+    my $peer_address = get_peer_address($peer_id);  # Funzione per ottenere l'indirizzo del peer
+    my $socket = IO::Socket::INET->new(
+        PeerAddr => $peer_address,
+        PeerPort => 5001,
+        Proto    => 'tcp'
+    ) or die "Impossibile connettersi al peer $peer_id: $!\n";
+
+    print $socket "TASK:$task_data\n";
+    close($socket);
+}
+
+# Funzione per ricevere un task
+sub receive_task {
+    my ($data) = @_;
+    if ($data =~ /^TASK:(.+)$/) {
+        my $task_data = $1;
+        my $result = execute_task($task_data);  # Funzione per eseguire il task
+        return $result;
+    }
+}
+
+# Funzione per eseguire un task
+sub execute_task {
+    my ($task_data) = @_;
+    # Logica per eseguire il task (es. calcolo distribuito)
+    return "Risultato del task: $task_data";
+}
+
+# Funzione per raccogliere i risultati dai peer
+sub collect_results {
+    my ($peer_id, $result) = @_;
+    print "Risultato ricevuto dal peer $peer_id: $result\n";
+    # Logica per aggregare i risultati
+}
+
+# Funzione per ottenere l'indirizzo di un peer
+sub get_peer_address {
+    my ($peer_id) = @_;
+    # Logica per ottenere l'indirizzo IP del peer dal database
+    return "127.0.0.1";  # Placeholder
 }
 
 1;

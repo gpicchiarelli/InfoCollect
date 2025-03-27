@@ -23,6 +23,9 @@ while (my $client = $server->accept()) {
             print $client "PONG\n";
         } elsif (/^SYNC$/) {
             p2p::sync_data($client);
+        } elsif (/^TASK:(.+)$/) {
+            my $result = p2p::receive_task($_);
+            print $client "RESULT:$result\n";
         }
     }
     close $client;

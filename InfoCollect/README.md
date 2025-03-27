@@ -30,3 +30,19 @@ InfoCollect utilizza un database SQLite per gestire le richieste di peer e i pee
 - `accepted_peers`: Memorizza i peer accettati.
 
 Questo approccio riduce il carico di lavoro duplicato e garantisce coerenza tra le istanze.
+
+InfoCollect supporta ora applicazioni di calcolo distribuito tramite il protocollo P2P. Le funzionalità includono:
+
+1. **Distribuzione dei task**: I task possono essere inviati ai peer disponibili per l'elaborazione.
+2. **Raccolta dei risultati**: I risultati dei task vengono raccolti e aggregati automaticamente.
+3. **Gestione degli errori**: I task falliti vengono riassegnati ad altri peer.
+
+### Nuovi Endpoint API
+
+- **POST /api/send_task**: Invia un task a un peer specifico.
+  - Parametri:
+    - `peer_id`: ID del peer destinatario.
+    - `task_data`: Dati del task da elaborare.
+  - Risposta:
+    - `{ success: 1 }` se il task è stato inviato con successo.
+    - `{ success: 0, error: "messaggio di errore" }` in caso di errore.
