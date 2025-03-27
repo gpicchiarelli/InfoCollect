@@ -12,8 +12,12 @@ use init_db;
 # Nome del database SQLite
 my $db_file = 'infocollect.db';
 
+# Variabile globale per un unico handler
+my $dbh_global;
+
 # Funzione per connettersi al database
 sub connect_db {
+    return $dbh_global if defined $dbh_global;
     my $dbh;
     eval {
         $dbh = init_db::createDB();
@@ -21,7 +25,8 @@ sub connect_db {
     if ($@ || !$dbh) {
         die "Errore durante l'inizializzazione del database: $@";
     }
-    return $dbh;
+    $dbh_global = $dbh;
+    return $dbh_global;
 }
 
 # Ottieni la chiave di crittografia dal database
@@ -79,7 +84,6 @@ sub add_rss_feed {
         print "Feed RSS aggiunto con successo: $title ($url)\n";
     }
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per ottenere tutti i feed RSS
@@ -94,7 +98,6 @@ sub get_all_rss_feeds {
     }
 
     $sth->finish();
-    $dbh->disconnect();
     return \@feeds;
 }
 
@@ -127,7 +130,6 @@ sub add_web_url {
         print "URL web aggiunto con successo: $url\n";
     }
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per ottenere tutti gli URL web
@@ -142,7 +144,6 @@ sub get_all_web_urls {
     }
 
     $sth->finish();
-    $dbh->disconnect();
     return \@urls;
 }
 
@@ -175,7 +176,6 @@ sub update_web_url_status {
         print "Stato dell'URL web aggiornato con successo: ID=$id, Stato=$status\n";
     }
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per aggiungere una nuova impostazione
@@ -197,7 +197,6 @@ sub add_setting {
         print "Impostazione aggiunta o aggiornata: $key = $value\n";
     }
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per aggiungere o aggiornare una impostazione
@@ -219,7 +218,6 @@ sub get_all_settings {
     }
 
     $sth->finish();
-    $dbh->disconnect();
     return \%settings;
 }
 
@@ -242,7 +240,6 @@ sub delete_setting {
         print "Impostazione eliminata: $key\n";
     }
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per verificare se un'impostazione esiste
@@ -260,7 +257,6 @@ sub setting_exists {
     my $exists = $sth->fetchrow_arrayref ? 1 : 0;
 
     $sth->finish();
-    $dbh->disconnect();
     return $exists;
 }
 
@@ -276,7 +272,6 @@ sub get_logs {
     }
 
     $sth->finish();
-    $dbh->disconnect();
     return \@logs;
 }
 
@@ -292,7 +287,6 @@ sub get_all_summaries {
     }
 
     $sth->finish();
-    $dbh->disconnect();
     return \@summaries;
 }
 
@@ -315,7 +309,6 @@ sub add_summary {
         print "Riassunto aggiunto con successo.\n";
     }
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per condividere un riassunto
@@ -337,7 +330,6 @@ sub add_notification_channel {
     my $sth = $dbh->prepare("INSERT INTO notification_channels (name, type, config) VALUES (?, ?, ?)");
     $sth->execute($name, $type, $config);
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Ottiene tutti i canali di notifica
@@ -350,7 +342,6 @@ sub get_notification_channels {
         push @channels, $row;
     }
     $sth->finish();
-    $dbh->disconnect();
     return \@channels;
 }
 
@@ -361,7 +352,6 @@ sub deactivate_notification_channel {
     my $sth = $dbh->prepare("UPDATE notification_channels SET active = 0 WHERE id = ?");
     $sth->execute($id);
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per aggiungere un mittente
@@ -373,7 +363,6 @@ sub add_sender {
     my $sth = $dbh->prepare("INSERT INTO senders (name, type, config) VALUES (?, ?, ?)");
     $sth->execute($name, $type, $encrypted_config);
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per ottenere tutti i mittenti
@@ -389,7 +378,6 @@ sub get_all_senders {
     }
 
     $sth->finish();
-    $dbh->disconnect();
     return \@senders;
 }
 
@@ -402,7 +390,6 @@ sub update_sender {
     my $sth = $dbh->prepare("UPDATE senders SET name = ?, type = ?, config = ?, active = ? WHERE id = ?");
     $sth->execute($name, $type, $encrypted_config, $active, $id);
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per eliminare un mittente
@@ -413,7 +400,6 @@ sub delete_sender {
     my $sth = $dbh->prepare("DELETE FROM senders WHERE id = ?");
     $sth->execute($id);
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per registrare un nuovo utente
@@ -435,7 +421,6 @@ sub register_user {
         print "Utente registrato con successo: $username\n";
     }
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per aggiungere un template
@@ -445,7 +430,6 @@ sub add_template {
     my $sth = $dbh->prepare("INSERT INTO templates (name, content) VALUES (?, ?)");
     $sth->execute($name, $content);
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per ottenere tutti i template
@@ -460,7 +444,6 @@ sub get_all_templates {
     }
 
     $sth->finish();
-    $dbh->disconnect();
     return \@templates;
 }
 
@@ -471,7 +454,6 @@ sub update_template {
     my $sth = $dbh->prepare("UPDATE templates SET name = ?, content = ? WHERE id = ?");
     $sth->execute($name, $content, $id);
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per eliminare un template
@@ -481,7 +463,6 @@ sub delete_template {
     my $sth = $dbh->prepare("DELETE FROM templates WHERE id = ?");
     $sth->execute($id);
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per ottenere un template per nome
@@ -493,7 +474,6 @@ sub get_template_by_name {
 
     my $row = $sth->fetchrow_hashref;
     $sth->finish();
-    $dbh->disconnect();
     return $row ? $row->{content} : undef;
 }
 
