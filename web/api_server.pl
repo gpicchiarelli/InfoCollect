@@ -3,6 +3,8 @@
 use Mojolicious::Lite;
 use lib './lib';
 use db;
+use rss_crawler;
+use web_crawler;
 
 # Endpoint per ottenere i feed RSS
 get '/api/feeds' => sub {
@@ -39,6 +41,35 @@ post '/api/settings' => sub {
     my $data = $c->req->json;
     db::add_setting($data->{key}, $data->{value});
     $c->render(json => { success => 1 });
+};
+
+# Endpoint per avviare il crawler RSS
+post '/api/crawler/rss' => sub {
+    my $c = shift;
+    eval { rss_crawler::esegui_crawler_rss(); };
+    if ($@) {
+        $c->render(json => { success => 0, error => $@ });
+    } else {
+        $c->render(json => { success => 1 });
+    }
+};
+
+# Endpoint per avviare il crawler Web
+post '/api/crawler/web' => sub {
+    my $c = shift;
+    eval { web_crawler::esegui_crawler_web(); };
+    if ($@) {
+        $c->render(json => { success => 0, error => $@ });
+    } else {
+        $c->render(json => { success => 1 });
+    }
+};
+
+# Endpoint per ottenere i log
+get '/api/logs' => sub {
+    my $c = shift;
+    my $logs = db::get_logs();  # Funzione da implementare
+    $c->render(json => $logs);
 };
 
 app->start;

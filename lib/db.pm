@@ -198,6 +198,22 @@ sub setting_exists {
     return $exists;
 }
 
+# Funzione per ottenere i log
+sub get_logs {
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT * FROM logs ORDER BY timestamp DESC LIMIT 100");
+    $sth->execute();
+
+    my @logs;
+    while (my $row = $sth->fetchrow_hashref) {
+        push @logs, $row;
+    }
+
+    $sth->finish();
+    $dbh->disconnect();
+    return \@logs;
+}
+
 1;
 
 # Licenza BSD
