@@ -12,6 +12,7 @@ use rss_crawler;
 use web_crawler;
 use config_manager;
 use init_conf;
+use opml qw(import_opml export_opml); # Importa le funzioni OPML
 
 
 # Funzione principale per avviare l'interfaccia CLI
@@ -114,6 +115,32 @@ sub avvia_cli {
             rimuovi_setting(@args);
         } elsif ($comando eq 'mod_setting') {
             modifica_setting(@args);
+        } elsif ($comando eq 'import_opml') {
+            my ($file_path) = @args;
+            unless ($file_path) {
+                print "Errore: specifica il percorso del file OPML da importare.\n";
+                next;
+            }
+            eval {
+                import_opml($file_path);
+                print "Importazione completata dal file: $file_path\n";
+            };
+            if ($@) {
+                print "Errore durante l'importazione: $@\n";
+            }
+        } elsif ($comando eq 'export_opml') {
+            my ($file_path) = @args;
+            unless ($file_path) {
+                print "Errore: specifica il percorso del file OPML di destinazione.\n";
+                next;
+            }
+            eval {
+                export_opml($file_path);
+                print "Esportazione completata nel file: $file_path\n";
+            };
+            if ($@) {
+                print "Errore durante l'esportazione: $@\n";
+            }
         } else {
             print "Comando non riconosciuto: '$comando'. Digita 'help' per vedere i comandi disponibili.\n";
         }
@@ -162,6 +189,10 @@ Comandi disponibili:
                         Elimina una impostazione.
   mod_setting <chiave> <nuovo_valore>
                         Modifica una impostazione.
+  import_opml <file_path>
+                        Importa feed RSS da un file OPML.
+  export_opml <file_path>
+                        Esporta i feed RSS in un file OPML.
 END_HELP
 }
 
