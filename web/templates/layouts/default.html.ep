@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>InfoCollect</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <%= content %>
+</body>
+</html>

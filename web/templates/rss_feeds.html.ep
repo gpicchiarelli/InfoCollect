@@ -1,0 +1,13 @@
+% layout 'default';
+<h1>Gestione Feed RSS</h1>
+<form method="POST" action="/rss_feeds">
+    <input type="text" name="title" placeholder="Titolo" required>
+    <input type="url" name="url" placeholder="URL" required>
+    <button type="submit">Aggiungi Feed</button>
+</form>
+<ul>
+    % for my $feed (@$feeds) {
+        <li><%= $feed->{title} %> - <%= $feed->{url} %></li>
+    % }
+</ul>
+<a href="/">Torna alla Dashboard</a>
