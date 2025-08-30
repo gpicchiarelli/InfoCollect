@@ -1,13 +1,19 @@
 % layout 'default';
-<h1>Gestione Feed RSS</h1>
-<form method="POST" action="/rss_feeds">
-    <input type="text" name="title" placeholder="Titolo" required>
-    <input type="url" name="url" placeholder="URL" required>
-    <button type="submit">Aggiungi Feed</button>
-</form>
-<ul>
-    % for my $feed (@$feeds) {
-        <li><%= $feed->{title} %> - <%= $feed->{url} %></li>
-    % }
-</ul>
-<a href="/">Torna alla Dashboard</a>
+<h1 class="page-title">Feed RSS</h1>
+<section class="card" aria-labelledby="add-feed">
+  <h2 id="add-feed" class="section-title">Aggiungi Feed</h2>
+  <form method="POST" action="/rss_feeds">
+      <input type="text" name="title" placeholder="Titolo" required>
+      <input type="url" name="url" placeholder="URL" required>
+      <button type="submit" class="btn btn-primary">Aggiungi</button>
+  </form>
+  </section>
+
+<section class="card" aria-labelledby="list-feed">
+  <h2 id="list-feed" class="section-title">Elenco Feed</h2>
+  <ul>
+      % for my $feed (@$feeds) {
+          <li><strong><%= $feed->{title} %></strong> — <a href="<%= $feed->{url} %>" target="_blank"><%= $feed->{url} %></a></li>
+      % }
+  </ul>
+</section>

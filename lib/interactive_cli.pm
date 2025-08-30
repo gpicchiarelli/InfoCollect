@@ -184,6 +184,10 @@ sub avvia_cli {
             my ($topic) = @args;
             $topic ||= 'readme';
             mostra_documentazione($topic);
+        } elsif ($comando eq 'doc_open') {
+            my ($topic) = @args;
+            $topic ||= 'readme';
+            apri_documentazione($topic);
         } else {
             print "Comando non riconosciuto: '$comando'. Digita 'help' per vedere i comandi disponibili.\n";
         }
