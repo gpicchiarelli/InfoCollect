@@ -1,5 +1,8 @@
 % layout 'default';
 <h1 class="page-title">Mittenti</h1>
+% if (my $n = flash 'notice') {
+  <section class="card"><div class="alert alert-info"><%= $n %></div></section>
+% }
 <section class="card" aria-labelledby="add-sender">
   <h2 id="add-sender" class="section-title">Aggiungi Mittente</h2>
   <form method="POST" action="/senders">
@@ -8,12 +11,21 @@
       <textarea name="config" placeholder='Config JSON' required></textarea>
       <button type="submit" class="btn btn-primary">Aggiungi</button>
   </form>
-</section>
+  <p style="color: var(--muted); margin-top: 8px;">Suggerimento: consulta la sezione Connettori per i campi richiesti dal tipo scelto.</p>
+  </section>
+
 <section class="card" aria-labelledby="list-sender">
   <h2 id="list-sender" class="section-title">Elenco Mittenti</h2>
   <ul>
       % for my $s (@$senders) {
-          <li><strong><%= $s->{name} %></strong> — <%= $s->{type} %></li>
+        <li>
+          <strong><%= $s->{name} %></strong> — <%= $s->{type} %>
+          <form method="POST" action="/senders/<%= $s->{id} %>/test_form" style="margin-top:8px; display:grid; grid-template-columns:1fr auto; gap:12px;">
+            <input type="hidden" name="id" value="<%= $s->{id} %>">
+            <input type="text" name="message" placeholder="Messaggio di test" value="Messaggio di test da InfoCollect">
+            <button type="submit" class="btn btn-primary">Invia test</button>
+          </form>
+        </li>
       % }
   </ul>
 </section>
