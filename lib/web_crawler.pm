@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use utf8;
 use LWP::UserAgent;
+use LWP::Protocol::https;
+use Mozilla::CA;
 use HTML::TreeBuilder;
 use DBI;
 use Encode qw(decode);
@@ -67,7 +69,16 @@ sub esegui_crawler_web {
     }
 
     $sth->execute();
-    my $ua = LWP::UserAgent->new(timeout => $timeout);
+    my $no_verify = $config{SSL_NO_VERIFY} ? 1 : 0;
+    my %ssl = (
+        verify_hostname => $no_verify ? 0 : 1,
+    );
+    if (!$no_verify) {
+        eval { $ssl{SSL_ca_file} = Mozilla::CA::SSL_ca_file(); 1 } or warn "CA bundle non trovato: $@";
+    } else {
+        $ssl{SSL_verify_mode} = 0x00; # no verify
+    }
+    my $ua = LWP::UserAgent->new(timeout => $timeout, ssl_opts => \%ssl);
     my $pm = Parallel::ForkManager->new($max_processes);
 
     while (my $row = $sth->fetchrow_hashref) {
