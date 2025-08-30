@@ -9,7 +9,7 @@
         % if ($a->{published_at}) {
           <small style="color:var(--muted);">(<%= $a->{published_at} %>)</small>
         % }
-        <form method="POST" action="/articles/<%= $a->{id} %>/delete" style="display:inline-block; margin-left:10px;">
+        <form method="POST" action="/articles/<%= $a->{id} %>/delete" class="inline ml-10">
           <button type="submit" class="btn">Elimina</button>
         </form>
       </li>

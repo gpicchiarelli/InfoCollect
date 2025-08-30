@@ -7,9 +7,9 @@
     % my $all_stop = $effective->{CRAWLER_STOP} && $effective->{CRAWLER_STOP} == 1;
     % my $rss_stop = $effective->{CRAWLER_RSS_STOP} && $effective->{CRAWLER_RSS_STOP} == 1;
     % my $web_stop = $effective->{CRAWLER_WEB_STOP} && $effective->{CRAWLER_WEB_STOP} == 1;
-    <span class="badge" style="padding:6px 10px; border-radius:12px; background: <%= $all_stop ? '#ff3b30' : '#34c759' %>; color:#fff;">Tutti: <%= $all_stop ? 'STOP' : 'ATTIVO' %></span>
-    <span class="badge" style="padding:6px 10px; border-radius:12px; background: <%= $rss_stop ? '#ff3b30' : '#34c759' %>; color:#fff; margin-left:8px;">RSS: <%= $rss_stop ? 'STOP' : 'ATTIVO' %></span>
-    <span class="badge" style="padding:6px 10px; border-radius:12px; background: <%= $web_stop ? '#ff3b30' : '#34c759' %>; color:#fff; margin-left:8px;">Web: <%= $web_stop ? 'STOP' : 'ATTIVO' %></span>
+    <span class="badge <%= $all_stop ? 'badge-stop' : 'badge-ok' %>">Tutti: <%= $all_stop ? 'STOP' : 'ATTIVO' %></span>
+    <span class="badge <%= $rss_stop ? 'badge-stop' : 'badge-ok' %>">RSS: <%= $rss_stop ? 'STOP' : 'ATTIVO' %></span>
+    <span class="badge <%= $web_stop ? 'badge-stop' : 'badge-ok' %>">Web: <%= $web_stop ? 'STOP' : 'ATTIVO' %></span>
   </div>
 </section>
 

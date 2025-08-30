@@ -36,7 +36,18 @@
             const response = await fetch('/api/feeds');
             const feeds = await response.json();
             const feedList = document.getElementById('feed-list');
-            feedList.innerHTML = feeds.map(feed => `<li>${feed.title} - <a href="${feed.url}" target="_blank">${feed.url}</a></li>`).join('');
+            feedList.innerHTML = feeds.map(feed => `
+              <li>
+                <strong>${feed.title}</strong> — <a href="${feed.url}" target="_blank">${feed.url}</a>
+                <button data-id="${feed.id}" class="delete-feed" style="margin-left:10px;">Elimina</button>
+              </li>`).join('');
+            feedList.querySelectorAll('.delete-feed').forEach(btn=>{
+              btn.addEventListener('click', async (e)=>{
+                const id = e.currentTarget.getAttribute('data-id');
+                const res = await fetch(`/api/feeds/${id}`, { method: 'DELETE' });
+                if (res.ok) loadFeeds();
+              });
+            });
         }
 
         loadFeeds();

@@ -106,7 +106,7 @@
             <button type="submit" class="btn">Verifica connessione</button>
           
 </form>
-          <form method="POST" action="/senders/<%= $s->{id} %>/delete" style="margin-top:8px; display:inline-block;">
+          <form method="POST" action="/senders/<%= $s->{id} %>/delete" class="inline" style="margin-top:8px;">
             <button type="submit" class="btn">Elimina</button>
           </form>
         </li>

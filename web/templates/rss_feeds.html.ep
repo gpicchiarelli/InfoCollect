@@ -14,7 +14,7 @@
   <ul>
       % for my $feed (@$feeds) {
           <li><strong><%= $feed->{title} %></strong> — <a href="<%= $feed->{url} %>" target="_blank"><%= $feed->{url} %></a>
-            <form method="POST" action="/rss_feeds/<%= $feed->{id} %>/delete" style="display:inline-block; margin-left:10px;">
+            <form method="POST" action="/rss_feeds/<%= $feed->{id} %>/delete" class="inline ml-10">
               <button type="submit" class="btn">Elimina</button>
             </form>
           </li>

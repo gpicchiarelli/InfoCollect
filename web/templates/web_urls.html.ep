@@ -15,11 +15,11 @@
     % for my $u (@$urls) {
       <li><a href="<%= $u->{url} %>" target="_blank"><%= $u->{url} %>
 </a> — <%= $u->{attivo} ? 'attivo' : 'inattivo' %>
-        <form method="POST" action="/web_urls/<%= $u->{id} %>/toggle" style="display:inline-block; margin-left:10px;">
+        <form method="POST" action="/web_urls/<%= $u->{id} %>/toggle" class="inline ml-10">
           <input type="hidden" name="status" value="<%= $u->{attivo} ? 0 : 1 %>">
           <button type="submit" class="btn"><%= $u->{attivo} ? 'Disattiva' : 'Attiva' %></button>
         </form>
-        <form method="POST" action="/web_urls/<%= $u->{id} %>/delete" style="display:inline-block; margin-left:10px;">
+        <form method="POST" action="/web_urls/<%= $u->{id} %>/delete" class="inline ml-10">
           <button type="submit" class="btn">Elimina</button>
         </form>
       </li>

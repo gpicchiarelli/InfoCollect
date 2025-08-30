@@ -128,6 +128,56 @@ post '/rss_feeds' => sub {
     $c->redirect_to('/rss_feeds');
 };
 
+# API compat: elenco/aggiunta feed RSS (utilizzato da alcune UI)
+get '/api/feeds' => sub {
+    my $c = shift;
+    my $feeds = db::get_all_rss_feeds();
+    $c->render(json => $feeds);
+};
+
+post '/api/feeds' => sub {
+    my $c = shift;
+    my $payload = $c->req->json // {};
+    my $title = $c->param('title') // $payload->{title};
+    my $url   = $c->param('url')   // $payload->{url};
+    eval { db::add_rss_feed($title, $url) };
+    if ($@) {
+        return $c->render(json => { ok => JSON::false, error => "$@" }, status => 400);
+    }
+    $c->render(json => { ok => JSON::true });
+};
+
+# Update feed (title/url)
+put '/api/feeds/:id' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    my $payload = $c->req->json // {};
+    my $title = $c->param('title') // $payload->{title};
+    my $url   = $c->param('url')   // $payload->{url};
+    # Per semplicità: eliminiamo e reinseriamo se cambia; meglio usare UPDATE se presente
+    eval {
+        my $dbh = db::connect_db();
+        my $sth = $dbh->prepare('UPDATE rss_feeds SET title = ?, url = ? WHERE id = ?');
+        $sth->execute($title, $url, $id);
+        $sth->finish();
+    };
+    if ($@) {
+        return $c->render(json => { ok => JSON::false, error => "$@" }, status => 400);
+    }
+    $c->render(json => { ok => JSON::true });
+};
+
+# Delete feed
+del '/api/feeds/:id' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    eval { db::delete_rss_feed($id) };
+    if ($@) {
+        return $c->render(json => { ok => JSON::false, error => "$@" }, status => 400);
+    }
+    $c->render(json => { ok => JSON::true });
+};
+
 post '/rss_feeds/:id/delete' => sub {
     my $c = shift;
     my $id = $c->param('id');
