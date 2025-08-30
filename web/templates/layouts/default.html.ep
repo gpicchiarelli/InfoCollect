@@ -19,6 +19,7 @@
         <a href="/connectors">Connettori</a>
         <a href="/senders">Mittenti</a>
       </nav>
+      <button class="btn theme-toggle" id="themeToggle" aria-label="Cambia tema">🌓</button>
     </div>
   </header>
   <main class="container" role="main">
@@ -27,5 +28,20 @@
   <footer class="app-footer" role="contentinfo">
     <div class="footer-inner">© <%= scalar localtime %> — InfoCollect</div>
   </footer>
+  <script>
+    (function () {
+      const key = 'infocollect.theme';
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const apply = (t)=>{ if(!t){root.removeAttribute('data-theme');return;} root.setAttribute('data-theme',t); };
+      try { apply(localStorage.getItem(key)); } catch(e){}
+      btn && btn.addEventListener('click', function(){
+        const cur = root.getAttribute('data-theme');
+        const next = cur === 'dark' ? 'light' : (cur === 'light' ? '' : 'dark');
+        apply(next);
+        try { next ? localStorage.setItem(key,next) : localStorage.removeItem(key); } catch(e){}
+      });
+    })();
+  </script>
 </body>
 </html>
