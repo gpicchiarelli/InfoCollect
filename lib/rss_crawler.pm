@@ -9,13 +9,14 @@ use Mozilla::CA;
 use XML::RSS;
 use XML::Simple;
 use DBI;
-use Encode qw(decode);
+use Encode qw(decode is_utf8);
 use open ':std', ':encoding(UTF-8)';
 use Parallel::ForkManager;
 use Time::HiRes qw(time);
 
 use lib './lib';
 use config_manager;
+use db; # ensure DB functions available when loaded standalone
 
 =pod
 
@@ -79,8 +80,24 @@ sub esegui_crawler_rss {
     }
     my $ua = LWP::UserAgent->new(timeout => $timeout, ssl_opts => \%ssl);
     $ua->agent('InfoCollectRSS/1.0');
-    my $use_fork = ($max_processes && $max_processes > 1) ? 1 : 0;
+    # macOS note: avoid forking due to Objective-C initialize-after-fork crash
+    my $is_darwin = ($^O =~ /darwin/i) ? 1 : 0;
+    my $use_fork = ($max_processes && $max_processes > 1 && !$is_darwin) ? 1 : 0;
     my $pm = $use_fork ? Parallel::ForkManager->new($max_processes) : undef;
+    if ($is_darwin && ($max_processes // 1) > 1) {
+        eval { db::add_log('WARN', 'RSS: forking disabilitato su macOS; MAX_PROCESSES forzato a 1') };
+    }
+
+    # Ensure stdout is UTF-8 to avoid wide-character warnings during prints
+    eval { binmode(STDOUT, ':encoding(UTF-8)') if defined fileno(STDOUT); };
+
+    # helper: decode bytes to Perl utf8 only if needed
+    my $to_utf8 = sub {
+        my ($s) = @_;
+        return '' unless defined $s;
+        return $s if is_utf8($s);
+        return decode('UTF-8', $s);
+    };
 
     while (my $feed = $sth->fetchrow_hashref) {
         # Stop se richiesto (generale o solo RSS)
@@ -135,9 +152,9 @@ sub esegui_crawler_rss {
                     # Normalizza campi RSS/Atom
                     my $title = '';
                     if (ref($item->{title}) eq 'HASH') {
-                        $title = decode('utf-8', $item->{title}->{content} // '');
+                        $title = $to_utf8->($item->{title}->{content} // '');
                     } else {
-                        $title = decode('utf-8', $item->{title} // '');
+                        $title = $to_utf8->($item->{title} // '');
                     }
                     my $url = '';
                     if (ref($item->{link}) eq 'HASH') {
@@ -151,16 +168,16 @@ sub esegui_crawler_rss {
                     my $published = $item->{pubDate} // $item->{published} // $item->{updated} // undef;
                     my $content = '';
                     if (exists $item->{description}) {
-                        $content = decode('utf-8', $item->{description} // '');
+                        $content = $to_utf8->($item->{description} // '');
                     } elsif (exists $item->{summary}) {
-                        $content = decode('utf-8', $item->{summary} // '');
+                        $content = $to_utf8->($item->{summary} // '');
                     } elsif (exists $item->{content}) {
-                        if (ref($item->{content}) eq 'HASH') { $content = decode('utf-8', $item->{content}->{content} // ''); }
-                        else { $content = decode('utf-8', $item->{content} // ''); }
+                        if (ref($item->{content}) eq 'HASH') { $content = $to_utf8->($item->{content}->{content} // ''); }
+                        else { $content = $to_utf8->($item->{content} // ''); }
                     }
                     my $author = '';
-                    if (ref($item->{author}) eq 'HASH') { $author = decode('utf-8', $item->{author}->{name} // ''); }
-                    else { $author = decode('utf-8', $item->{author} // ''); }
+                    if (ref($item->{author}) eq 'HASH') { $author = $to_utf8->($item->{author}->{name} // ''); }
+                    else { $author = $to_utf8->($item->{author} // ''); }
 
                     # Salta se l'URL è vuoto o già presente nel database
                     next unless $url;
