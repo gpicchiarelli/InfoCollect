@@ -14,6 +14,34 @@
 </section>
 
 
+<section class="card" aria-labelledby="quick-links-title">
+  <h2 id="quick-links-title" class="section-title">Collegamenti Rapidi</h2>
+  <div class="grid-3">
+    <div class="card">
+      <div class="section-title">RSS</div>
+      <div class="actions">
+        <a class="btn" href="/rss_feeds">Feed RSS</a>
+        <a class="btn" href="/articles">Articoli</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Web</div>
+      <div class="actions">
+        <a class="btn" href="/web_urls">URL Web</a>
+        <a class="btn" href="/pages">Pagine</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Sistema</div>
+      <div class="actions">
+        <a class="btn" href="/settings">Impostazioni</a>
+        <a class="btn" href="/logs">Logs</a>
+        <a class="btn" href="/db/status">DB</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="card" aria-labelledby="crawler-actions-title">
   <h2 id="crawler-actions-title" class="section-title">Azioni Crawler</h2>
   <div class="actions">

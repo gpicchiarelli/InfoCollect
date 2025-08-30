@@ -1,32 +1,68 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>InfoCollect</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>InfoCollect</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <header class="app-navbar" role="banner">
     <div class="nav-inner">
       <a class="brand" href="/" aria-label="Home InfoCollect">InfoCollect</a>
-      <nav class="nav-links" aria-label="Navigazione principale">
-        <a href="/rss_feeds">Feed RSS</a>
-        <a href="/articles">Articoli</a>
-        <a href="/web_urls">URL Web</a>
-        <a href="/pages">Pagine</a>
-        <a href="/settings">Impostazioni</a>
-        <a href="/summaries">Riassunti</a>
-        <a href="/notifications">Notifiche</a>
-        <a href="/connectors">Connettori</a>
-        <a href="/logs">Logs</a>
-        <a href="/senders">Mittenti</a>
-      </nav>
+      <div class="nav-actions">
+        <a class="nav-top" href="/db/status" title="Stato DB">DB</a>
+        <a class="nav-top" href="/logs" title="Logs">Logs</a>
+        <a class="nav-top" href="/version" title="Versione">Ver.</a>
+      </div>
     </div>
   </header>
-  <main class="container" role="main">
-    <%= content %>
-  </main>
+
+  % my $path = $c->req->url->path->to_string // '/';
+  % my $is = sub { my ($p) = @_; return (index($path, $p) == 0) ? 'active' : '' };
+
+  <div class="app-shell">
+    <aside class="sidebar" role="navigation" aria-label="Menu">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Panoramica</div>
+        <a class="nav-link <%= $is->('/') %>" href="/">Dashboard</a>
+        <a class="nav-link <%= $is->('/db') %>" href="/db/status">Stato Database</a>
+        <a class="nav-link <%= $is->('/logs') %>" href="/logs">Logs</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">RSS</div>
+        <a class="nav-link <%= $is->('/rss_feeds') %>" href="/rss_feeds">Feed RSS</a>
+        <a class="nav-link <%= $is->('/articles') %>" href="/articles">Articoli</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Web</div>
+        <a class="nav-link <%= $is->('/web_urls') %>" href="/web_urls">URL Web</a>
+        <a class="nav-link <%= $is->('/pages') %>" href="/pages">Pagine</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Impostazioni</div>
+        <a class="nav-link <%= $is->('/settings') %>" href="/settings">Configurazione</a>
+        <a class="nav-link <%= $is->('/summaries') %>" href="/summaries">Riassunti</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Notifiche</div>
+        <a class="nav-link <%= $is->('/notifications') %>" href="/notifications">Canali</a>
+        <a class="nav-link <%= $is->('/senders') %>" href="/senders">Mittenti</a>
+        <a class="nav-link <%= $is->('/connectors') %>" href="/connectors">Connettori</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Documentazione</div>
+        <a class="nav-link" href="/docs">Indice</a>
+        <a class="nav-link" href="/docs/README">README</a>
+      </div>
+    </aside>
+    <main class="main" role="main">
+      <div class="container">
+        <%= content %>
+      </div>
+    </main>
+  </div>
+
   <footer class="app-footer" role="contentinfo">
     <div class="footer-inner">© <%= scalar localtime %> — InfoCollect</div>
   </footer>
