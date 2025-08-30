@@ -25,6 +25,7 @@ Pannelli Web
 - Connettori: `/connectors`
   - Elenco connettori supportati con campi richiesti e descrizioni.
   - API di validazione: `POST /connectors/:type/validate` con `config` (JSON) restituisce esito `{ok: true}` o `{ok:false, error:"..."}`.
+ - Test invio: nella pagina Mittenti, per ciascun account è presente un pulsante "Invia test" che invia un messaggio di prova usando il connettore configurato.
 
 CLI
 ---
@@ -33,6 +34,7 @@ CLI
 - Aggiornamento: `update_sender <id> <name> <type> <json_config> <active>`
 - Eliminazione: `delete_sender <id>`
 - Test invio (via API Web): `curl -X POST http://localhost:3000/senders/<id>/test -d 'message=Prova'`
+ - Test invio (via Web con redirect/flash): form in `/senders` (POST `/senders/:id/test_form`).
 
 Sicurezza
 ---------
@@ -42,4 +44,3 @@ Sicurezza
 Estensioni
 ----------
 - Per aggiungere un connettore, creare un modulo in `lib/` con una funzione `send_notification($channel, $message)` e registrarlo in `lib/notification.pm::supported_connectors`.
-

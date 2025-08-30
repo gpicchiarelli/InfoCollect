@@ -24,7 +24,7 @@ InfoCollect utilizza un protocollo P2P per sincronizzare dati e impostazioni tra
 
 InfoCollect utilizza un database SQLite per gestire le richieste di peer e i peer accettati. Lo schema del database è definito in `schema.sql`.
 
-Installazione (verboso)
+Installazione
 -----------------------
 La procedura seguente guida in modo dettagliato al primo avvio, passando dall’installazione delle dipendenze fino all’esecuzione simultanea del servizio web e della console testuale.
 
@@ -68,6 +68,18 @@ Comandi utili (panoramica)
   - `infocollect --web --port 4000` avvia solo il web server
 - Start combinato: `perl script/start_all.pl --port 3000`
   - Avvio guidato di web+daemon in background e CLI in foreground
+
+Interfaccia Web (UI)
+--------------------
+- Tema Apple‑like con font di sistema, card e ombre morbide. Supporto automatico Light/Dark e toggle manuale (bottone 🌓 nella navbar) con persistenza locale.
+- Pagine principali:
+  - Dashboard: avvio rapido dei crawler
+  - Feed RSS: aggiunta ed elenco
+  - URL Web: aggiunta ed elenco
+  - Impostazioni: aggiunta/aggiornamento ed elenco
+  - Riassunti: elenco
+  - Connettori: elenco tipi supportati e campi richiesti
+  - Mittenti (accounts): aggiunta ed elenco, con pulsante “Invia test” per ogni account
 - Dev TS (demo): `npm run dev:web`
   - Strumenti ausiliari di monitoraggio/local dev (non necessari in produzione)
 - Make target: `make start`

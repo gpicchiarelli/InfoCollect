@@ -10,6 +10,9 @@ use p2p;
 use Mojo::Util qw(slurp);
 use notification;
 
+# Serve static files from ./static
+app->static->paths->[0] = app->home->rel_file('static');
+
 =pod
 
 =head1 NAME
@@ -220,6 +223,15 @@ post '/connectors/:type/validate' => sub {
     my ($ok, $err) = notification::validate_config($type, $config);
     return $c->render(json => { ok => JSON::true }) if $ok;
     $c->render(json => { ok => JSON::false, error => $err }, status => 400);
+};
+
+post '/connectors/:type/validate_form' => sub {
+    my $c = shift;
+    my $type = $c->param('type');
+    my $config = $c->param('config');
+    my ($ok, $err) = notification::validate_config($type, $config);
+    $c->flash(notice => $ok ? "Config valida per $type" : "Config NON valida per $type: $err");
+    $c->redirect_to('/connectors');
 };
 
 # Test invio tramite mittente (account) esistente

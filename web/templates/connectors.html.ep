@@ -1,14 +1,21 @@
 % layout 'default';
 <h1 class="page-title">Connettori supportati</h1>
 
+% if (my $n = flash 'notice') {
+  <section class="card"><div class="alert alert-info"><%= $n %></div></section>
+% }
+
 <section class="card">
   <ul>
     % for my $c (@$connectors) {
       <li>
         <strong><%= $c->{type} %></strong> — <%= $c->{desc} %><br/>
         <small style="color: var(--muted);">Richiesti: <%= join(', ', @{$c->{required}}) %></small>
+        <form method="POST" action="/connectors/<%= $c->{type} %>/validate_form" style="margin-top:8px; display:grid; grid-template-columns:1fr auto; gap:12px;">
+          <textarea name="config" placeholder='Config JSON da validare' required></textarea>
+          <button type="submit" class="btn btn-primary">Valida</button>
+        </form>
       </li>
     % }
   </ul>
 </section>
-
