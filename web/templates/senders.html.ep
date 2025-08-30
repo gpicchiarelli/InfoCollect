@@ -1,15 +1,19 @@
 % layout 'default';
-<h1>Mittenti</h1>
-<form method="POST" action="/senders">
-    <input type="text" name="name" placeholder="Nome" required>
-    <input type="text" name="type" placeholder="Tipo" required>
-    <textarea name="config" placeholder='Config JSON' required></textarea>
-    <button type="submit">Aggiungi</button>
-</form>
-<ul>
-    % for my $s (@$senders) {
-        <li><strong><%= $s->{name} %></strong> — <%= $s->{type} %></li>
-    % }
-</ul>
-<a href="/">Torna alla Dashboard</a>
-
+<h1 class="page-title">Mittenti</h1>
+<section class="card" aria-labelledby="add-sender">
+  <h2 id="add-sender" class="section-title">Aggiungi Mittente</h2>
+  <form method="POST" action="/senders">
+      <input type="text" name="name" placeholder="Nome" required>
+      <input type="text" name="type" placeholder="Tipo" required>
+      <textarea name="config" placeholder='Config JSON' required></textarea>
+      <button type="submit" class="btn btn-primary">Aggiungi</button>
+  </form>
+</section>
+<section class="card" aria-labelledby="list-sender">
+  <h2 id="list-sender" class="section-title">Elenco Mittenti</h2>
+  <ul>
+      % for my $s (@$senders) {
+          <li><strong><%= $s->{name} %></strong> — <%= $s->{type} %></li>
+      % }
+  </ul>
+</section>
