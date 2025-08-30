@@ -12,6 +12,7 @@ use DBI;
 use Encode qw(decode);
 use open ':std', ':encoding(UTF-8)';
 use Parallel::ForkManager;
+use Time::HiRes qw(time);
 
 use lib './lib';
 use config_manager;
@@ -56,6 +57,15 @@ sub esegui_crawler_rss {
     # Recupera tutti i feed RSS dal database
     my $sth = $dbh->prepare("SELECT id, url FROM rss_feeds");
     $sth->execute();
+    my ($feeds_count) = eval { $dbh->selectrow_array('SELECT COUNT(*) FROM rss_feeds') };
+    if (!$feeds_count) {
+        eval { db::add_log('WARN', 'RSS: nessun feed configurato') };
+        print "Nessun feed RSS configurato.\n";
+        $sth->finish();
+        return;
+    }
+
+    my $t0 = time();
 
     # Configura l'UserAgent per le richieste HTTP
     my $no_verify = $config{SSL_NO_VERIFY} ? 1 : 0;
@@ -119,6 +129,7 @@ sub esegui_crawler_rss {
                 # Ogni child usa una nuova connessione DB (post-fork)
                 my $dbh_worker = db::connect_db();
 
+                my $added = 0;
                 foreach my $item (@$items) {
                     # Normalizza campi RSS/Atom
                     my $title = '';
@@ -165,7 +176,9 @@ sub esegui_crawler_rss {
 
                     print "Articolo aggiunto: $title ($url)\n";
                     eval { db::add_log('INFO', "RSS: articolo aggiunto '$title'") };
+                    $added++;
                 }
+                eval { db::add_log('INFO', "RSS: feed $feed->{url} — nuovi: $added") };
             } else {
                 my $err = "Errore nel recupero del feed $feed->{url}: " . $response->status_line;
                 warn $err;
@@ -186,7 +199,9 @@ sub esegui_crawler_rss {
     # Chiude il cursore (lascia la connessione del padre attiva)
     $sth->finish();
 
-    print "Crawler RSS completato.\n";
+    my $dt = sprintf('%.2f', time() - $t0);
+    eval { db::add_log('INFO', "RSS: crawler completato in ${dt}s per $feeds_count feed") };
+    print "Crawler RSS completato in ${dt}s.\n";
 }
 
 1;

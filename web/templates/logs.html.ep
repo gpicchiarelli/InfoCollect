@@ -18,4 +18,19 @@
       </div>
     % }
   </div>
+  % if (($pages // 1) > 1) {
+    <nav class="pagination">
+      % my $p = $page // 1; my $pp = $per // 50;
+      % my $prev = $p > 1 ? $p-1 : 1; my $next = $p < $pages ? $p+1 : $pages;
+      <a href="/logs?page=<%= $prev %>&per=<%= $pp %>">« Prev</a>
+      % for my $i (1..$pages) {
+        % if ($i == $p) {
+          <span class="current"><%= $i %></span>
+        % } else {
+          <a href="/logs?page=<%= $i %>&per=<%= $pp %>"><%= $i %></a>
+        % }
+      % }
+      <a href="/logs?page=<%= $next %>&per=<%= $pp %>">Next »</a>
+    </nav>
+  % }
 </section>

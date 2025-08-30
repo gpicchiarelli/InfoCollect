@@ -132,8 +132,10 @@ get '/docs/:name' => sub {
 # Gestione feed RSS
 get '/rss_feeds' => sub {
     my $c = shift;
-    my $feeds = db::get_all_rss_feeds();
-    $c->stash(feeds => $feeds);
+    my $page = $c->param('page') // 1; my $per = $c->param('per') // 20;
+    my ($feeds,$total) = db::get_rss_feeds_paginated($page,$per);
+    my $pages = int(($total + $per - 1)/$per) || 1;
+    $c->stash(feeds => $feeds, page=>$page+0, per=>$per+0, total=>$total+0, pages=>$pages+0);
     $c->render(template => 'rss_feeds');
 };
 
@@ -246,8 +248,10 @@ get '/opml/export' => sub {
 # Gestione URL web
 get '/web_urls' => sub {
     my $c = shift;
-    my $urls = db::get_all_web_urls();
-    $c->stash(urls => $urls);
+    my $page = $c->param('page') // 1; my $per = $c->param('per') // 20;
+    my ($urls,$total) = db::get_web_urls_paginated($page,$per);
+    my $pages = int(($total + $per - 1)/$per) || 1;
+    $c->stash(urls => $urls, page=>$page+0, per=>$per+0, total=>$total+0, pages=>$pages+0);
     $c->render(template => 'web_urls');
 };
 
@@ -296,8 +300,10 @@ post '/settings' => sub {
 # Gestione riassunti
 get '/summaries' => sub {
     my $c = shift;
-    my $summaries = db::get_all_summaries();
-    $c->stash(summaries => $summaries);
+    my $page = $c->param('page') // 1; my $per = $c->param('per') // 20;
+    my ($summaries,$total) = db::get_summaries_paginated($page,$per);
+    my $pages = int(($total + $per - 1)/$per) || 1;
+    $c->stash(summaries => $summaries, page=>$page+0, per=>$per+0, total=>$total+0, pages=>$pages+0);
     $c->render(template => 'summaries');
 };
 
@@ -307,8 +313,10 @@ get '/summaries' => sub {
 # Pagine web
 get '/pages' => sub {
     my $c = shift;
-    my $pages = db::get_all_web_data();
-    $c->stash(pages => $pages);
+    my $page = $c->param('page') // 1; my $per = $c->param('per') // 20;
+    my ($pages_rows,$total) = db::get_pages_paginated($page,$per);
+    my $pages = int(($total + $per - 1)/$per) || 1;
+    $c->stash(pages => $pages_rows, page=>$page+0, per=>$per+0, total=>$total+0, pages=>$pages+0);
     $c->render(template => 'pages');
 };
 
@@ -322,8 +330,10 @@ post '/pages/:id/delete' => sub {
 # Logs viewer
 get '/logs' => sub {
     my $c = shift;
-    my $logs = db::get_logs();
-    $c->stash(logs => $logs);
+    my $page = $c->param('page') // 1; my $per = $c->param('per') // 50;
+    my ($logs,$total) = db::get_logs_paginated($page,$per);
+    my $pages = int(($total + $per - 1)/$per) || 1;
+    $c->stash(logs => $logs, page=>$page+0, per=>$per+0, total=>$total+0, pages=>$pages+0);
     $c->render(template => 'logs');
 };
 
@@ -337,8 +347,10 @@ get '/logs.json' => sub {
 # Articoli RSS
 get '/articles' => sub {
     my $c = shift;
-    my $articles = db::get_all_rss_articles();
-    $c->stash(articles => $articles);
+    my $page = $c->param('page') // 1; my $per = $c->param('per') // 20;
+    my ($articles,$total) = db::get_rss_articles_paginated($page,$per);
+    my $pages = int(($total + $per - 1)/$per) || 1;
+    $c->stash(articles => $articles, page=>$page+0, per=>$per+0, total=>$total+0, pages=>$pages+0);
     $c->render(template => 'articles');
 };
 
@@ -352,8 +364,10 @@ post '/articles/:id/delete' => sub {
 # Gestione canali di notifica
 get '/notifications' => sub {
     my $c = shift;
-    my $channels = db::get_notification_channels();
-    $c->stash(channels => $channels);
+    my $page = $c->param('page') // 1; my $per = $c->param('per') // 20;
+    my ($channels,$total) = db::get_notification_channels_paginated($page,$per);
+    my $pages = int(($total + $per - 1)/$per) || 1;
+    $c->stash(channels => $channels, page=>$page+0, per=>$per+0, total=>$total+0, pages=>$pages+0);
     $c->render(template => 'notifications');
 };
 
@@ -387,10 +401,12 @@ post '/connectors/:type/check' => sub {
 # Gestione mittenti
 get '/senders' => sub {
     my $c = shift;
-    my $senders = db::get_all_senders();
+    my $page = $c->param('page') // 1; my $per = $c->param('per') // 20;
+    my ($senders,$total) = db::get_senders_paginated($page,$per);
     my $connectors = notification::supported_connectors();
     my %templates = map { $_->{type} => notification::default_config_template($_->{type}) } @$connectors;
-    $c->stash(senders => $senders, connectors => $connectors, templates => \%templates);
+    my $pages = int(($total + $per - 1)/$per) || 1;
+    $c->stash(senders => $senders, connectors => $connectors, templates => \%templates, page=>$page+0, per=>$per+0, total=>$total+0, pages=>$pages+0);
     $c->render(template => 'senders');
 };
 

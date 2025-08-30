@@ -11,6 +11,7 @@ use DBI;
 use Encode qw(decode);
 use HTML::Strip;
 use Parallel::ForkManager;
+use Time::HiRes qw(time);
 use open ':std', ':encoding(UTF-8)';
 
 use lib './lib';
@@ -67,6 +68,15 @@ sub esegui_crawler_web {
     }
 
     $sth->execute();
+    my ($urls_count) = eval { $dbh->selectrow_array('SELECT COUNT(*) FROM web WHERE attivo = 1') };
+    if (!$urls_count) {
+        eval { db::add_log('WARN', 'WEB: nessun URL attivo configurato') };
+        print "Nessun URL attivo configurato.\n";
+        $sth->finish();
+        return;
+    }
+
+    my $t0 = time();
     my $no_verify = $config{SSL_NO_VERIFY} ? 1 : 0;
     my %ssl = (
         verify_hostname => $no_verify ? 0 : 1,
@@ -133,6 +143,8 @@ sub esegui_crawler_web {
 
     $pm->wait_all_children;
     $sth->finish();
+    my $dt = sprintf('%.2f', time() - $t0);
+    eval { db::add_log('INFO', "WEB: crawler completato in ${dt}s per $urls_count URL attivi") };
 }
 
 1;

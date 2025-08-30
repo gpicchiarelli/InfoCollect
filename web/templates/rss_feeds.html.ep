@@ -10,7 +10,7 @@
       <input type="url" name="url" placeholder="URL" required>
       <button type="submit" class="btn btn-primary">Aggiungi</button>
   </form>
-  </section>
+</section>
 
 <section class="card" aria-labelledby="list-feed">
   <h2 id="list-feed" class="section-title">Elenco Feed</h2>
@@ -34,6 +34,21 @@
         </li>
       % }
   </ul>
+  % if (($pages // 1) > 1) {
+    <nav class="pagination">
+      % my $p = $page // 1; my $pp = $per // 20;
+      % my $prev = $p > 1 ? $p-1 : 1; my $next = $p < $pages ? $p+1 : $pages;
+      <a href="/rss_feeds?page=<%= $prev %>&per=<%= $pp %>">« Prev</a>
+      % for my $i (1..$pages) {
+        % if ($i == $p) {
+          <span class="current"><%= $i %></span>
+        % } else {
+          <a href="/rss_feeds?page=<%= $i %>&per=<%= $pp %>"><%= $i %></a>
+        % }
+      % }
+      <a href="/rss_feeds?page=<%= $next %>&per=<%= $pp %>">Next »</a>
+    </nav>
+  % }
 </section>
 
 <section class="card" aria-labelledby="opml-section">

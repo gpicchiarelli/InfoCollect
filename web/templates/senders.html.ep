@@ -123,4 +123,19 @@
         </li>
       % }
   </ul>
+  % if (($pages // 1) > 1) {
+    <nav class="pagination">
+      % my $p = $page // 1; my $pp = $per // 20;
+      % my $prev = $p > 1 ? $p-1 : 1; my $next = $p < $pages ? $p+1 : $pages;
+      <a href="/senders?page=<%= $prev %>&per=<%= $pp %>">« Prev</a>
+      % for my $i (1..$pages) {
+        % if ($i == $p) {
+          <span class="current"><%= $i %></span>
+        % } else {
+          <a href="/senders?page=<%= $i %>&per=<%= $pp %>"><%= $i %></a>
+        % }
+      % }
+      <a href="/senders?page=<%= $next %>&per=<%= $pp %>">Next »</a>
+    </nav>
+  % }
 </section>

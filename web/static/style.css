@@ -193,3 +193,11 @@ a { color: var(--accent); text-decoration: none; }
 .inline { display: inline-block; }
 .ml-10 { margin-left: 10px; }
 .hint { color: var(--muted); margin: 0; }
+
+/* Pagination */
+.pagination { display: flex; gap: var(--space-2); margin-top: var(--space-3); align-items: center; flex-wrap: wrap; }
+.pagination a, .pagination span {
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  text-decoration: none; color: var(--text); background: #fff; font-weight: 600;
+}
+.pagination .current { background: color-mix(in srgb, var(--accent) 10%, #fff); }

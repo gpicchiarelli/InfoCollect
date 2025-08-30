@@ -785,3 +785,67 @@ sub regenerate_procedures {
 # È ESCLUSA. IN NESSUN CASO L'AUTORE SARÀ RESPONSABILE PER DANNI DERIVANTI
 # DALL'USO DEL SOFTWARE.
 # -----------------------------------------------------------------------------
+sub _paginate {
+    my (%args) = @_;
+    my $table    = $args{table}    or die "table richiesto";
+    my $columns  = $args{columns}  || '*';
+    my $order_by = $args{order_by} || 'id DESC';
+    my $where    = $args{where}    || '';
+    my $bind     = $args{bind}     || [];
+    my $page     = ($args{page}    || 1) + 0;
+    my $per_page = ($args{per_page}|| 20) + 0;
+    $page = 1 if $page < 1; $per_page = 20 if $per_page < 1;
+
+    my $dbh = connect_db();
+    my $count_sql = "SELECT COUNT(*) FROM $table $where";
+    my ($total) = $dbh->selectrow_array($count_sql, undef, @$bind);
+    my $offset = ($page - 1) * $per_page;
+    my $sql = "SELECT $columns FROM $table $where ORDER BY $order_by LIMIT ? OFFSET ?";
+    my $sth = $dbh->prepare($sql);
+    $sth->execute(@$bind, $per_page, $offset);
+    my $rows = $sth->fetchall_arrayref({});
+    $sth->finish();
+    return ($rows, $total);
+}
+
+sub get_rss_feeds_paginated {
+    my ($page,$per) = @_;
+    return _paginate(table=>'rss_feeds', columns=>'id,title,url,added_at', order_by=>'added_at DESC, id DESC', page=>$page, per_page=>$per);
+}
+
+sub get_rss_articles_paginated {
+    my ($page,$per) = @_;
+    return _paginate(table=>'rss_articles', columns=>'id,feed_id,title,url,published_at,author', order_by=>'COALESCE(published_at, "") DESC, id DESC', page=>$page, per_page=>$per);
+}
+
+sub get_web_urls_paginated {
+    my ($page,$per) = @_;
+    return _paginate(table=>'web', columns=>'id,url,attivo', order_by=>'id DESC', page=>$page, per_page=>$per);
+}
+
+sub get_pages_paginated {
+    my ($page,$per) = @_;
+    return _paginate(table=>'pages', columns=>'id,url,title,visited_at', order_by=>'visited_at DESC, id DESC', page=>$page, per_page=>$per);
+}
+
+sub get_logs_paginated {
+    my ($page,$per) = @_;
+    return _paginate(table=>'logs', columns=>'id,timestamp,level,message', order_by=>'timestamp DESC, id DESC', page=>$page, per_page=>$per);
+}
+
+sub get_summaries_paginated {
+    my ($page,$per) = @_;
+    return _paginate(table=>'summaries', columns=>'id,page_id,summary,created_at', order_by=>'created_at DESC, id DESC', page=>$page, per_page=>$per);
+}
+
+sub get_senders_paginated {
+    my ($page,$per) = @_;
+    my ($rows,$total) = _paginate(table=>'senders', columns=>'id,name,type,config,active', order_by=>'id DESC', page=>$page, per_page=>$per);
+    for my $row (@$rows) { $row->{config} = decrypt_data($row->{config}) if $row->{config}; }
+    return ($rows,$total);
+}
+
+sub get_notification_channels_paginated {
+    my ($page,$per) = @_;
+    return _paginate(table=>'notification_channels', columns=>'id,name,type,active', where=>'WHERE active = 1', order_by=>'id DESC', page=>$page, per_page=>$per);
+}
