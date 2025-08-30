@@ -26,6 +26,150 @@ Cross-reference funzioni: vedi docs/REFERENCE.md (sezione "DB").
 
 =cut
 
+=head1 FUNCTIONS
+
+=over 4
+
+=item connect_db()
+
+Restituisce un handle DBI singleton a SQLite, inizializzandolo tramite C<init_db::createDB>.
+
+=item get_encryption_key()
+
+Recupera la chiave di cifratura dalle impostazioni (C<INFOCOLLECT_ENCRYPTION_KEY>).
+
+=item encrypt_data($data)
+
+Cifra i dati con AES‑GCM e restituisce una stringa esadecimale (IV||CIPHERTEXT||TAG).
+
+=item decrypt_data($hex)
+
+Decifra la stringa esadecimale generata da C<encrypt_data> e ritorna il plaintext.
+
+=item add_rss_feed($title, $url)
+
+Inserisce un feed in C<rss_feeds>.
+
+=item get_all_rss_feeds()
+
+Ritorna arrayref di feed con C<id,title,url>.
+
+=item get_all_rss_data()
+
+Ritorna gli articoli RSS da C<rss_articles>.
+
+=item add_web_url($url)
+
+Inserisce un URL attivo in C<web>.
+
+=item get_all_web_urls()
+
+Ritorna gli URL web con stato attivo.
+
+=item get_all_web_data()
+
+Ritorna le pagine dalla tabella C<pages>.
+
+=item update_web_url_status($id, $status)
+
+Aggiorna il campo C<attivo> per un URL.
+
+=item add_setting($key, $value)
+
+Aggiunge/aggiorna una impostazione in C<settings>.
+
+=item add_or_update_setting($key, $value)
+
+Alias esplicito per inserimento/aggiornamento con C<ON CONFLICT>.
+
+=item set_setting($key, $value)
+
+Compat: alias di C<add_or_update_setting> usato da alcune UI.
+
+=item get_all_settings()
+
+Ritorna hashref di tutte le impostazioni (merge con default in C<config_manager>). 
+
+=item delete_setting($key)
+
+Rimuove una impostazione.
+
+=item setting_exists($key)
+
+Ritorna 1/0 se la chiave esiste in C<settings>.
+
+=item get_logs()
+
+Ritorna ultimi 100 log da C<logs>.
+
+=item get_all_summaries()
+
+Ritorna i riassunti da C<summaries>.
+
+=item add_summary($page_id, $summary)
+
+Inserisce un riassunto associato a una pagina.
+
+=item share_summary($summary_id, $recipient)
+
+Simula la condivisione di un riassunto verso un destinatario.
+
+=item add_notification_channel($name, $type, $config)
+
+Aggiunge un canale di notifica in C<notification_channels>.
+
+=item get_notification_channels()
+
+Ritorna i canali attivi.
+
+=item deactivate_notification_channel($id)
+
+Imposta C<active=0> su un canale di notifica.
+
+=item add_sender($name,$type,$config)
+
+Inserisce un mittente cifrando la configurazione.
+
+=item get_all_senders()
+
+Ritorna i mittenti decifrando la configurazione.
+
+=item update_sender($id,$name,$type,$config,$active)
+
+Aggiorna un mittente.
+
+=item delete_sender($id)
+
+Elimina un mittente.
+
+=item register_user($username,$password)
+
+Registra un utente cifrando la password.
+
+=item add_template($name,$content)
+
+Aggiunge un template testuale.
+
+=item get_all_templates()
+
+Ritorna tutti i template.
+
+=item update_template($id,$name,$content)
+
+Aggiorna un template.
+
+=item delete_template($id)
+
+Elimina un template.
+
+=item get_template_by_name($name)
+
+Ritorna il contenuto del template per nome.
+
+=back
+
+=cut
+
 # Nome del database SQLite
 my $db_file = 'infocollect.db';
 

@@ -26,6 +26,12 @@ cpanm --quiet --notest --installdeps . || { echo "Installazione CPAN fallita" >&
 echo "==> Inizializzazione database SQLite"
 perl -Mlib=lib -Minit_db -e 'init_db::createDB()' || { echo "Init DB fallita" >&2; exit 1; }
 
+# Configura token HuggingFace opzionale da variabile d'ambiente
+if [ -n "${HUGGINGFACE_API_TOKEN:-}" ]; then
+  echo "==> Configuro HUGGINGFACE_API_TOKEN dalle variabili d'ambiente"
+  perl -Mlib=lib -Mconfig_manager -e 'config_manager::add_setting("HUGGINGFACE_API_TOKEN", $ENV{HUGGINGFACE_API_TOKEN})'
+fi
+
 if [ -f package.json ]; then
   if command -v npm >/dev/null 2>&1; then
     echo "==> Installazione dipendenze Node (package.json)"
@@ -47,4 +53,3 @@ Note:
 - Imposta INFOCOLLECT_ENCRYPTION_KEY in settings per una chiave personalizzata.
 - Moduli opzionali potrebbero richiedere tool di sistema (es. OpenSSL).
 EON
-

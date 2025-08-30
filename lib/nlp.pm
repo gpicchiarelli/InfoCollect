@@ -10,6 +10,8 @@ use Lingua::Stem::It; # Sostituito Lingua::IT::Stemmer
 use Lingua::EN::Tagger;
 use Text::Extract::Words;
 use Encode qw(decode);
+use lib './lib';
+use config_manager;
 use Exporter 'import';
 
 our @EXPORT_OK = qw(riassumi_contenuto rilevanza_per_interessi estrai_parole_chiave);
@@ -22,7 +24,8 @@ my $tagger_en = Lingua::EN::Tagger->new();
 
 # Configurazione API per il riassunto
 my $api_url = 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn';
-my $api_token = 'YOUR_HUGGINGFACE_API_TOKEN'; # Sostituisci con il tuo token API
+# Token letto dalle impostazioni, con fallback
+my $api_token = eval { config_manager::get_setting('HUGGINGFACE_API_TOKEN') } // 'YOUR_HUGGINGFACE_API_TOKEN';
 
 =pod
 
@@ -36,6 +39,27 @@ Fornisce riassunto via API (con fallback locale), valutazione di rilevanza in ba
 e estrazione di parole chiave. Parametrizza modelli e token API.
 
 Cross-reference: docs/REFERENCE.md (NLP).
+
+=cut
+
+=head1 FUNCTIONS
+
+=over 4
+
+=item riassumi_contenuto($content)
+
+Ritorna un riassunto del testo passato. Usa l'API HuggingFace se è impostato
+il token C<HUGGINGFACE_API_TOKEN> in settings; altrimenti usa un fallback locale.
+
+=item rilevanza_per_interessi($testo, \@interessi)
+
+Ritorna 1/0 in base alla presenza di parole degli interessi nel testo.
+
+=item estrai_parole_chiave($testo, $lingua)
+
+Estrae parole chiave dal testo (stemming IT, tagging EN, fallback generico).
+
+=back
 
 =cut
 

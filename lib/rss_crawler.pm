@@ -28,6 +28,19 @@ Cross-reference: docs/REFERENCE.md (Crawler).
 
 =cut
 
+=head1 FUNCTIONS
+
+=over 4
+
+=item esegui_crawler_rss()
+
+Itera su tutti i feed in C<rss_feeds>, scarica e parse i contenuti RSS,
+inserendo nuovi item in C<rss_articles>. Parallelizza con C<Parallel::ForkManager>.
+
+=back
+
+=cut
+
 # Funzione principale per eseguire il crawler RSS
 sub esegui_crawler_rss {
     my %config = config_manager::get_all_settings();

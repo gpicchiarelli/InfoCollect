@@ -30,6 +30,19 @@ Cross-reference: docs/REFERENCE.md (Crawler).
 
 =cut
 
+=head1 FUNCTIONS
+
+=over 4
+
+=item esegui_crawler_web()
+
+Scarica tutte le pagine per gli URL attivi in C<web>, estrae titolo e genera
+riassunto con C<nlp::riassumi_contenuto>, salvando in C<pages> (incluso C<summary>). Parallelizza con C<Parallel::ForkManager>.
+
+=back
+
+=cut
+
 sub esegui_crawler_web {
     my %config = eval { config_manager::get_all_settings() };
     if ($@) {

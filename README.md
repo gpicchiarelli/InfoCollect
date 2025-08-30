@@ -67,6 +67,8 @@ Comandi utili (panoramica)
   - Avvio guidato di web+daemon in background e CLI in foreground
 - Dev TS (demo): `npm run dev:web`
   - Strumenti ausiliari di monitoraggio/local dev (non necessari in produzione)
+- Make target: `make start`
+  - Esegue l’avvio combinato equivalente a `script/start_all.pl`
 
 Documentazione
 --------------
@@ -94,6 +96,7 @@ Sicurezza e cifratura
 ---------------------
 - Le configurazioni sensibili dei mittenti sono cifrate in AES‑GCM tramite le utilità in `lib/db.pm`.
 - Alla prima inizializzazione viene inserita una chiave di cifratura di sviluppo; in produzione, impostarne una personalizzata in `settings` (chiave `INFOCOLLECT_ENCRYPTION_KEY`).
+- Per abilitare il riassunto remoto (HuggingFace), imposta la chiave `HUGGINGFACE_API_TOKEN` nelle impostazioni o esporta l’ENV `HUGGINGFACE_API_TOKEN` prima di eseguire `./setup.sh`.
 
 Linguaggi e struttura del codice
 --------------------------------

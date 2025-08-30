@@ -24,6 +24,13 @@ Cross-reference: docs/REFERENCE.md (riferimenti generali), lib/db.pm, lib/p2p.pm
 
 =cut
 
+#
+# FUNCTIONS (route handlers)
+# - GET /            : dashboard HTML
+# - GET/POST /rss_feeds, /web_urls, /settings, /summaries, /notifications, /senders
+# - POST /crawler/rss, /crawler/web
+# - API JSON: POST /api/send_task, POST /api/import_opml, GET /api/pages
+#
 # Pagina principale
 get '/' => sub {
     my $c = shift;

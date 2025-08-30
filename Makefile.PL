@@ -32,3 +32,13 @@ WriteMakefile(
   test => { TESTS => 't/*.t' },
 );
 
+package MY;
+sub postamble {
+  return <<'MAKE_FRAG';
+
+.PHONY: start
+start:
+	$(PERL) script/start_all.pl --port 3000
+
+MAKE_FRAG
+}

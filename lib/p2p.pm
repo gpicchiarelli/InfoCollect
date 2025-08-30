@@ -28,6 +28,94 @@ Cross-reference funzioni: vedi docs/REFERENCE.md (sezione "P2P").
 
 =cut
 
+=head1 FUNCTIONS
+
+=over 4
+
+=item start_udp_discovery($udp_port, $tcp_port)
+
+Invia periodicamente broadcast UDP per annunciare presenza e porta TCP.
+
+=item start_tcp_server($tcp_port, $config_module)
+
+Avvia server TCP che gestisce SYNC_REQUEST/RESPONSE, PEER_REQUEST e TASK.
+
+=item log_latency($host, $latency_ms)
+
+Registra la latenza misurata in C<latency_monitor>.
+
+=item verify_peer($peer_id, $peer_public_key)
+
+Verifica l'identità del peer (controllo semplice basato su hash).
+
+=item encrypt_with_public_key($data, $public_key)
+
+Esegue cifratura dei dati delegando a C<db::encrypt_data>.
+
+=item decrypt_with_private_key($data)
+
+Decifra i dati delegando a C<db::decrypt_data>.
+
+=item get_public_key()
+
+Restituisce la chiave pubblica locale.
+
+=item get_machine_id()
+
+Restituisce identificatore univoco della macchina.
+
+=item add_peer_request($peer_id, $peer_public_key)
+
+Inserisce/aggiorna la richiesta di peer.
+
+=item accept_peer($peer_id)
+
+Sposta una richiesta nella tabella peer accettati.
+
+=item reject_peer($peer_id)
+
+Rimuove una richiesta dalla lista.
+
+=item is_peer_accepted($peer_id)
+
+Ritorna 1/0 se il peer risulta accettato.
+
+=item get_accepted_peers()
+
+Ritorna arrayref di peer accettati.
+
+=item get_peer_requests()
+
+Ritorna arrayref di richieste di peer.
+
+=item sync_data($client_handle)
+
+Invia tutte le impostazioni correnti al client (test/daemon).
+
+=item send_task($peer_id, $task_data)
+
+Invia un task ad un peer via TCP.
+
+=item receive_task($line)
+
+Parsa un comando TASK e ritorna il risultato di C<execute_task>.
+
+=item execute_task($task_data)
+
+Esegue un compito (placeholder) e ritorna il risultato.
+
+=item collect_results($peer_id, $result)
+
+Riceve ed elabora i risultati dei task distribuiti.
+
+=item get_peer_address($peer_id)
+
+Restituisce l'indirizzo IP del peer (se disponibile; placeholder 127.0.0.1).
+
+=back
+
+=cut
+
 # Variabili globali
 my $rsa = Crypt::PK::RSA->new();
 $rsa->generate_key(2048);
