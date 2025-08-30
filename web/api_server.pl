@@ -1,7 +1,8 @@
 #!/usr/bin/env perl
 
 use Mojolicious::Lite;
-use lib './lib';
+use FindBin;
+use lib "$FindBin::Bin/../lib"; # ensure modules load relative to this script
 use db;
 use rss_crawler;
 use web_crawler;
@@ -11,7 +12,6 @@ use Mojo::File qw(path);
 use File::Temp qw(tempfile);
 use XML::Simple;
 use JSON ();
-use FindBin;
 use config_manager;
 use notification;
 
