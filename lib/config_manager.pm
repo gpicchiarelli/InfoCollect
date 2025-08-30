@@ -62,19 +62,25 @@ sub get_all_settings {
         SSL_NO_VERIFY               => 0,
     );
 
-    my $dbh = db::connect_db();
-    my $sql = q{
-        SELECT key, value FROM settings
-    };
-
-    my $sth = $dbh->prepare($sql);
-    $sth->execute() or die $dbh->errstr;
+    my $sql = q{ SELECT key, value FROM settings };
+    my ($dbh, $sth, $ok);
+    for my $try (1..2) {
+        $dbh = db::connect_db();
+        eval {
+            $sth = $dbh->prepare($sql);
+            $sth->execute();
+            $ok = 1;
+        };
+        last if $ok;
+        warn "config_manager::get_all_settings retry ($try): $@" if $@;
+    }
+    die "Impossibile leggere le impostazioni dal DB" unless $ok;
 
     while (my $row = $sth->fetchrow_hashref) {
         $defaults{$row->{key}} = $row->{value};
     }
 
-    $sth->finish();
+    $sth->finish() if $sth;
     # $dbh->disconnect();  # Rimosso
 
     return %defaults;

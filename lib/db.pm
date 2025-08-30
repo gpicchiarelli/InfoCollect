@@ -175,19 +175,32 @@ my $db_file = 'infocollect.db';
 
 # Variabile globale per un unico handler
 my $dbh_global;
+my $dbh_pid; # PID del processo che possiede l'handle
 my $pragmas_applied = 0;
 
 # Funzione per connettersi al database
 sub connect_db {
-    return $dbh_global if defined $dbh_global;
+    # Riconnetti se:
+    # - non esiste handle
+    # - l'handle non è attivo (ping fallisce)
+    # - l'handle appartiene a un PID differente (post-fork)
+    if (defined $dbh_global) {
+        my $same_pid = (defined $dbh_pid && $dbh_pid == $$) ? 1 : 0;
+        my $alive = eval { $dbh_global->ping } ? 1 : 0;
+        if ($same_pid && $alive) {
+            return $dbh_global;
+        }
+        # Handle non valido: prova a chiudere silenziosamente e ricrea
+        eval { $dbh_global->disconnect if $dbh_global }; # ignora errori
+        undef $dbh_global;
+    }
+
     my $dbh;
-    eval {
-        $dbh = init_db::createDB();
-    };
+    eval { $dbh = init_db::createDB(); };
     if ($@ || !$dbh) {
         die "Errore durante l'inizializzazione del database: $@";
     }
-    # Applica PRAGMA per concorrenza e stabilità (una sola volta)
+    # Applica PRAGMA per concorrenza e stabilità
     eval {
         $dbh->{sqlite_busy_timeout} = 5000; # 5s
         $dbh->do('PRAGMA journal_mode=WAL');
@@ -195,6 +208,7 @@ sub connect_db {
         $pragmas_applied = 1;
     };
     $dbh_global = $dbh;
+    $dbh_pid = $$;
     return $dbh_global;
 }
 

@@ -111,8 +111,9 @@ sub esegui_crawler_web {
                     $summary = "Riassunto non disponibile";
                 }
 
-                # Salva i dati nel database
-                my $insert_sth = $dbh->prepare("INSERT INTO pages (url, title, content, summary) VALUES (?, ?, ?, ?)");
+                # Salva i dati nel database (nuova connessione per child post-fork)
+                my $dbh_worker = db::connect_db();
+                my $insert_sth = $dbh_worker->prepare("INSERT INTO pages (url, title, content, summary) VALUES (?, ?, ?, ?)");
                 $insert_sth->execute($url, $title, $content, $summary);
             } else {
                 warn "Errore durante il download dell'URL $url: " . $res->status_line;
@@ -127,7 +128,6 @@ sub esegui_crawler_web {
 
     $pm->wait_all_children;
     $sth->finish();
-    $dbh->disconnect();
 }
 
 1;

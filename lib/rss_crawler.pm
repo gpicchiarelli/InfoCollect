@@ -94,6 +94,9 @@ sub esegui_crawler_rss {
                 my $rss = XML::RSS->new();
                 $rss->parse($rss_content);
 
+                # Ogni child usa una nuova connessione DB (post-fork)
+                my $dbh_worker = db::connect_db();
+
                 foreach my $item (@{$rss->{items}}) {
                     my $title       = decode('utf-8', $item->{title} // '');
                     my $url         = $item->{link} // '';
@@ -103,12 +106,12 @@ sub esegui_crawler_rss {
 
                     # Salta se l'URL è vuoto o già presente nel database
                     next unless $url;
-                    my $exists_sth = $dbh->prepare("SELECT 1 FROM rss_articles WHERE url = ?");
+                    my $exists_sth = $dbh_worker->prepare("SELECT 1 FROM rss_articles WHERE url = ?");
                     $exists_sth->execute($url);
                     next if $exists_sth->fetchrow_array;
 
                     # Inserisce l'articolo nel database
-                    my $insert_sth = $dbh->prepare(q{
+                    my $insert_sth = $dbh_worker->prepare(q{
                         INSERT INTO rss_articles (feed_id, title, url, published_at, content, author)
                         VALUES (?, ?, ?, ?, ?, ?)
                     });
@@ -129,9 +132,8 @@ sub esegui_crawler_rss {
 
     $pm->wait_all_children;
 
-    # Chiude il cursore e la connessione al database
+    # Chiude il cursore (lascia la connessione del padre attiva)
     $sth->finish();
-    $dbh->disconnect or warn "Errore durante la disconnessione dal database: $DBI::errstr";
 
     print "Crawler RSS completato.\n";
 }
