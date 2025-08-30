@@ -1,22 +1,14 @@
 % layout 'default';
-<h1 class="text-2xl font-bold">InfoCollect - Dashboard</h1>
-<nav aria-label="Navigazione principale">
-    <ul class="navigation-list">
-        <li><a href="/rss_feeds" aria-label="Gestione Feed RSS">Gestione Feed RSS</a></li>
-        <li><a href="/web_urls" aria-label="Gestione URL Web">Gestione URL Web</a></li>
-        <li><a href="/settings" aria-label="Gestione Impostazioni">Gestione Impostazioni</a></li>
-        <li><a href="/summaries" aria-label="Gestione Riassunti">Gestione Riassunti</a></li>
-        <li><a href="/notifications" aria-label="Gestione Canali di Notifica">Gestione Canali di Notifica</a></li>
-        <li><a href="/senders" aria-label="Gestione Mittenti">Gestione Mittenti</a></li>
-    </ul>
-</nav>
-<section class="crawler-actions" aria-labelledby="crawler-actions-title">
-    <h2 id="crawler-actions-title" class="text-xl font-semibold">Azioni Crawler</h2>
+<h1 class="page-title">Dashboard</h1>
+
+<section class="card" aria-labelledby="crawler-actions-title">
+  <h2 id="crawler-actions-title" class="section-title">Azioni Crawler</h2>
+  <div class="actions">
     <form method="POST" action="/crawler/rss">
-        <button type="submit" class="btn-primary" aria-label="Avvia il crawler per RSS">Avvia Crawler RSS</button>
+      <button type="submit" class="btn btn-primary" aria-label="Avvia il crawler per RSS">Avvia Crawler RSS</button>
     </form>
     <form method="POST" action="/crawler/web">
-        <button type="submit" class="btn-primary" aria-label="Avvia il crawler per Web">Avvia Crawler Web</button>
+      <button type="submit" class="btn btn-primary" aria-label="Avvia il crawler per Web">Avvia Crawler Web</button>
     </form>
+  </div>
 </section>
-<!-- Ottimizzazioni future possono essere aggiunte qui -->

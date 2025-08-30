@@ -1,10 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>InfoCollect</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+  <header class="app-navbar" role="banner">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="Home InfoCollect"> InfoCollect</a>
+      <nav class="nav-links" aria-label="Navigazione principale">
+        <a href="/rss_feeds">Feed RSS</a>
+        <a href="/web_urls">URL Web</a>
+        <a href="/settings">Impostazioni</a>
+        <a href="/summaries">Riassunti</a>
+        <a href="/notifications">Notifiche</a>
+        <a href="/senders">Mittenti</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container" role="main">
     <%= content %>
+  </main>
+  <footer class="app-footer" role="contentinfo">
+    <div class="footer-inner">© <%= scalar localtime %> — InfoCollect</div>
+  </footer>
 </body>
 </html>
