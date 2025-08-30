@@ -23,18 +23,18 @@ sub import_opml {
 
     my $xml = XML::Simple->new;
     my $data = $xml->XMLin($file_path, KeyAttr => [], ForceArray => ['outline']);
+    my @inserted;
 
     foreach my $feed (@{$data->{body}->{outline}}) {
         my $title = $feed->{title} // 'Senza Titolo';
         my $url   = $feed->{xmlUrl};
-
-        if ($url) {
-            print "Importazione feed: $title ($url)\n";
-            db::add_rss_feed($title, $url);
-        }
+        next unless $url;
+        eval { db::add_rss_feed($title, $url); push @inserted, { title => $title, url => $url }; };
+        warn $@ if $@; # duplicate or DB error are warned but flow continues
     }
 
     print "Importazione completata.\n";
+    return \@inserted;
 }
 
 # Esporta i feed RSS esistenti in un file OPML
@@ -57,6 +57,7 @@ sub export_opml {
 
     write_file($file_path, $output);
     print "Esportazione completata in: $file_path\n";
+    return scalar(@$feeds);
 }
 
 1;

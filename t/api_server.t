@@ -1,9 +1,12 @@
 use strict;
 use warnings;
 use Test::More;
-use Test::Mojo;
 use FindBin;
-require "$FindBin::Bin/../web/api_server.pl";
+BEGIN {
+  eval { require Test::Mojo; 1 } or plan skip_all => 'Test::Mojo non installato';
+  eval { require Mojolicious::Lite; 1 } or plan skip_all => 'Mojolicious::Lite non installato';
+  require "$FindBin::Bin/../web/api_server.pl";
+}
 my $t = Test::Mojo->new;
 
 # Test dell'endpoint /api/send_task
