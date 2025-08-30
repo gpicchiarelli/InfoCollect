@@ -13,7 +13,13 @@
   <h2 id="list-channel" class="section-title">Elenco Canali</h2>
   <ul>
       % for my $c (@$channels) {
-          <li><strong><%= $c->{name} %></strong> — <%= $c->{type} %></li>
+          <li><strong><%= $c->{name} %></strong> — <%= $c->{type} %>
+          % if ($c->{active}) {
+            <form method="POST" action="/notifications/<%= $c->{id} %>/deactivate" style="display:inline-block; margin-left:10px;">
+              <button type="submit" class="btn">Disattiva</button>
+            </form>
+          % }
+        </li>
       % }
   </ul>
 </section>

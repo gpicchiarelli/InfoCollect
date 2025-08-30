@@ -247,6 +247,15 @@ sub add_rss_feed {
     $sth->finish();
 }
 
+# Elimina un feed RSS
+sub delete_rss_feed {
+    my ($id) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare('DELETE FROM rss_feeds WHERE id = ?');
+    $sth->execute($id);
+    $sth->finish();
+}
+
 # Funzione per ottenere tutti i feed RSS
 sub get_all_rss_feeds {
     my $dbh = connect_db();
@@ -290,6 +299,15 @@ sub add_web_url {
     } else {
         print "URL web aggiunto con successo: $url\n";
     }
+    $sth->finish();
+}
+
+# Elimina un URL web
+sub delete_web_url {
+    my ($id) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare('DELETE FROM web WHERE id = ?');
+    $sth->execute($id);
     $sth->finish();
 }
 

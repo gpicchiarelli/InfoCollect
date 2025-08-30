@@ -55,6 +55,7 @@ sub get_all_settings {
         WEB_INTERVALLO_MINUTI       => 15,
         CRAWLER_TIMEOUT             => 10,
         MAX_PROCESSES               => 5,
+        SSL_NO_VERIFY               => 0,
         UDP_DISCOVERY_INTERVAL_SEC  => 5,  # Intervallo per il discovery UDP
         TCP_SYNC_PORT               => 5001,  # Porta per la sincronizzazione TCP
         UDP_DISCOVERY_PORT          => 5000,  # Porta per il discovery UDP

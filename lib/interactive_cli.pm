@@ -126,6 +126,63 @@ sub avvia_cli {
             rilancia_rss();
         } elsif ($comando eq 'relaunch_web') {
             rilancia_web();
+        } elsif ($comando eq 'delete_rss_feed') {
+            my ($id) = @args; unless ($id) { print "Uso: delete_rss_feed <id>
+"; next; }
+            eval { db::delete_rss_feed($id); print "Feed eliminato: $id
+"; };
+            print "Errore: $@
+" if $@;
+        } elsif ($comando eq 'delete_web_url') {
+            my ($id) = @args; unless ($id) { print "Uso: delete_web_url <id>
+"; next; }
+            eval { db::delete_web_url($id); print "URL eliminato: $id
+"; };
+            print "Errore: $@
+" if $@;
+        } elsif ($comando eq 'toggle_web_url') {
+            my ($id,$st)=@args; unless ($id && defined $st){ print "Uso: toggle_web_url <id> <0|1>
+"; next; }
+            eval { db::update_web_url_status($id, $st); print "URL $id stato=$st
+"; };
+            print "Errore: $@
+" if $@;
+        } elsif ($comando eq 'list_connectors') {
+            my $list = notification::supported_connectors();
+            foreach my $c (@$list){ print "$c->{type}: requisiti= ".join(',',@{$c->{required}})." — $c->{desc}
+"; }
+        } elsif ($comando eq 'validate_connector') {
+            my ($type,$json)=@args; unless ($type && $json){ print "Uso: validate_connector <type> <json>
+"; next; }
+            my ($ok,$err)=notification::validate_config($type, $json); print $ok?"Valido
+":"Non valido: $err
+";
+        } elsif ($comando eq 'check_connector') {
+            my ($type,$json)=@args; unless ($type && $json){ print "Uso: check_connector <type> <json>
+"; next; }
+            my ($ok,$err)=notification::check_connector($type, $json); print $ok?"OK
+":"KO: $err
+";
+        } elsif ($comando eq 'test_sender') {
+            my ($id,@m)=@args; my $msg= join(' ',@m)||'Messaggio di test'; unless ($id){ print "Uso: test_sender <id> [message]
+"; next; }
+            my $senders=db::get_all_senders(); my ($s)=grep { $_->{id}==$id } @$senders; unless($s){ print "Sender non trovato
+"; next; }
+            eval { notification::send_notification($s,$msg); print "Inviato
+"; };
+            print "Errore: $@
+" if $@;
+        } elsif ($comando eq 'check_sender') {
+            my ($id)=@args; unless ($id){ print "Uso: check_sender <id>
+"; next; }
+            my $senders=db::get_all_senders(); my ($s)=grep { $_->{id}==$id } @$senders; unless($s){ print "Sender non trovato
+"; next; }
+            my ($ok,$err)=notification::check_connector($s->{type}, $s); print $ok?"OK
+":"KO: $err
+";
+        } elsif ($comando eq 'list_logs') {
+            my $logs = db::get_logs(); foreach my $l (@$logs){ print "[$l->{timestamp}] $l->{level} — $l->{message}
+"; }
         } elsif ($comando eq 'add_sender') {
             aggiungi_mittente(@args);
         } elsif ($comando eq 'list_senders') {

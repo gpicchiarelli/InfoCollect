@@ -112,6 +112,10 @@
           <form method="POST" action="/senders/<%= $s->{id} %>/check" style="margin-top:8px; display:grid; grid-template-columns:1fr auto; gap:12px;">
             <input type="hidden" name="id" value="<%= $s->{id} %>">
             <button type="submit" class="btn">Verifica connessione</button>
+          
+</form>
+          <form method="POST" action="/senders/<%= $s->{id} %>/delete" style="margin-top:8px; display:inline-block;">
+            <button type="submit" class="btn">Elimina</button>
           </form>
         </li>
       % }

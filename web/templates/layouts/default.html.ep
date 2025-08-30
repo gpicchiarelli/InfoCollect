@@ -9,7 +9,7 @@
 <body>
   <header class="app-navbar" role="banner">
     <div class="nav-inner">
-      <a class="brand" href="/" aria-label="Home InfoCollect"> InfoCollect</a>
+      <a class="brand" href="/" aria-label="Home InfoCollect">InfoCollect</a>
       <nav class="nav-links" aria-label="Navigazione principale">
         <a href="/rss_feeds">Feed RSS</a>
         <a href="/web_urls">URL Web</a>

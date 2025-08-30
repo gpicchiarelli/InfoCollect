@@ -11,6 +11,9 @@ WriteMakefile(
     'JSON'                   => 0,
     'CryptX'                 => 0, # Crypt::AuthEnc::GCM, Crypt::PK::RSA
     'LWP::UserAgent'         => 0,
+    'LWP::Protocol::https'   => 0,
+    'IO::Socket::SSL'        => 0,
+    'Mozilla::CA'            => 0,
     'XML::RSS'               => 0,
     'Parallel::ForkManager'  => 0,
     'HTML::Tree'             => 0,

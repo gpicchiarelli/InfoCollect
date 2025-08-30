@@ -17,8 +17,31 @@ use notification;
 my %s = eval { config_manager::get_all_settings() };
 app->secrets([ $s{MOJO_SECRET} || 'infocollect_dev_secret' ]);
 
-# Serve static files from web/static (accetta esecuzione da qualunque CWD)
-app->static->paths->[0] = "$FindBin::Bin/static";
+# Serve static files (accetta esecuzione da qualunque CWD)
+# Con richieste come /static/style.css cerchiamo in "$FindBin::Bin/static/style.css"
+app->static->paths->[0] = $FindBin::Bin;
+
+# Health and version endpoints
+get '/healthz' => sub {
+    my $c = shift;
+    my ($db_ok, $err) = (JSON::false, undef);
+    eval {
+        my $dbh = db::connect_db();
+        $dbh->do('SELECT 1');
+        $db_ok = JSON::true;
+    };
+    $err = "$@" if $@;
+    $c->render(json => { ok => JSON::true, db => $db_ok, error => ($err // '') });
+};
+
+get '/version' => sub {
+    my $c = shift;
+    my %st = eval { config_manager::get_all_settings() };
+    my $ver = $st{APP_VERSION} || 'dev';
+    my $perl = $];
+    my $mojo = $Mojolicious::VERSION;
+    $c->render(json => { app => 'InfoCollect', version => $ver, perl => $perl, mojolicious => $mojo });
+};
 
 =pod
 
@@ -93,6 +116,14 @@ post '/rss_feeds' => sub {
     $c->redirect_to('/rss_feeds');
 };
 
+post '/rss_feeds/:id/delete' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    eval { db::delete_rss_feed($id) };
+    $c->flash(notice => $@ ? "Errore eliminazione feed: $@" : 'Feed eliminato');
+    $c->redirect_to('/rss_feeds');
+};
+
 # Gestione URL web
 get '/web_urls' => sub {
     my $c = shift;
@@ -105,6 +136,23 @@ post '/web_urls' => sub {
     my $c = shift;
     my $url = $c->param('url');
     db::add_web_url($url);
+    $c->redirect_to('/web_urls');
+};
+
+post '/web_urls/:id/toggle' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    my $status = $c->param('status');
+    eval { db::update_web_url_status($id, $status) };
+    $c->flash(notice => $@ ? "Errore aggiornamento stato: $@" : 'Stato aggiornato');
+    $c->redirect_to('/web_urls');
+};
+
+post '/web_urls/:id/delete' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    eval { db::delete_web_url($id) };
+    $c->flash(notice => $@ ? "Errore eliminazione URL: $@" : 'URL eliminato');
     $c->redirect_to('/web_urls');
 };
 
@@ -160,6 +208,14 @@ post '/notifications' => sub {
     my $type = $c->param('type');
     my $config = $c->param('config');
     db::add_notification_channel($name, $type, $config);
+    $c->redirect_to('/notifications');
+};
+
+post '/notifications/:id/deactivate' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    eval { db::deactivate_notification_channel($id) };
+    $c->flash(notice => $@ ? "Errore disattivazione: $@" : 'Canale disattivato');
     $c->redirect_to('/notifications');
 };
 
@@ -229,6 +285,16 @@ post '/api/import_opml' => sub {
     my $c = shift;
     my $file_path = $c->param('file_path');
     eval { opml::import_opml($file_path) };
+    if ($@) {
+        return $c->render(json => { success => 0, error => "$@" }, status => 500);
+    }
+    $c->render(json => { success => 1 });
+};
+
+post '/api/export_opml' => sub {
+    my $c = shift;
+    my $file_path = $c->param('file_path');
+    eval { opml::export_opml($file_path) };
     if ($@) {
         return $c->render(json => { success => 0, error => "$@" }, status => 500);
     }
@@ -314,6 +380,14 @@ post '/senders/:id/check' => sub {
     my ($ok,$err) = notification::check_connector($s->{type}, $s);
     return $c->render(json => { ok => JSON::true }) if $ok;
     $c->render(json => { ok => JSON::false, error => $err }, status => 400);
+};
+
+post '/senders/:id/delete' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    eval { db::delete_sender($id) };
+    $c->flash(notice => $@ ? "Errore eliminazione mittente: $@" : 'Mittente eliminato');
+    $c->redirect_to('/senders');
 };
 
 app->start;

@@ -13,7 +13,11 @@
   <h2 id="list-feed" class="section-title">Elenco Feed</h2>
   <ul>
       % for my $feed (@$feeds) {
-          <li><strong><%= $feed->{title} %></strong> — <a href="<%= $feed->{url} %>" target="_blank"><%= $feed->{url} %></a></li>
+          <li><strong><%= $feed->{title} %></strong> — <a href="<%= $feed->{url} %>" target="_blank"><%= $feed->{url} %></a>
+            <form method="POST" action="/rss_feeds/<%= $feed->{id} %>/delete" style="display:inline-block; margin-left:10px;">
+              <button type="submit" class="btn">Elimina</button>
+            </form>
+          </li>
       % }
   </ul>
 </section>
