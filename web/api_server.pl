@@ -146,7 +146,9 @@ post '/notifications' => sub {
 get '/senders' => sub {
     my $c = shift;
     my $senders = db::get_all_senders();
-    $c->stash(senders => $senders);
+    my $connectors = notification::supported_connectors();
+    my %templates = map { $_->{type} => notification::default_config_template($_->{type}) } @$connectors;
+    $c->stash(senders => $senders, connectors => $connectors, templates => \%templates);
     $c->render(template => 'senders');
 };
 
@@ -155,7 +157,13 @@ post '/senders' => sub {
     my $name = $c->param('name');
     my $type = $c->param('type');
     my $config = $c->param('config');
+    my ($ok,$err) = notification::validate_config($type, $config);
+    if (!$ok) {
+        $c->flash(notice => "Config non valida: $err");
+        return $c->redirect_to('/senders');
+    }
     db::add_sender($name, $type, $config);
+    $c->flash(notice => "Mittente aggiunto: $name ($type)");
     $c->redirect_to('/senders');
 };
 

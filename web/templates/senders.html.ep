@@ -5,12 +5,29 @@
 % }
 <section class="card" aria-labelledby="add-sender">
   <h2 id="add-sender" class="section-title">Aggiungi Mittente</h2>
-  <form method="POST" action="/senders">
+  <form method="POST" action="/senders" id="addSenderForm">
       <input type="text" name="name" placeholder="Nome" required>
-      <input type="text" name="type" placeholder="Tipo" required>
-      <textarea name="config" placeholder='Config JSON' required></textarea>
+      <select name="type" id="senderType" required>
+        <option value="" disabled selected>Seleziona tipo</option>
+        % for my $c (@$connectors) {
+          <option value="<%= $c->{type} %>"><%= $c->{type} %></option>
+        % }
+      </select>
+      <textarea name="config" id="senderConfig" placeholder='Config JSON' required></textarea>
+      <button type="button" class="btn" id="prefillBtn">Riempi config</button>
       <button type="submit" class="btn btn-primary">Aggiungi</button>
   </form>
+  <script>
+    (function(){
+      const templates = <%== Mojo::JSON::encode_json($templates) %>;
+      const typeSel = document.getElementById('senderType');
+      const cfg = document.getElementById('senderConfig');
+      const btn = document.getElementById('prefillBtn');
+      function prefill(){ const t = typeSel.value; if (t && templates[t]) cfg.value = templates[t]; }
+      btn && btn.addEventListener('click', prefill);
+      typeSel && typeSel.addEventListener('change', prefill);
+    })();
+  </script>
   <p style="color: var(--muted); margin-top: 8px;">Suggerimento: consulta la sezione Connettori per i campi richiesti dal tipo scelto.</p>
   </section>
 

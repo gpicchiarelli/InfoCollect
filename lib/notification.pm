@@ -10,7 +10,7 @@ use teams;
 use whatsapp;
 use Text::Template;
 use db;
-use JSON qw(decode_json);
+use JSON qw(decode_json encode_json);
 
 sub send_notification {
     my ($channel, $message, $template_name, $template_data) = @_;
@@ -59,6 +59,28 @@ sub validate_config {
     return (0, 'Tipo connettore non supportato') unless $c;
     my @missing = grep { !exists $cfg->{$_} || $cfg->{$_} eq '' } @{ $c->{required} };
     return @missing ? (0, 'Chiavi mancanti: ' . join(', ', @missing)) : (1, undef);
+}
+
+sub default_config_template {
+    my ($type) = @_;
+    my ($c) = grep { $_->{type} eq $type } @{ supported_connectors() } or return '{}';
+    my %tpl;
+    for my $k (@{ $c->{required} }) {
+        $tpl{$k} = $k =~ /port/     ? 1234
+                 : $k =~ /ssl/      ? JSON::false
+                 : $k =~ /timeout/  ? 10
+                 : $k =~ /host/     ? 'example.com'
+                 : $k =~ /url/      ? 'https://example.com'
+                 : $k =~ /to/       ? 'dest@example.com'
+                 : $k =~ /from/     ? 'mitt@example.com'
+                 : $k =~ /subject/  ? 'InfoCollect'
+                 : $k =~ /phone/    ? '+390000000000'
+                 : $k =~ /channel/  ? '#canale'
+                 : $k =~ /nick/     ? 'infocollect'
+                 : $k =~ /ircname/  ? 'InfoCollect Bot'
+                 :                    '';
+    }
+    return JSON->new->pretty->encode(\%tpl);
 }
 
 1;
