@@ -15,10 +15,7 @@
       </select>
 
       <div id="guidedBox" style="grid-column:1/-1;"></div>
-
-      <textarea name="config" id="senderConfig" placeholder='Oppure incolla qui Config JSON' required></textarea>
       <div class="actions">
-        <button type="button" class="btn" id="prefillBtn">Riempi config</button>
         <button type="submit" class="btn btn-primary">Aggiungi</button>
       </div>
   </form>
@@ -48,8 +45,8 @@
       };
 
       const typeSel = document.getElementById('senderType');
-      const cfg = document.getElementById('senderConfig');
-      const btn = document.getElementById('prefillBtn');
+      const cfg = null;
+      const btn = null;
       const guided = document.getElementById('guidedBox');
 
       function renderGuided(){
@@ -86,13 +83,8 @@
       }
 
       function prefill(){ const t = typeSel.value; if (t && templates[t]) cfg.value = templates[t]; }
-      btn && btn.addEventListener('click', prefill);
-      typeSel && typeSel.addEventListener('change', function(){ renderGuided(); prefill(); });
+      typeSel && typeSel.addEventListener('change', function(){ renderGuided(); });
       renderGuided();
-
-      document.getElementById('addSenderForm').addEventListener('submit', function(){
-        const o = buildConfig(); if (o) cfg.value = JSON.stringify(o, null, 2);
-      });
     })();
   </script>
   <p style="color: var(--muted); margin-top: 8px;">Suggerimento: consulta la sezione Connettori per i campi richiesti dal tipo scelto.</p>

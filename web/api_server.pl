@@ -370,6 +370,15 @@ post '/connectors/:type/validate_form' => sub {
     my $c = shift;
     my $type = $c->param('type');
     my $config = $c->param('config');
+    if (!$config) {
+        my %cfg;
+        my ($spec) = grep { $_->{type} eq $type } @{ notification::supported_connectors() };
+        if ($spec) {
+            for my $k (@{ $spec->{required} }) { my $v = $c->param("field_$k"); $cfg{$k} = $v if defined $v && $v ne '' }
+            for my $p ($c->param) { next unless $p =~ /^field_(.+)$/; my $k=$1; $cfg{$k} = $c->param($p) if !exists $cfg{$k} && defined $c->param($p) && $c->param($p) ne '' }
+        }
+        $config = JSON::encode_json(\%cfg);
+    }
     my ($ok, $err) = notification::validate_config($type, $config);
     $c->flash(notice => $ok ? "Config valida per $type" : "Config NON valida per $type: $err");
     $c->redirect_to('/connectors');

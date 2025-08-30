@@ -12,12 +12,19 @@
         <strong><%= $c->{type} %></strong> — <%= $c->{desc} %><br/>
         <small style="color: var(--muted);">Richiesti: <%= join(', ', @{$c->{required}}) %></small>
         <form method="POST" action="/connectors/<%= $c->{type} %>/validate_form" style="margin-top:8px; display:grid; grid-template-columns:1fr auto; gap:12px;">
-          <textarea name="config" placeholder='Config JSON da validare' required></textarea>
+          % for my $k (@{$c->{required}}) {
+            <input type="text" name="field_<%= $k %>" placeholder="<%= $k %>" required>
+          % }
+          % if ($c->{type} eq "Mail") {
+            <input type="text" name="field_smtp_user" placeholder="smtp_user">
+            <input type="password" name="field_smtp_pass" placeholder="smtp_pass">
+            <input type="number" name="field_smtp_timeout" placeholder="smtp_timeout">
+            <label style="grid-column:1/-1; color:var(--muted)"><input type="checkbox" name="field_smtp_ssl" value="1"> Usa SSL</label>
+          % } elsif ($c->{type} eq "Telegram") {
+            <input type="url" name="field_api_url" placeholder="api_url (opz.)" value="https://api.telegram.org">
+          % }
           <button type="submit" class="btn btn-primary">Valida</button>
-        </form>
-        <form method="POST" action="/connectors/<%= $c->{type} %>/check" style="margin-top:8px; display:grid; grid-template-columns:1fr auto; gap:12px;">
-          <textarea name="config" placeholder='Config JSON da verificare' required></textarea>
-          <button type="submit" class="btn">Check</button>
+          <button type="submit" formaction="/connectors/<%= $c->{type} %>/check" class="btn">Check</button>
         </form>
       </li>
     % }
