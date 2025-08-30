@@ -5,7 +5,7 @@
 % }
 <section class="card" aria-labelledby="add-sender">
   <h2 id="add-sender" class="section-title">Aggiungi Mittente</h2>
-  <form method="POST" action="/senders" id="addSenderForm">
+  <form method="POST" action="/senders" id="addSenderForm" class="form-grid">
       <input type="text" name="name" placeholder="Nome" required>
       <select name="type" id="senderType" required>
         <option value="" disabled selected>Seleziona tipo</option>
@@ -87,7 +87,7 @@
       renderGuided();
     })();
   </script>
-  <p style="color: var(--muted); margin-top: 8px;">Suggerimento: consulta la sezione Connettori per i campi richiesti dal tipo scelto.</p>
+  <p class="muted" style="margin-top: 8px;">Suggerimento: consulta la sezione Connettori per i campi richiesti dal tipo scelto.</p>
   </section>
 
 <section class="card" aria-labelledby="list-sender">
@@ -95,19 +95,24 @@
   <ul>
       % for my $s (@$senders) {
         <li>
-          <strong><%= $s->{name} %></strong> — <%= $s->{type} %>
-          <form method="POST" action="/senders/<%= $s->{id} %>/test_form" style="margin-top:8px; display:grid; grid-template-columns:1fr auto; gap:12px;">
+          <div class="row">
+            <div class="row-main">
+              <strong><%= $s->{name} %></strong> — <%= $s->{type} %>
+            </div>
+            <div class="row-actions">
+              <form method="POST" action="/senders/<%= $s->{id} %>/check">
+                <input type="hidden" name="id" value="<%= $s->{id} %>">
+                <button type="submit" class="btn btn-sm">Verifica</button>
+              </form>
+              <form method="POST" action="/senders/<%= $s->{id} %>/delete">
+                <button type="submit" class="btn btn-sm">Elimina</button>
+              </form>
+            </div>
+          </div>
+          <form method="POST" action="/senders/<%= $s->{id} %>/test_form" class="form-grid" style="margin-top:8px;">
             <input type="hidden" name="id" value="<%= $s->{id} %>">
             <input type="text" name="message" placeholder="Messaggio di test" value="Messaggio di test da InfoCollect">
             <button type="submit" class="btn btn-primary">Invia test</button>
-          </form>
-          <form method="POST" action="/senders/<%= $s->{id} %>/check" style="margin-top:8px; display:grid; grid-template-columns:1fr auto; gap:12px;">
-            <input type="hidden" name="id" value="<%= $s->{id} %>">
-            <button type="submit" class="btn">Verifica connessione</button>
-          
-</form>
-          <form method="POST" action="/senders/<%= $s->{id} %>/delete" class="inline" style="margin-top:8px;">
-            <button type="submit" class="btn">Elimina</button>
           </form>
         </li>
       % }

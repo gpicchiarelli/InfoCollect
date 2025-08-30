@@ -4,10 +4,16 @@
   % if (stash('summaries') && scalar @{stash('summaries')}) {
   <ul>
       % for my $s (@$summaries) {
-          <li>Pagina #<%= $s->{page_id} %>: <%= $s->{summary} %> (<%= $s->{created_at} %>)</li>
+          <li>
+            <div class="row">
+              <div class="row-main">
+                Pagina #<%= $s->{page_id} %>: <%= $s->{summary} %> <span class="muted">(<%= $s->{created_at} %>)</span>
+              </div>
+            </div>
+          </li>
       % }
   </ul>
   % } else {
-    <p style="color: var(--muted);">Nessun riassunto disponibile.</p>
+    <p class="muted">Nessun riassunto disponibile.</p>
   % }
 </section>

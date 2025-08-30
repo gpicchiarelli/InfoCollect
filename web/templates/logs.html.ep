@@ -4,9 +4,13 @@
   <ul>
     % for my $l (@$logs) {
       <li>
-        <strong>[<%= $l->{timestamp} %>]</strong>
-        <span style="color:<%= $l->{level} eq 'ERROR' ? '#ff3b30' : '#34c759' %>"><%= $l->{level} %></span>
-        — <%= $l->{message} %>
+        <div class="row">
+          <div class="row-main">
+            <strong>[<%= $l->{timestamp} %>]</strong>
+            <span style="color:<%= $l->{level} eq 'ERROR' ? '#ff3b30' : '#34c759' %>"><%= $l->{level} %></span>
+            — <%= $l->{message} %>
+          </div>
+        </div>
       </li>
     % }
   </ul>

@@ -2,7 +2,7 @@
 <h1 class="page-title">Canali di Notifica</h1>
 <section class="card" aria-labelledby="add-channel">
   <h2 id="add-channel" class="section-title">Aggiungi Canale</h2>
-  <form method="POST" action="/notifications">
+  <form method="POST" action="/notifications" class="form-grid">
       <input type="text" name="name" placeholder="Nome" required>
       <input type="text" name="type" placeholder="Tipo (IRC/Mail/RSS/Teams/WhatsApp)" required>
       <textarea name="config" placeholder='Config JSON' required></textarea>
@@ -13,12 +13,19 @@
   <h2 id="list-channel" class="section-title">Elenco Canali</h2>
   <ul>
       % for my $c (@$channels) {
-          <li><strong><%= $c->{name} %></strong> — <%= $c->{type} %>
-          % if ($c->{active}) {
-            <form method="POST" action="/notifications/<%= $c->{id} %>/deactivate" style="display:inline-block; margin-left:10px;">
-              <button type="submit" class="btn">Disattiva</button>
-            </form>
-          % }
+        <li>
+          <div class="row">
+            <div class="row-main">
+              <strong><%= $c->{name} %></strong> — <%= $c->{type} %>
+            </div>
+            <div class="row-actions">
+              % if ($c->{active}) {
+                <form method="POST" action="/notifications/<%= $c->{id} %>/deactivate">
+                  <button type="submit" class="btn btn-sm">Disattiva</button>
+                </form>
+              % }
+            </div>
+          </div>
         </li>
       % }
   </ul>
