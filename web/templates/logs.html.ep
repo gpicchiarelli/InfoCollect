@@ -1,0 +1,13 @@
+% layout 'default';
+<h1 class="page-title">Logs</h1>
+<section class="card">
+  <ul>
+    % for my $l (@$logs) {
+      <li>
+        <strong>[<%= $l->{timestamp} %>]</strong>
+        <span style="color:<%= $l->{level} eq 'ERROR' ? '#ff3b30' : '#34c759' %>"><%= $l->{level} %></span>
+        — <%= $l->{message} %>
+      </li>
+    % }
+  </ul>
+</section>

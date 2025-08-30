@@ -42,6 +42,10 @@
             <input type="text" name="message" placeholder="Messaggio di test" value="Messaggio di test da InfoCollect">
             <button type="submit" class="btn btn-primary">Invia test</button>
           </form>
+          <form method="POST" action="/senders/<%= $s->{id} %>/check" style="margin-top:8px; display:grid; grid-template-columns:1fr auto; gap:12px;">
+            <input type="hidden" name="id" value="<%= $s->{id} %>">
+            <button type="submit" class="btn">Verifica connessione</button>
+          </form>
         </li>
       % }
   </ul>

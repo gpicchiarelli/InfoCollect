@@ -15,6 +15,10 @@
           <textarea name="config" placeholder='Config JSON da validare' required></textarea>
           <button type="submit" class="btn btn-primary">Valida</button>
         </form>
+        <form method="POST" action="/connectors/<%= $c->{type} %>/check" style="margin-top:8px; display:grid; grid-template-columns:1fr auto; gap:12px;">
+          <textarea name="config" placeholder='Config JSON da verificare' required></textarea>
+          <button type="submit" class="btn">Check</button>
+        </form>
       </li>
     % }
   </ul>

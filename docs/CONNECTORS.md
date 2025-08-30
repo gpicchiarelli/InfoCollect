@@ -9,6 +9,7 @@ Connettori supportati (built‑in)
 --------------------------------
 - IRC: invia messaggi in un canale IRC
   - Richiesti: `server`, `port`, `nick`, `ircname`, `channel`
+  - Opzionali: `password`, `use_ssl` (true/false; richiede IO::Socket::SSL) e porta TLS tipica 6697
 - Mail: invia email via SMTP
   - Richiesti: `to`, `from`, `subject`, `smtp_host`, `smtp_port`
 - RSS: genera un feed RSS su file

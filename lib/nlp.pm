@@ -8,7 +8,7 @@ use JSON;
 use Lingua::Identify qw/langof/;
 use Lingua::Stem::It; # Sostituito Lingua::IT::Stemmer
 use Lingua::EN::Tagger;
-use Text::Extract::Words;
+use List::Util qw();
 use Encode qw(decode);
 use lib './lib';
 use config_manager;
@@ -119,7 +119,7 @@ sub estrai_parole_chiave {
 
     if ($lingua && $lingua eq 'it') {
         # Stemming per l'italiano con Lingua::Stem::It
-        my @parole = Text::Extract::Words::extract($testo);
+        my @parole = _extract_words($testo);
         @parole_chiave = Lingua::Stem::It::stem(@parole);
     } elsif ($lingua && $lingua eq 'en') {
         # Tagging per l'inglese
@@ -127,12 +127,23 @@ sub estrai_parole_chiave {
         @parole_chiave = $tagged_text =~ /<nn>(.*?)<\/nn>/g;  # Estrai i sostantivi
     } else {
         # Fallback: estrai parole senza elaborazione
-        @parole_chiave = Text::Extract::Words::extract($testo);
+        @parole_chiave = _extract_words($testo);
     }
 
     # Rimuove duplicati e restituisce le parole chiave
     my %seen;
     return [grep { !$seen{$_}++ } @parole_chiave];
+}
+
+# Estrazione semplice di parole (Unicode) senza dipendenze esterne
+sub _extract_words {
+    my ($t) = @_;
+    return () unless defined $t && length $t;
+    # Estrae sequenze di lettere/numeri di almeno 3 caratteri (Unicode aware)
+    my @w = ($t =~ /[\p{L}\p{Nd}]{3,}/gu);
+    # normalizza in minuscolo
+    @w = map { lc $_ } @w;
+    return @w;
 }
 
 1;

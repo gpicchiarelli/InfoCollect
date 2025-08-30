@@ -442,6 +442,15 @@ sub get_logs {
     return \@logs;
 }
 
+# Inserisce un log generico
+sub add_log {
+    my ($level, $message) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare('INSERT INTO logs(level, message) VALUES(?, ?)');
+    $sth->execute($level || 'INFO', $message || '');
+    $sth->finish();
+}
+
 # Funzione per ottenere tutti i riassunti
 sub get_all_summaries {
     my $dbh = connect_db();

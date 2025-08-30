@@ -17,6 +17,7 @@
         <a href="/summaries">Riassunti</a>
         <a href="/notifications">Notifiche</a>
         <a href="/connectors">Connettori</a>
+        <a href="/logs">Logs</a>
         <a href="/senders">Mittenti</a>
       </nav>
       <button class="btn theme-toggle" id="themeToggle" aria-label="Cambia tema">🌓</button>

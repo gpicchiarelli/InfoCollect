@@ -125,6 +125,20 @@ get '/summaries' => sub {
     $c->render(template => 'summaries');
 };
 
+
+# Logs viewer
+get '/logs' => sub {
+    my $c = shift;
+    my $logs = db::get_logs();
+    $c->stash(logs => $logs);
+    $c->render(template => 'logs');
+};
+
+get '/logs.json' => sub {
+    my $c = shift;
+    $c->render(json => db::get_logs());
+};
+
 # Gestione canali di notifica
 get '/notifications' => sub {
     my $c = shift;
@@ -140,6 +154,16 @@ post '/notifications' => sub {
     my $config = $c->param('config');
     db::add_notification_channel($name, $type, $config);
     $c->redirect_to('/notifications');
+};
+
+
+post '/connectors/:type/check' => sub {
+    my $c = shift;
+    my $type = $c->param('type');
+    my $config = $c->param('config') || $c->req->json;
+    my ($ok, $err) = notification::check_connector($type, $config);
+    return $c->render(json => { ok => JSON::true }) if $ok;
+    $c->render(json => { ok => JSON::false, error => $err }, status => 400);
 };
 
 # Gestione mittenti
@@ -272,6 +296,17 @@ post '/senders/:id/test_form' => sub {
         $c->flash(notice => "Messaggio di test inviato (ID=$id)");
     }
     $c->redirect_to('/senders');
+};
+
+post '/senders/:id/check' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    my $senders = db::get_all_senders();
+    my ($s) = grep { $_->{id} == $id } @$senders;
+    unless ($s) { return $c->render(json => { ok => JSON::false, error => 'Sender non trovato' }, status => 404); }
+    my ($ok,$err) = notification::check_connector($s->{type}, $s);
+    return $c->render(json => { ok => JSON::true }) if $ok;
+    $c->render(json => { ok => JSON::false, error => $err }, status => 400);
 };
 
 app->start;
