@@ -80,7 +80,8 @@ Documentazione
 - P2P: vedi `lib/p2p.pm`
 - DB e funzioni: vedi `lib/db.pm`
 - Riferimenti cross‑reference: `docs/REFERENCE.md`
- - Console interattiva (comandi): `docs/CLI.md`
+- Console interattiva (comandi): `docs/CLI.md`
+- Connettori e account: `docs/CONNECTORS.md`
 
 Cross-reference funzioni (principali)
 -------------------------------------

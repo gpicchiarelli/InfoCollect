@@ -8,6 +8,7 @@ use web_crawler;
 use opml;
 use p2p;
 use Mojo::Util qw(slurp);
+use notification;
 
 =pod
 
@@ -195,8 +196,62 @@ post '/api/import_opml' => sub {
 # API: elenco pagine
 get '/api/pages' => sub {
     my $c = shift;
-    my $pages = db::get_all_web_data();
-    $c->render(json => $pages);
+  my $pages = db::get_all_web_data();
+  $c->render(json => $pages);
+};
+
+# Connettori: elenco e validazione
+get '/connectors' => sub {
+    my $c = shift;
+    my $list = notification::supported_connectors();
+    $c->stash(connectors => $list);
+    $c->render(template => 'connectors');
+};
+
+get '/connectors.json' => sub {
+    my $c = shift;
+    $c->render(json => notification::supported_connectors());
+};
+
+post '/connectors/:type/validate' => sub {
+    my $c = shift;
+    my $type = $c->param('type');
+    my $config = $c->param('config') || $c->req->json;
+    my ($ok, $err) = notification::validate_config($type, $config);
+    return $c->render(json => { ok => JSON::true }) if $ok;
+    $c->render(json => { ok => JSON::false, error => $err }, status => 400);
+};
+
+# Test invio tramite mittente (account) esistente
+post '/senders/:id/test' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    my $msg = $c->param('message') // 'Messaggio di test da InfoCollect';
+    my $senders = db::get_all_senders();
+    my ($s) = grep { $_->{id} == $id } @$senders;
+    return $c->reply->not_found unless $s;
+    eval { notification::send_notification($s, $msg) };
+    if ($@) {
+        return $c->render(json => { success => 0, error => "$@" }, status => 500);
+    }
+    $c->render(json => { success => 1 });
+};
+
+# Test via form: redirect + flash
+post '/senders/:id/test_form' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    my $msg = $c->param('message') // 'Messaggio di test da InfoCollect';
+    my $senders = db::get_all_senders();
+    my ($s) = grep { $_->{id} == $id } @$senders;
+    unless ($s) { return $c->redirect_to('/senders'); }
+    eval { notification::send_notification($s, $msg) };
+    if ($@) {
+        $c->flash(notice => "Errore nell'invio: $@");
+    } else {
+        $c->flash(notice => "Messaggio di test inviato (ID=$id)");
+    }
+    $c->redirect_to('/senders');
 };
 
 app->start;

@@ -16,6 +16,7 @@
         <a href="/settings">Impostazioni</a>
         <a href="/summaries">Riassunti</a>
         <a href="/notifications">Notifiche</a>
+        <a href="/connectors">Connettori</a>
         <a href="/senders">Mittenti</a>
       </nav>
     </div>

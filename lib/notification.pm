@@ -10,6 +10,7 @@ use teams;
 use whatsapp;
 use Text::Template;
 use db;
+use JSON qw(decode_json);
 
 sub send_notification {
     my ($channel, $message, $template_name, $template_data) = @_;
@@ -38,6 +39,26 @@ sub send_notification {
     } else {
         warn "Tipo di canale non supportato: $channel->{type}\n";
     }
+}
+
+sub supported_connectors {
+    return [
+        { type => 'IRC',      required => [qw(server port nick ircname channel)], desc => 'Invia messaggi in un canale IRC' },
+        { type => 'Mail',     required => [qw(to from subject smtp_host smtp_port)], desc => 'Invia email via SMTP' },
+        { type => 'RSS',      required => [qw(title link description item_title item_link output_file)], desc => 'Scrive feed RSS su file' },
+        { type => 'Teams',    required => [qw(webhook_url)], desc => 'Microsoft Teams webhook' },
+        { type => 'WhatsApp', required => [qw(api_url phone)], desc => 'Invio messaggi via API WhatsApp' },
+    ];
+}
+
+sub validate_config {
+    my ($type, $config_str_or_hash) = @_;
+    my $cfg = ref $config_str_or_hash eq 'HASH' ? $config_str_or_hash : eval { decode_json($config_str_or_hash) };
+    return (0, 'Config JSON non valido') unless $cfg && ref $cfg eq 'HASH';
+    my ($c) = grep { $_->{type} eq $type } @{ supported_connectors() };
+    return (0, 'Tipo connettore non supportato') unless $c;
+    my @missing = grep { !exists $cfg->{$_} || $cfg->{$_} eq '' } @{ $c->{required} };
+    return @missing ? (0, 'Chiavi mancanti: ' . join(', ', @missing)) : (1, undef);
 }
 
 1;

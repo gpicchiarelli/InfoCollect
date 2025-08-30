@@ -1,0 +1,14 @@
+% layout 'default';
+<h1 class="page-title">Connettori supportati</h1>
+
+<section class="card">
+  <ul>
+    % for my $c (@$connectors) {
+      <li>
+        <strong><%= $c->{type} %></strong> — <%= $c->{desc} %><br/>
+        <small style="color: var(--muted);">Richiesti: <%= join(', ', @{$c->{required}}) %></small>
+      </li>
+    % }
+  </ul>
+</section>
+
