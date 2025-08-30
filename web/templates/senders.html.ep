@@ -13,19 +13,86 @@
           <option value="<%= $c->{type} %>"><%= $c->{type} %></option>
         % }
       </select>
-      <textarea name="config" id="senderConfig" placeholder='Config JSON' required></textarea>
-      <button type="button" class="btn" id="prefillBtn">Riempi config</button>
-      <button type="submit" class="btn btn-primary">Aggiungi</button>
+
+      <div id="guidedBox" style="grid-column:1/-1;"></div>
+
+      <textarea name="config" id="senderConfig" placeholder='Oppure incolla qui Config JSON' required></textarea>
+      <div class="actions">
+        <button type="button" class="btn" id="prefillBtn">Riempi config</button>
+        <button type="submit" class="btn btn-primary">Aggiungi</button>
+      </div>
   </form>
   <script>
     (function(){
       const templates = <%== Mojo::JSON::encode_json($templates) %>;
+      const defs = {
+        Mail: [
+          {n:'to',t:'email',l:'A (email)',r:1},
+          {n:'from',t:'email',l:'Da (email)',r:1},
+          {n:'subject',t:'text',l:'Oggetto',r:1},
+          {n:'smtp_host',t:'text',l:'SMTP Host',r:1},
+          {n:'smtp_port',t:'number',l:'SMTP Port',r:1,v:587},
+          {n:'smtp_user',t:'text',l:'SMTP User'},
+          {n:'smtp_pass',t:'password',l:'SMTP Pass'},
+          {n:'smtp_ssl',t:'checkbox',l:'Usa SSL',v:true},
+          {n:'smtp_timeout',t:'number',l:'Timeout (s)',v:10}
+        ],
+        Slack: [ {n:'webhook_url',t:'url',l:'Webhook URL',r:1} ],
+        Teams: [ {n:'webhook_url',t:'url',l:'Webhook URL',r:1} ],
+        Discord: [ {n:'webhook_url',t:'url',l:'Webhook URL',r:1} ],
+        Telegram: [
+          {n:'bot_token',t:'text',l:'Bot Token',r:1},
+          {n:'chat_id',t:'text',l:'Chat ID',r:1},
+          {n:'api_url',t:'url',l:'API URL (opzionale)',v:'https://api.telegram.org'}
+        ]
+      };
+
       const typeSel = document.getElementById('senderType');
       const cfg = document.getElementById('senderConfig');
       const btn = document.getElementById('prefillBtn');
+      const guided = document.getElementById('guidedBox');
+
+      function renderGuided(){
+        const t = typeSel.value; guided.innerHTML='';
+        const fields = defs[t]||[];
+        if (!fields.length) return;
+        const frag = document.createDocumentFragment();
+        fields.forEach(f=>{
+          const wrap = document.createElement('div');
+          wrap.style.display='contents';
+          const label = document.createElement('label');
+          label.textContent=f.l; label.style.color='var(--muted)';
+          label.style.gridColumn='1/-1'; label.style.marginTop='8px';
+          const input = document.createElement('input');
+          input.type=f.t==='checkbox'?'checkbox':(f.t||'text');
+          input.name='guided_'+f.n;
+          input.placeholder=f.l;
+          if (f.t==='checkbox') input.checked=!!f.v; else if (f.v!==undefined) input.value=f.v;
+          if (f.r) input.required=true;
+          frag.appendChild(label); frag.appendChild(input);
+        });
+        guided.appendChild(frag);
+      }
+
+      function buildConfig(){
+        const t = typeSel.value; const fields = defs[t]||[]; if (!fields.length) return null;
+        const o={};
+        fields.forEach(f=>{
+          const el = document.querySelector('[name="guided_'+f.n+'"]');
+          if (!el) return;
+          if (f.t==='checkbox') o[f.n]=el.checked; else if (f.t==='number') o[f.n]=el.value?Number(el.value):undefined; else o[f.n]=el.value;
+        });
+        return o;
+      }
+
       function prefill(){ const t = typeSel.value; if (t && templates[t]) cfg.value = templates[t]; }
       btn && btn.addEventListener('click', prefill);
-      typeSel && typeSel.addEventListener('change', prefill);
+      typeSel && typeSel.addEventListener('change', function(){ renderGuided(); prefill(); });
+      renderGuided();
+
+      document.getElementById('addSenderForm').addEventListener('submit', function(){
+        const o = buildConfig(); if (o) cfg.value = JSON.stringify(o, null, 2);
+      });
     })();
   </script>
   <p style="color: var(--muted); margin-top: 8px;">Suggerimento: consulta la sezione Connettori per i campi richiesti dal tipo scelto.</p>

@@ -4,10 +4,7 @@ use Test::More;
 use Test::Exception;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-BEGIN {
-  eval { require Crypt::PK::RSA; 1 } or plan skip_all => 'CryptX non installato';
-  require p2p; p2p->import();
-}
+BEGIN { require p2p; p2p->import(); }
 
 # Test della funzione get_machine_id
 ok(p2p::get_machine_id(), "get_machine_id restituisce un valore");

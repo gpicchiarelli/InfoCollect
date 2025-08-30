@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use IO::Socket::INET;
 use Socket qw(inet_aton sockaddr_in);
-use Crypt::PK::RSA;
 use Digest::SHA qw(sha256_hex);
 use Sys::Hostname;
 use threads;
@@ -117,11 +116,9 @@ Restituisce l'indirizzo IP del peer (se disponibile; placeholder 127.0.0.1).
 =cut
 
 # Variabili globali
-my $rsa = Crypt::PK::RSA->new();
-$rsa->generate_key(2048);
-my $private_key = $rsa->export_key_pem('private');
-my $public_key = $rsa->export_key_pem('public');
+# Chiavi/ID semplificati per evitare dipendenze RSA
 my $machine_id = sha256_hex(hostname());
+my $public_key = hostname();
 
 # Funzione per avviare il discovery UDP
 sub start_udp_discovery {

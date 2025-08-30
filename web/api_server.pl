@@ -7,11 +7,18 @@ use rss_crawler;
 use web_crawler;
 use opml;
 use p2p;
-use Mojo::Util qw(slurp);
+use Mojo::File qw(path);
+use JSON ();
+use FindBin;
+use config_manager;
 use notification;
 
-# Serve static files from ./static
-app->static->paths->[0] = app->home->rel_file('static');
+# App secrets (evita warning passphrase)
+my %s = eval { config_manager::get_all_settings() };
+app->secrets([ $s{MOJO_SECRET} || 'infocollect_dev_secret' ]);
+
+# Serve static files from web/static (accetta esecuzione da qualunque CWD)
+app->static->paths->[0] = "$FindBin::Bin/static";
 
 =pod
 
@@ -66,7 +73,7 @@ get '/docs/:name' => sub {
     );
     my $file = $map{$name};
     return $c->reply->not_found unless $file && -e $file;
-    my $content = slurp($file);
+    my $content = path($file)->slurp;
     $c->render(text => $content);
 };
 
