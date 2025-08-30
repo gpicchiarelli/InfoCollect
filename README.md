@@ -1,6 +1,6 @@
 # InfoCollect
 
-**InfoCollect** è un sistema avanzato di raccolta automatica di notizie da fonti RSS e Web, scritto interamente in Perl.
+InfoCollect è un sistema avanzato di raccolta automatica di notizie da fonti RSS e Web. La maggior parte del codice è in Perl (core, crawler, DB, P2P, web server), con componenti ausiliarie in TypeScript/Node per strumenti di sviluppo e monitoraggio.
 
 ---
 
@@ -24,19 +24,49 @@ InfoCollect utilizza un protocollo P2P per sincronizzare dati e impostazioni tra
 
 InfoCollect utilizza un database SQLite per gestire le richieste di peer e i peer accettati. Lo schema del database è definito in `schema.sql`.
 
-Installazione
--------------
-- Avvio rapido (consigliato): `./setup.sh`
-  - Installa le dipendenze CPAN da `cpanfile`
-  - Inizializza il database (crea tabelle e chiave di cifratura di sviluppo)
-  - Installa dipendenze Node (se presente `npm`)
+Installazione (verboso)
+-----------------------
+La procedura seguente guida in modo dettagliato al primo avvio, passando dall’installazione delle dipendenze fino all’esecuzione simultanea del servizio web e della console testuale.
 
-Comandi utili
--------------
+1) Prerequisiti
+   - Perl 5.32+ con toolchain (make/gcc) per moduli XS
+   - cpanm (App::cpanminus) per installare CPAN in modo affidabile
+   - SQLite3 (presente di default su molte piattaforme)
+   - Node.js 18+ (solo per la parte TS opzionale)
+
+2) Setup automatico
+   - Esegui: `./setup.sh`
+   - Cosa fa in dettaglio:
+     - Verifica la presenza di `perl` e `cpanm`; se manca `cpanm` prova a installarlo localmente
+     - Installa tutte le dipendenze CPAN elencate in `cpanfile` (incluso CryptX, Mojolicious, Dancer2, ecc.)
+     - Inizializza o aggiorna il database SQLite creando tutte le tabelle necessarie e, se assente, una chiave di cifratura di sviluppo in `settings`
+     - Se `npm` è disponibile, installa anche le dipendenze Node definite in `package.json`
+
+3) Verifica post-setup (facoltativa ma consigliata)
+   - Avvia l’API web su porta 3000: `perl web/api_server.pl daemon -l http://*:3000`
+   - In un altro terminale, avvia il daemon P2P: `perl daemon.pl`
+   - Apri la console testuale: `perl script/console.pl`
+   - Le tre componenti condividono lo stesso database (`infocollect.db`), quindi ogni modifica si riflette ovunque.
+
+4) Avvio semplificato “tutto-in-uno”
+   - `perl script/start_all.pl --port 3000`
+   - Esegue in background il server web e il daemon, poi avvia la console interattiva in foreground.
+
+Comandi utili (panoramica)
+--------------------------
 - API web (Mojolicious): `perl web/api_server.pl daemon -l http://*:3000`
+  - Dashboard HTML (templates in `web/templates/`) per operazioni frequenti
+  - API JSON per integrazione: vedi `web/api_server.pl` (es. `/api/pages`, `/api/send_task`, `/api/import_opml`)
 - Daemon P2P: `perl daemon.pl`
+  - Server TCP minimale per ping, sync e task
 - Agent (crawler + P2P): `perl InfoCollect/agent.pl`
-- Dev server TS (Express demo): `npm run dev:web`
+  - Avvia discovery/server P2P e lancia periodicamente i crawler RSS/Web
+- Console testuale: `perl script/console.pl`
+  - Interfaccia CLI interattiva per gestire feed, URL, impostazioni, riassunti, notifiche e sender
+- Start combinato: `perl script/start_all.pl --port 3000`
+  - Avvio guidato di web+daemon in background e CLI in foreground
+- Dev TS (demo): `npm run dev:web`
+  - Strumenti ausiliari di monitoraggio/local dev (non necessari in produzione)
 
 Documentazione
 --------------
@@ -44,6 +74,7 @@ Documentazione
 - API Web: vedi `web/api_server.pl`
 - P2P: vedi `lib/p2p.pm`
 - DB e funzioni: vedi `lib/db.pm`
+ - Riferimenti cross‑reference: `docs/REFERENCE.md`
 
 Cross-reference funzioni (principali)
 -------------------------------------
@@ -53,6 +84,21 @@ Cross-reference funzioni (principali)
 - DB accesso: `lib/db.pm:1` — connessione, cifratura, CRUD su impostazioni, feed, web, summaries, notification e senders.
 - P2P: `lib/p2p.pm:1` — discovery UDP, server TCP, sync impostazioni, gestione peer.
 - Notifiche: `lib/notification.pm:1` — dispatch verso IRC/Mail/RSS/Teams/WhatsApp.
+ - Console CLI: `lib/interactive_cli.pm:19` — comandi interattivi amministrativi.
+
+Allineamento tra servizi
+------------------------
+Sia la console testuale (Perl) sia il servizio web (Mojolicious) condividono le stesse funzioni di accesso al DB (`lib/db.pm`) e lo stesso file di database (`infocollect.db`). Questo garantisce coerenza: ogni operazione fatta via CLI è immediatamente visibile sul web (e viceversa).
+
+Sicurezza e cifratura
+---------------------
+- Le configurazioni sensibili dei mittenti sono cifrate in AES‑GCM tramite le utilità in `lib/db.pm`.
+- Alla prima inizializzazione viene inserita una chiave di cifratura di sviluppo; in produzione, impostarne una personalizzata in `settings` (chiave `INFOCOLLECT_ENCRYPTION_KEY`).
+
+Linguaggi e struttura del codice
+--------------------------------
+- Core, orchestrazione, crawler, P2P e web server sono in Perl (Mojolicious e Dancer2).
+- Componenti opzionali in TypeScript/Node forniscono tool di sviluppo e monitor: non sono necessarie in produzione.
 ### Tabelle principali
 
 - `peer_requests`: Memorizza le richieste di peer in attesa di approvazione.

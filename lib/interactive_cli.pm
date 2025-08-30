@@ -14,6 +14,23 @@ use config_manager;
 use init_conf;
 use opml qw(import_opml export_opml); # Importa le funzioni OPML
 
+=pod
+
+=head1 NAME
+
+interactive_cli - Console testuale amministrativa di InfoCollect
+
+=head1 DESCRIPTION
+
+Offre un REPL interattivo per amministrare feed RSS, URL web, impostazioni,
+riassunti e sistemi di notifica. Condivide DB e impostazioni con il servizio web.
+
+Comando d’ingresso: C<avvia_cli>.
+
+Cross-reference: docs/REFERENCE.md (CLI interattiva).
+
+=cut
+
 
 # Funzione principale per avviare l'interfaccia CLI
 sub avvia_cli {

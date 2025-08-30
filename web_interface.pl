@@ -6,6 +6,19 @@ use Dancer2;
 use lib './lib';
 use db;
 
+=pod
+
+=head1 NAME
+
+web_interface.pl - Interfaccia Dancer2 minimale per impostazioni
+
+=head1 DESCRIPTION
+
+Espone una semplice pagina per visualizzare e aggiornare impostazioni.
+Fornita come alternativa minimal a Mojolicious, con stesso backend DB.
+
+=cut
+
 get '/' => sub {
     template 'index' => { settings => db::get_all_settings() };
 };

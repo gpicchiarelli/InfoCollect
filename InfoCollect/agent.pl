@@ -16,6 +16,20 @@ use p2p;
 use config_manager;
 use DBI;
 
+=pod
+
+=head1 NAME
+
+agent.pl - Ciclo periodico che esegue crawler e orchestration P2P
+
+=head1 DESCRIPTION
+
+Avvia un notification agent, discovery UDP e server TCP P2P, quindi esegue
+periodicamente i crawler RSS e Web onorando le impostazioni.
+Condivide DB e impostazioni con API web e console CLI.
+
+=cut
+
 my $intervallo = shift @ARGV || 30; # default ogni 30 minuti
 
 if ($ARGV[0] && $ARGV[0] eq 'show-latency') {

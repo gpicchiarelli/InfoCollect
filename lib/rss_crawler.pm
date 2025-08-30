@@ -13,6 +13,21 @@ use Parallel::ForkManager;
 use lib './lib';
 use config_manager;
 
+=pod
+
+=head1 NAME
+
+rss_crawler - Crawler parallelo di feed RSS
+
+=head1 DESCRIPTION
+
+Recupera i feed RSS, effettua il parsing e inserisce articoli in `rss_articles`.
+Onora `CRAWLER_TIMEOUT` e `MAX_PROCESSES` dalle impostazioni.
+
+Cross-reference: docs/REFERENCE.md (Crawler).
+
+=cut
+
 # Funzione principale per eseguire il crawler RSS
 sub esegui_crawler_rss {
     my %config = config_manager::get_all_settings();

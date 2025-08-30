@@ -24,6 +24,21 @@ my $tagger_en = Lingua::EN::Tagger->new();
 my $api_url = 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn';
 my $api_token = 'YOUR_HUGGINGFACE_API_TOKEN'; # Sostituisci con il tuo token API
 
+=pod
+
+=head1 NAME
+
+nlp - Utilità NLP per riassunto, interessi e parole chiave
+
+=head1 DESCRIPTION
+
+Fornisce riassunto via API (con fallback locale), valutazione di rilevanza in base ad interessi
+e estrazione di parole chiave. Parametrizza modelli e token API.
+
+Cross-reference: docs/REFERENCE.md (NLP).
+
+=cut
+
 # Riassume un testo in base alla lingua
 sub riassumi_contenuto {
     my ($content) = @_;

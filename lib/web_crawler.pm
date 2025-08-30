@@ -15,6 +15,21 @@ use lib './lib';
 use nlp qw(riassumi_contenuto rilevanza_per_interessi);
 use config_manager;
 
+=pod
+
+=head1 NAME
+
+web_crawler - Crawler parallelo di pagine web con riassunto NLP
+
+=head1 DESCRIPTION
+
+Scarica URL attivi da `web`, estrae titolo e genera riassunto (`nlp::riassumi_contenuto`),
+salvando in `pages` con `summary`.
+
+Cross-reference: docs/REFERENCE.md (Crawler).
+
+=cut
+
 sub esegui_crawler_web {
     my %config = eval { config_manager::get_all_settings() };
     if ($@) {

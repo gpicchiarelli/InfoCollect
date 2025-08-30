@@ -6,6 +6,19 @@ use IO::Socket::INET;
 use lib './lib';
 use p2p;
 
+=pod
+
+=head1 NAME
+
+daemon.pl - Demone TCP minimale per ping e sincronizzazione
+
+=head1 DESCRIPTION
+
+Accetta connessioni TCP per rispondere a PING, restituire SYNC dei settings
+ed eseguire TASK. Utilizzato come componente di supporto per P2P.
+
+=cut
+
 my $port = 5001;
 
 if (@ARGV && $ARGV[0] eq '--help') {

@@ -10,6 +10,22 @@ use Digest::SHA qw(sha256);
 use init_db;
 use config_manager; # accesso alle impostazioni per la chiave di cifratura
 
+=pod
+
+=head1 NAME
+
+db - Accesso unificato al database SQLite e utilità di cifratura
+
+=head1 DESCRIPTION
+
+Fornisce connessione singleton al DB e funzioni CRUD per feed RSS, pagine web,
+riassunti, impostazioni, canali di notifica, mittenti e template. Include
+primitive di cifratura (AES-GCM) per configurazioni sensibili.
+
+Cross-reference funzioni: vedi docs/REFERENCE.md (sezione "DB").
+
+=cut
+
 # Nome del database SQLite
 my $db_file = 'infocollect.db';
 

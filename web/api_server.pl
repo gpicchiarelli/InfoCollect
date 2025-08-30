@@ -8,6 +8,22 @@ use web_crawler;
 use opml;
 use p2p;
 
+=pod
+
+=head1 NAME
+
+api_server.pl - Interfaccia web Mojolicious per InfoCollect
+
+=head1 DESCRIPTION
+
+Espone dashboard HTML e API JSON per gestire feed, URL web, impostazioni, riassunti,
+notifiche e mittenti. Integra endpoint per l’invio di task P2P e import OPML.
+Condivide lo stesso database della console CLI.
+
+Cross-reference: docs/REFERENCE.md (riferimenti generali), lib/db.pm, lib/p2p.pm.
+
+=cut
+
 # Pagina principale
 get '/' => sub {
     my $c = shift;

@@ -13,6 +13,21 @@ use Time::HiRes qw(gettimeofday tv_interval);
 use db;
 use config_manager;
 
+=pod
+
+=head1 NAME
+
+p2p - Funzioni di scoperta UDP, sincronizzazione TCP e gestione peer
+
+=head1 DESCRIPTION
+
+Implementa broadcast UDP, server TCP per sync impostazioni (delta), misura latenza
+e tabelle peer. Fornisce utilità per inviare task e raccogliere risultati.
+
+Cross-reference funzioni: vedi docs/REFERENCE.md (sezione "P2P").
+
+=cut
+
 # Variabili globali
 my $rsa = Crypt::PK::RSA->new();
 $rsa->generate_key(2048);
