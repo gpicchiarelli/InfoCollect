@@ -168,6 +168,22 @@ sub avvia_cli {
             if ($@) {
                 print "Errore durante l'esportazione: $@\n";
             }
+        } elsif ($comando eq 'set_hf_token') {
+            my ($token) = @args;
+            unless ($token) { print "Utilizzo: set_hf_token <token>\n"; next; }
+            eval { config_manager::add_setting('HUGGINGFACE_API_TOKEN', $token); print "Token HF aggiornato.\n"; };
+            print "Errore: $@\n" if $@;
+        } elsif ($comando eq 'sync_settings') {
+            my ($peer_ip, $port) = @args;
+            unless ($peer_ip) { print "Utilizzo: sync_settings <peer_ip> [port]\n"; next; }
+            my %s = config_manager::get_all_settings();
+            $port ||= ($s{TCP_SYNC_PORT} || 5001);
+            eval { config_manager::sync_settings($peer_ip, $port); print "Sync impostazioni completato con $peer_ip:$port\n"; };
+            print "Errore sync: $@\n" if $@;
+        } elsif ($comando eq 'show_docs') {
+            my ($topic) = @args;
+            $topic ||= 'readme';
+            mostra_documentazione($topic);
         } else {
             print "Comando non riconosciuto: '$comando'. Digita 'help' per vedere i comandi disponibili.\n";
         }
@@ -220,6 +236,10 @@ Comandi disponibili:
                         Importa feed RSS da un file OPML.
   export_opml <file_path>
                         Esporta i feed RSS in un file OPML.
+  set_hf_token <token>   Imposta il token HuggingFace per i riassunti remoti.
+  sync_settings <ip> [port]
+                        Sincronizza impostazioni con un peer remoto.
+  show_docs [topic]      Mostra documentazione (readme|setup|cli|reference).
 END_HELP
 }
 
@@ -519,6 +539,24 @@ sub modifica_setting {
     }
     # Utilizza add_setting che aggiorna se la chiave esiste
     config_manager::add_setting($chiave, $nuovo_valore);
+}
+
+# Mostra documentazione (da files in docs/ o README)
+sub mostra_documentazione {
+    my ($topic) = @_;
+    my %map = (
+        readme    => 'README.md',
+        setup     => 'docs/SETUP.md',
+        cli       => 'docs/CLI.md',
+        reference => 'docs/REFERENCE.md',
+    );
+    my $file = $map{lc $topic} // 'README.md';
+    if (open my $fh, '<:encoding(UTF-8)', $file) {
+        local $/; my $txt = <$fh>; close $fh;
+        print "\n===== $file =====\n$txt\n";
+    } else {
+        print "Impossibile aprire $file: $!\n";
+    }
 }
 
 1;

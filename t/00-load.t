@@ -1,6 +1,8 @@
 use strict;
 use warnings;
 use Test::More;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 
 BEGIN {
     use_ok('p2p') or BAIL_OUT("Impossibile caricare il modulo p2p");

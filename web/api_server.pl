@@ -7,6 +7,7 @@ use rss_crawler;
 use web_crawler;
 use opml;
 use p2p;
+use Mojo::Util qw(slurp);
 
 =pod
 
@@ -35,6 +36,34 @@ Cross-reference: docs/REFERENCE.md (riferimenti generali), lib/db.pm, lib/p2p.pm
 get '/' => sub {
     my $c = shift;
     $c->render(template => 'index');
+};
+
+# Elenco documentazione disponibile
+get '/docs' => sub {
+    my $c = shift;
+    my @docs = (
+        { name => 'README',     file => 'README.md' },
+        { name => 'SETUP',      file => 'docs/SETUP.md' },
+        { name => 'CLI',        file => 'docs/CLI.md' },
+        { name => 'REFERENCE',  file => 'docs/REFERENCE.md' },
+    );
+    $c->render(json => \@docs);
+};
+
+# Visualizza un documento per nome
+get '/docs/:name' => sub {
+    my $c = shift;
+    my $name = uc($c->param('name') // 'README');
+    my %map = (
+        README    => 'README.md',
+        SETUP     => 'docs/SETUP.md',
+        CLI       => 'docs/CLI.md',
+        REFERENCE => 'docs/REFERENCE.md',
+    );
+    my $file = $map{$name};
+    return $c->reply->not_found unless $file && -e $file;
+    my $content = slurp($file);
+    $c->render(text => $content);
 };
 
 # Gestione feed RSS

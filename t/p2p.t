@@ -2,7 +2,8 @@ use strict;
 use warnings;
 use Test::More;
 use Test::Exception;
-use lib '../lib';
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use p2p;
 
 # Test della funzione get_machine_id
@@ -26,6 +27,6 @@ throws_ok { p2p::send_task("peer_id_non_esistente", "task_data") }
 ok(p2p::start_udp_discovery(5000, 5001), 'start_udp_discovery funziona');
 
 # Test della funzione start_tcp_server
-ok(p2p::start_tcp_server(5001, sub { return 1; }), 'start_tcp_server funziona');
+ok(p2p::start_tcp_server(5001, 'config_manager'), 'start_tcp_server funziona');
 
 done_testing();
