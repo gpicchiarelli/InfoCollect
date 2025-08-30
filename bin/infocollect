@@ -1,0 +1,50 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use FindBin;
+use Getopt::Long qw(GetOptions);
+
+my $mode = '';
+my $port = 3000;
+my $help = 0;
+GetOptions(
+  'web'     => sub { $mode = 'web' },
+  'daemon'  => sub { $mode = 'daemon' },
+  'cli'     => sub { $mode = 'cli' },
+  'all'     => sub { $mode = 'all' },
+  'port=i'  => \$port,
+  'help'    => \$help,
+) or $help = 1;
+
+if ($help || !$mode) {
+  print <<"USAGE";
+infocollect - orchestratore servizi InfoCollect
+
+Uso:
+  infocollect --web [--port N]     Avvia solo il servizio web
+  infocollect --daemon             Avvia solo il daemon P2P
+  infocollect --cli                Avvia solo la console CLI
+  infocollect --all [--port N]     Avvia web+daemon e poi la console CLI
+
+Esempi:
+  infocollect --all --port 3000
+  infocollect --web --port 4000
+USAGE
+  exit 0;
+}
+
+my $root = "$FindBin::Bin/..";
+my $perl = $^X;
+
+if ($mode eq 'web') {
+  exec $perl, "$root/web/api_server.pl", 'daemon', '-l', "http://*:$port";
+} elsif ($mode eq 'daemon') {
+  exec $perl, "$root/daemon.pl";
+} elsif ($mode eq 'cli') {
+  exec $perl, "$root/script/console.pl";
+} elsif ($mode eq 'all') {
+  exec $perl, "$root/script/start_all.pl", '--port', $port;
+}
+
+exit 0;
+

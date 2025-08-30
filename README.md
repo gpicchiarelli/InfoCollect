@@ -63,6 +63,9 @@ Comandi utili (panoramica)
   - Avvia discovery/server P2P e lancia periodicamente i crawler RSS/Web
 - Console testuale: `perl script/console.pl`
   - Interfaccia CLI interattiva per gestire feed, URL, impostazioni, riassunti, notifiche e sender
+- Orchestratore: `bin/infocollect`
+  - `infocollect --all --port 3000` avvia web+daemon+CLI
+  - `infocollect --web --port 4000` avvia solo il web server
 - Start combinato: `perl script/start_all.pl --port 3000`
   - Avvio guidato di web+daemon in background e CLI in foreground
 - Dev TS (demo): `npm run dev:web`

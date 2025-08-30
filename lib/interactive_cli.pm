@@ -240,6 +240,7 @@ Comandi disponibili:
   sync_settings <ip> [port]
                         Sincronizza impostazioni con un peer remoto.
   show_docs [topic]      Mostra documentazione (readme|setup|cli|reference).
+  doc_open [topic]       Apre la documentazione nel browser/sistema.
 END_HELP
 }
 
@@ -557,6 +558,30 @@ sub mostra_documentazione {
     } else {
         print "Impossibile aprire $file: $!\n";
     }
+}
+
+# Apre un documento con il viewer di sistema (best effort)
+sub apri_documentazione {
+    my ($topic) = @_;
+    my %map = (
+        readme    => 'README.md',
+        setup     => 'docs/SETUP.md',
+        cli       => 'docs/CLI.md',
+        reference => 'docs/REFERENCE.md',
+    );
+    my $file = $map{lc $topic} // 'README.md';
+    unless (-e $file) { print "File non trovato: $file\n"; return; }
+    my $cmd;
+    if ($^O =~ /darwin/i) {
+        $cmd = qq{open "$file"};
+    } elsif ($^O =~ /mswin|cygwin/i) {
+        $cmd = qq{start "" "$file"};
+    } else {
+        $cmd = qq{xdg-open "$file"};
+    }
+    system($cmd) == 0
+        ? print "Apertura di $file in corso...\n"
+        : print "Impossibile aprire automaticamente. Percorso: $file\n";
 }
 
 1;
