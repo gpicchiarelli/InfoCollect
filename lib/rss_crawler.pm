@@ -71,12 +71,22 @@ sub esegui_crawler_rss {
     my $pm = Parallel::ForkManager->new($max_processes);
 
     while (my $feed = $sth->fetchrow_hashref) {
+        # Stop se richiesto (generale o solo RSS)
+        %config = config_manager::get_all_settings();
+        last if ($config{CRAWLER_STOP} && $config{CRAWLER_STOP} == 1)
+             || ($config{CRAWLER_RSS_STOP} && $config{CRAWLER_RSS_STOP} == 1);
         $pm->start and next;
 
         eval {
             print "Elaborazione del feed RSS: $feed->{url}\n";
 
             # Effettua la richiesta HTTP per il feed RSS
+            my %cfg_now = config_manager::get_all_settings();
+            if (($cfg_now{CRAWLER_STOP} && $cfg_now{CRAWLER_STOP} == 1)
+             || ($cfg_now{CRAWLER_RSS_STOP} && $cfg_now{CRAWLER_RSS_STOP} == 1)) {
+                print "Stop richiesto. Interrompo child RSS.\n";
+                $pm->finish;
+            }
             my $response = $ua->get($feed->{url});
             if ($response->is_success) {
                 my $rss_content = $response->decoded_content;

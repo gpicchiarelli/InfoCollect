@@ -303,6 +303,37 @@ post '/crawler/web' => sub {
     $c->redirect_to('/');
 };
 
+# Stop/Resume crawler
+post '/crawler/stop' => sub {
+    my $c = shift;
+    config_manager::add_setting('CRAWLER_STOP', 1);
+    $c->flash(notice => 'Stop richiesto per tutti i crawler');
+    $c->redirect_to('/');
+};
+
+post '/crawler/rss/stop' => sub {
+    my $c = shift;
+    config_manager::add_setting('CRAWLER_RSS_STOP', 1);
+    $c->flash(notice => 'Stop richiesto per crawler RSS');
+    $c->redirect_to('/');
+};
+
+post '/crawler/web/stop' => sub {
+    my $c = shift;
+    config_manager::add_setting('CRAWLER_WEB_STOP', 1);
+    $c->flash(notice => 'Stop richiesto per crawler Web');
+    $c->redirect_to('/');
+};
+
+post '/crawler/resume' => sub {
+    my $c = shift;
+    config_manager::add_setting('CRAWLER_STOP', 0);
+    config_manager::add_setting('CRAWLER_RSS_STOP', 0);
+    config_manager::add_setting('CRAWLER_WEB_STOP', 0);
+    $c->flash(notice => 'Crawler riattivati');
+    $c->redirect_to('/');
+};
+
 # API: invio task a peer
 post '/api/send_task' => sub {
     my $c = shift;

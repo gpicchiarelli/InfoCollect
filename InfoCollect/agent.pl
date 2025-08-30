@@ -74,9 +74,22 @@ p2p::start_tcp_server($tcp_port, 'config_manager');
 
 while (1) {
     eval {
-        print "[Agent] Avvio dei crawler...\n";
-        rss_crawler::esegui_crawler_rss();
-        web_crawler::esegui_crawler_web();
+        my %s = config_manager::get_all_settings();
+        if (!($s{CRAWLER_STOP} && $s{CRAWLER_STOP} == 1)) {
+            print "[Agent] Avvio dei crawler...\n";
+            if (!($s{CRAWLER_RSS_STOP} && $s{CRAWLER_RSS_STOP} == 1)) {
+                rss_crawler::esegui_crawler_rss();
+            } else {
+                print "[Agent] Crawler RSS in stop.\n";
+            }
+            if (!($s{CRAWLER_WEB_STOP} && $s{CRAWLER_WEB_STOP} == 1)) {
+                web_crawler::esegui_crawler_web();
+            } else {
+                print "[Agent] Crawler Web in stop.\n";
+            }
+        } else {
+            print "[Agent] Tutti i crawler in stop.\n";
+        }
         print "[Agent] Attesa $intervallo minuti prima del prossimo ciclo...\n";
     };
     if ($@) {

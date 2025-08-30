@@ -82,12 +82,22 @@ sub esegui_crawler_web {
     my $pm = Parallel::ForkManager->new($max_processes);
 
     while (my $row = $sth->fetchrow_hashref) {
+        # Stop se richiesto (generale o solo WEB)
+        %config = config_manager::get_all_settings();
+        last if ($config{CRAWLER_STOP} && $config{CRAWLER_STOP} == 1)
+             || ($config{CRAWLER_WEB_STOP} && $config{CRAWLER_WEB_STOP} == 1);
         $pm->start and next;
 
         eval {
             my $url = $row->{url};
             next unless $url;
 
+            my %cfg_now = config_manager::get_all_settings();
+            if (($cfg_now{CRAWLER_STOP} && $cfg_now{CRAWLER_STOP} == 1)
+             || ($cfg_now{CRAWLER_WEB_STOP} && $cfg_now{CRAWLER_WEB_STOP} == 1)) {
+                print "Stop richiesto. Interrompo child WEB.\n";
+                $pm->finish;
+            }
             my $res = $ua->get($url);
             if ($res->is_success) {
                 my $content = $res->decoded_content;

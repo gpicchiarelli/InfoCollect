@@ -10,5 +10,17 @@
     <form method="POST" action="/crawler/web">
       <button type="submit" class="btn btn-primary" aria-label="Avvia il crawler per Web">Avvia Crawler Web</button>
     </form>
+    <form method="POST" action="/crawler/stop">
+      <button type="submit" class="btn" aria-label="Ferma tutti i crawler">Ferma Tutti</button>
+    </form>
+    <form method="POST" action="/crawler/rss/stop">
+      <button type="submit" class="btn" aria-label="Ferma crawler RSS">Ferma RSS</button>
+    </form>
+    <form method="POST" action="/crawler/web/stop">
+      <button type="submit" class="btn" aria-label="Ferma crawler Web">Ferma Web</button>
+    </form>
+    <form method="POST" action="/crawler/resume">
+      <button type="submit" class="btn" aria-label="Riattiva crawler">Riattiva</button>
+    </form>
   </div>
 </section>
