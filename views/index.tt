@@ -1,0 +1,26 @@
+[%
+  SET title = 'InfoCollect (Dancer2)';
+%]
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <title>[% title %]</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <h1>InfoCollect - Impostazioni</h1>
+    <form method="post" action="/update">
+      <input type="text" name="key" placeholder="Chiave" required />
+      <input type="text" name="value" placeholder="Valore" required />
+      <button type="submit">Salva</button>
+    </form>
+    <h2>Valori correnti</h2>
+    <ul>
+      [% FOREACH k IN settings.keys.sort %]
+        <li><strong>[% k %]</strong> = [% settings.${k} %]</li>
+      [% END %]
+    </ul>
+  </body>
+ </html>
+
