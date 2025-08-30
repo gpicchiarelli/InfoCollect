@@ -1,0 +1,11 @@
+% layout 'default';
+<h1 class="page-title">Stato Database</h1>
+<section class="card">
+  <ul>
+    <li><strong>Percorso</strong> = <%= $dbstatus->{path} || '(sconosciuto)' %></li>
+    <li><strong>Scrivibile</strong> = <%= defined $dbstatus->{writable} ? ($dbstatus->{writable} ? 'sì' : 'no') : 'n/d' %></li>
+    <li><strong>journal_mode</strong> = <%= $dbstatus->{journal_mode} // 'n/d' %></li>
+    <li><strong>synchronous</strong> = <%= $dbstatus->{synchronous} // 'n/d' %></li>
+    <li><strong>busy_timeout</strong> = <%= $dbstatus->{busy_timeout} // 0 %> ms</li>
+  </ul>
+</section>

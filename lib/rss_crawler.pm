@@ -50,8 +50,7 @@ sub esegui_crawler_rss {
     my $max_processes = $config{MAX_PROCESSES};
 
     # Connessione al database
-    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, sqlite_unicode => 1, AutoCommit => 1 })
-        or die "Errore di connessione al database: $DBI::errstr";
+    my $dbh = db::connect_db();
 
     # Recupera tutti i feed RSS dal database
     my $sth = $dbh->prepare("SELECT id, url FROM rss_feeds");

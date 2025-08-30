@@ -6,12 +6,34 @@ use warnings;
 use DBI;
 use File::Spec;
 use File::Basename qw(dirname);
+use File::Path qw(make_path);
+use File::Copy qw(copy);
 
 sub createDB {
-    # Fissa il percorso del DB alla root del progetto (una cartella sopra lib/)
-    my $lib_dir = dirname(__FILE__);
+    # Percorso DB configurabile via ENV, altrimenti usa ./var/infocollect.db a partire dalla root progetto
+    my $lib_dir  = dirname(__FILE__);
     my $root_dir = File::Spec->catdir($lib_dir, '..');
-    my $db_file = File::Spec->catfile($root_dir, "infocollect.db");
+    my $default_dir = File::Spec->catdir($root_dir, 'var');
+    my $db_file = $ENV{INFOCOLLECT_DB_PATH} // File::Spec->catfile($default_dir, 'infocollect.db');
+
+    my $db_dir = dirname($db_file);
+    if (!-d $db_dir) {
+        make_path($db_dir) or die "Impossibile creare la directory DB '$db_dir': $!\n";
+    }
+
+    # Migrazione da posizioni legacy se il DB non esiste ancora
+    if (!-e $db_file) {
+        my @legacy = (
+            File::Spec->catfile($root_dir, 'infocollect.db'),
+            File::Spec->catfile($root_dir, 'InfoCollect', 'infocollect.db'),
+        );
+        for my $old (@legacy) {
+            next unless -e $old;
+            print "Migrazione DB legacy da '$old' a '$db_file'...\n";
+            copy($old, $db_file) or die "Copia DB da '$old' a '$db_file' fallita: $!\n";
+            last;
+        }
+    }
 
     if (-e $db_file) {
         print "Il database '$db_file' esiste già. Nessuna modifica effettuata.\n";

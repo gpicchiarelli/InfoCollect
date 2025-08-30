@@ -55,9 +55,7 @@ sub esegui_crawler_web {
     my $max_processes = $config{MAX_PROCESSES} // 4;  # Valore predefinito
     my $timeout = $config{CRAWLER_TIMEOUT} // 10;    # Valore predefinito
 
-    my $dbh = eval {
-        DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, sqlite_unicode => 1, AutoCommit => 1 });
-    };
+    my $dbh = eval { db::connect_db() };
     if ($@) {
         die "Errore di connessione al database: $@";
     }

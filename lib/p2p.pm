@@ -194,7 +194,7 @@ sub start_tcp_server {
 # Funzione per registrare latenza e host nel database
 sub log_latency {
     my ($host, $latency_ms) = @_;
-    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, AutoCommit => 1 });
+    my $dbh = db::connect_db()
     my $sth = $dbh->prepare(q{
         INSERT INTO latency_monitor (host, latency_ms)
         VALUES (?, ?)
@@ -202,7 +202,6 @@ sub log_latency {
     });
     $sth->execute($host, $latency_ms);
     $sth->finish();
-    $dbh->disconnect();
 }
 
 # Funzione per verificare l'identità del peer
@@ -238,7 +237,7 @@ sub get_machine_id {
 # Funzione per aggiungere una richiesta di peer
 sub add_peer_request {
     my ($peer_id, $peer_public_key) = @_;
-    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, AutoCommit => 1 });
+    my $dbh = db::connect_db()
     my $sth = $dbh->prepare(q{
         INSERT INTO peer_requests (peer_id, public_key)
         VALUES (?, ?)
@@ -246,14 +245,13 @@ sub add_peer_request {
     });
     $sth->execute($peer_id, $peer_public_key);
     $sth->finish();
-    $dbh->disconnect();
     print "Richiesta di peer aggiunta: $peer_id\n";
 }
 
 # Funzione per accettare un peer
 sub accept_peer {
     my ($peer_id) = @_;
-    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, AutoCommit => 1 });
+    my $dbh = db::connect_db()
     my $sth = $dbh->prepare(q{
         INSERT INTO accepted_peers (peer_id, public_key)
         SELECT peer_id, public_key FROM peer_requests WHERE peer_id = ?
@@ -267,37 +265,34 @@ sub accept_peer {
     } else {
         print "Peer non trovato nella lista delle richieste: $peer_id\n";
     }
-    $dbh->disconnect();
 }
 
 # Funzione per rifiutare un peer
 sub reject_peer {
     my ($peer_id) = @_;
-    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, AutoCommit => 1 });
+    my $dbh = db::connect_db()
     my $rows = $dbh->do("DELETE FROM peer_requests WHERE peer_id = ?", undef, $peer_id);
     if ($rows > 0) {
         print "Peer rifiutato: $peer_id\n";
     } else {
         print "Peer non trovato nella lista delle richieste: $peer_id\n";
     }
-    $dbh->disconnect();
 }
 
 # Funzione per verificare se un peer è accettato
 sub is_peer_accepted {
     my ($peer_id) = @_;
-    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, AutoCommit => 1 });
+    my $dbh = db::connect_db()
     my $sth = $dbh->prepare("SELECT peer_id FROM accepted_peers WHERE peer_id = ?");
     $sth->execute($peer_id);
     my $row = $sth->fetchrow_hashref();
     $sth->finish();
-    $dbh->disconnect();
     return defined $row;
 }
 
 # Funzione per ottenere la lista dei peer accettati
 sub get_accepted_peers {
-    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, AutoCommit => 1 });
+    my $dbh = db::connect_db()
     my $sth = $dbh->prepare("SELECT peer_id FROM accepted_peers");
     $sth->execute();
     my @peers;
@@ -305,13 +300,12 @@ sub get_accepted_peers {
         push @peers, $row->{peer_id};
     }
     $sth->finish();
-    $dbh->disconnect();
     return \@peers;
 }
 
 # Funzione per ottenere la lista delle richieste di peer
 sub get_peer_requests {
-    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, AutoCommit => 1 });
+    my $dbh = db::connect_db()
     my $sth = $dbh->prepare("SELECT peer_id FROM peer_requests");
     $sth->execute();
     my @requests;
@@ -319,7 +313,6 @@ sub get_peer_requests {
         push @requests, $row->{peer_id};
     }
     $sth->finish();
-    $dbh->disconnect();
     return \@requests;
 }
 

@@ -6,7 +6,7 @@ use DBI;
 use db;  # Importiamo il modulo db per la connessione al database
 use IO::Socket::INET;  # Importiamo il modulo IO::Socket::INET per la connessione di rete
 use Exporter 'import'; # Importa Exporter per esportare funzioni
-our @EXPORT_OK = qw(get_all_settings get_setting add_setting delete_setting setting_exists sync_settings apply_delta); # Esporta le funzioni
+our @EXPORT_OK = qw(get_all_settings get_setting add_setting delete_setting setting_exists sync_settings apply_delta get_defaults); # Esporta le funzioni
 
 
 # Funzione per aggiungere una nuova impostazione
@@ -59,6 +59,7 @@ sub get_all_settings {
         UDP_DISCOVERY_INTERVAL_SEC  => 5,  # Intervallo per il discovery UDP
         TCP_SYNC_PORT               => 5001,  # Porta per la sincronizzazione TCP
         UDP_DISCOVERY_PORT          => 5000,  # Porta per il discovery UDP
+        SSL_NO_VERIFY               => 0,
     );
 
     my $dbh = db::connect_db();
@@ -76,6 +77,22 @@ sub get_all_settings {
     $sth->finish();
     # $dbh->disconnect();  # Rimosso
 
+    return %defaults;
+}
+
+
+# Restituisce solo i default (senza merge con DB)
+sub get_defaults {
+    my %defaults = (
+        RSS_INTERVALLO_MINUTI       => 15,
+        WEB_INTERVALLO_MINUTI       => 15,
+        CRAWLER_TIMEOUT             => 10,
+        MAX_PROCESSES               => 5,
+        UDP_DISCOVERY_INTERVAL_SEC  => 5,
+        TCP_SYNC_PORT               => 5001,
+        UDP_DISCOVERY_PORT          => 5000,
+        SSL_NO_VERIFY               => 0,
+    );
     return %defaults;
 }
 

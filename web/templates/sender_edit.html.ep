@@ -1,0 +1,50 @@
+% layout 'default';
+% my $s = stash('sender');
+% my $connectors = stash('connectors');
+<h1 class="page-title">Modifica Mittente</h1>
+<section class="card">
+  <form method="POST" action="/senders/<%= $s->{id} %>/update" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <label style="grid-column:1/-1; color:var(--muted);">Nome</label>
+    <input type="text" name="name" value="<%= $s->{name} %>" required style="grid-column:1/-1;">
+    <label style="grid-column:1/-1; color:var(--muted);">Tipo</label>
+    <select name="type" id="editType" required style="grid-column:1/-1;">
+      % for my $c (@$connectors) {
+        <option value="<%= $c->{type} %>" <%= $c->{type} eq $s->{type} ? 'selected' : '' %>><%= $c->{type} %></option>
+      % }
+    </select>
+    <label style="grid-column:1/-1; color:var(--muted);">Attivo</label>
+    <label style="grid-column:1/-1; color:var(--muted);"><input type="checkbox" name="active" value="1" <%= $s->{active} ? 'checked' : '' %>> Attivo</label>
+    <div id="editGuided" style="grid-column:1/-1;"></div>
+    <div class="actions" style="grid-column:1/-1;">
+      <button type="submit" class="btn btn-primary">Salva</button>
+      <a href="/senders" class="btn">Annulla</a>
+    </div>
+  </form>
+</section>
+<script>
+(function(){
+  const specs = <%== Mojo::JSON::encode_json($connectors) %>;
+  const cfg = (function(){ try{return JSON.parse(<%== Mojo::JSON::to_json($s->{config}||'{}') %>);}catch(e){return {};}})();
+  const typeSel = document.getElementById('editType');
+  const box = document.getElementById('editGuided');
+  function fieldsFor(t){ return (specs.find(x=>x.type===t)||{}).required||[] }
+  function render(){
+    const t = typeSel.value; const req=fieldsFor(t); box.innerHTML='';
+    const frag = document.createDocumentFragment();
+    req.forEach(k=>{
+      const label = document.createElement('label'); label.textContent=k; label.style.color='var(--muted)'; label.style.gridColumn='1/-1';
+      const input = document.createElement('input'); input.type='text'; input.name='field_'+k; input.value = (cfg&&cfg[k])||'';
+      frag.appendChild(label); frag.appendChild(input);
+    });
+    if (t==='Mail'){
+      [['smtp_user','text'],['smtp_pass','password'],['smtp_timeout','number']].forEach(([k,tp])=>{ const l=document.createElement('label'); l.textContent=k; l.style.color='var(--muted)'; l.style.gridColumn='1/-1'; const i=document.createElement('input'); i.type=tp; i.name='field_'+k; i.value=(cfg&&cfg[k])||''; frag.appendChild(l); frag.appendChild(i); });
+      const l=document.createElement('label'); l.textContent='smtp_ssl'; l.style.color='var(--muted)'; l.style.gridColumn='1/-1'; const i=document.createElement('input'); i.type='checkbox'; i.name='field_smtp_ssl'; i.checked=!!(cfg&&cfg.smtp_ssl); frag.appendChild(l); frag.appendChild(i);
+    }
+    if (t==='Telegram'){
+      const l=document.createElement('label'); l.textContent='api_url (opz.)'; l.style.color='var(--muted)'; l.style.gridColumn='1/-1'; const i=document.createElement('input'); i.type='url'; i.name='field_api_url'; i.value=(cfg&&cfg.api_url)||'https://api.telegram.org'; frag.appendChild(l); frag.appendChild(i);
+    }
+    box.appendChild(frag);
+  }
+  typeSel.addEventListener('change', render); render();
+})();
+</script>

@@ -43,6 +43,15 @@ get '/version' => sub {
     $c->render(json => { app => 'InfoCollect', version => $ver, perl => $perl, mojolicious => $mojo });
 };
 
+# DB status
+get '/db/status' => sub {
+    my $c = shift;
+    my $st = db::get_db_status();
+    $c->stash(dbstatus => $st);
+    $c->render(template => 'db_status');
+};
+
+
 =pod
 
 =head1 NAME
@@ -69,6 +78,8 @@ Cross-reference: docs/REFERENCE.md (riferimenti generali), lib/db.pm, lib/p2p.pm
 # Pagina principale
 get '/' => sub {
     my $c = shift;
+    my %effective = config_manager::get_all_settings();
+    $c->stash(effective => \%effective);
     $c->render(template => 'index');
 };
 
@@ -161,8 +172,9 @@ post '/web_urls/:id/delete' => sub {
 # Gestione impostazioni
 get '/settings' => sub {
     my $c = shift;
-    my $settings = db::get_all_settings();
-    $c->stash(settings => $settings);
+    my %effective = config_manager::get_all_settings();
+    my $raw = db::get_all_settings();
+    $c->stash(effective => \%effective, settings => $raw);
     $c->render(template => 'settings');
 };
 
@@ -274,6 +286,39 @@ get '/senders' => sub {
     $c->stash(senders => $senders, connectors => $connectors, templates => \%templates);
     $c->render(template => 'senders');
 };
+
+get '/senders/:id/edit' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    my $s = db::get_sender_by_id($id) or return $c->reply->not_found;
+    my $connectors = notification::supported_connectors();
+    $c->stash(sender => $s, connectors => $connectors);
+    $c->render(template => 'sender_edit');
+};
+
+post '/senders/:id/update' => sub {
+    my $c = shift;
+    my $id   = $c->param('id');
+    my $name = $c->param('name');
+    my $type = $c->param('type');
+    my $active = $c->param('active') ? 1 : 0;
+    my %cfg;
+    my ($spec) = grep { $_->{type} eq $type } @{ notification::supported_connectors() };
+    if ($spec) {
+        for my $k (@{ $spec->{required} }) { my $v = $c->param("field_$k"); $cfg{$k} = $v if defined $v && $v ne '' }
+        for my $p ($c->param) { next unless $p =~ /^field_(.+)$/; my $k=$1; $cfg{$k} = $c->param($p) if !exists $cfg{$k} && defined $c->param($p) && $c->param($p) ne '' }
+    }
+    my $config = JSON::encode_json(\%cfg);
+    my ($ok,$err) = notification::validate_config($type, $config);
+    if (!$ok) {
+        $c->flash(notice => "Config non valida: $err");
+        return $c->redirect_to("/senders/$id/edit");
+    }
+    db::update_sender($id, $name, $type, $config, $active);
+    $c->flash(notice => 'Mittente aggiornato');
+    $c->redirect_to('/senders');
+};
+
 
 post '/senders' => sub {
     my $c = shift;

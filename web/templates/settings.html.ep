@@ -8,8 +8,16 @@
       <button type="submit" class="btn btn-primary">Salva</button>
   </form>
 </section>
+<section class="card" aria-labelledby="list-effective">
+  <h2 id="list-effective" class="section-title">Impostazioni Effettive (merge defaults + DB)</h2>
+  <ul>
+      % for my $k (sort keys %$effective) {
+          <li><strong><%= $k %></strong> = <%= $effective->{$k} %></li>
+      % }
+  </ul>
+</section>
 <section class="card" aria-labelledby="list-config">
-  <h2 id="list-config" class="section-title">Tutte le impostazioni</h2>
+  <h2 id="list-config" class="section-title">Override in DB</h2>
   <ul>
       % for my $k (sort keys %$settings) {
           <li><strong><%= $k %></strong> = <%= $settings->{$k} %></li>

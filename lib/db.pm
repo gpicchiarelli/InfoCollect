@@ -175,6 +175,7 @@ my $db_file = 'infocollect.db';
 
 # Variabile globale per un unico handler
 my $dbh_global;
+my $pragmas_applied = 0;
 
 # Funzione per connettersi al database
 sub connect_db {
@@ -186,6 +187,13 @@ sub connect_db {
     if ($@ || !$dbh) {
         die "Errore durante l'inizializzazione del database: $@";
     }
+    # Applica PRAGMA per concorrenza e stabilità (una sola volta)
+    eval {
+        $dbh->{sqlite_busy_timeout} = 5000; # 5s
+        $dbh->do('PRAGMA journal_mode=WAL');
+        $dbh->do('PRAGMA synchronous=NORMAL');
+        $pragmas_applied = 1;
+    };
     $dbh_global = $dbh;
     return $dbh_global;
 }
@@ -598,6 +606,19 @@ sub get_all_senders {
 }
 
 # Funzione per aggiornare un mittente
+
+
+# Ritorna un mittente per id (decifrando la config)
+sub get_sender_by_id {
+    my ($id) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare("SELECT id, name, type, config, active FROM senders WHERE id = ?");
+    $sth->execute($id);
+    my $row = $sth->fetchrow_hashref;
+    $sth->finish();
+    if ($row && $row->{config}) { $row->{config} = decrypt_data($row->{config}); }
+    return $row;
+}
 sub update_sender {
     my ($id, $name, $type, $config, $active) = @_;
     my $encrypted_config = encrypt_data($config);
@@ -691,6 +712,33 @@ sub get_template_by_name {
     my $row = $sth->fetchrow_hashref;
     $sth->finish();
     return $row ? $row->{content} : undef;
+}
+
+# Stato del DB: path, permessi, pragmi
+sub get_db_status {
+    my $dbh = connect_db();
+    my $rows = $dbh->selectall_arrayref('PRAGMA database_list', { Slice => {} });
+    my ($main) = grep { ($_->{name} // '') eq 'main' } @$rows;
+    my $path = $main ? ($main->{file} // '') : '';
+    my ($journal) = eval { $dbh->selectrow_array('PRAGMA journal_mode') };
+    my ($sync)    = eval { $dbh->selectrow_array('PRAGMA synchronous') };
+    my $busy      = $dbh->{sqlite_busy_timeout} // 0;
+    my $writable  = undef;
+    if ($path && -e $path) {
+        $writable = -w $path ? 1 : 0;
+    } elsif ($path) {
+        # verifica dir
+        require File::Basename; require File::Spec;
+        my $dir = File::Basename::dirname($path);
+        $writable = -w $dir ? 1 : 0;
+    }
+    return {
+        path          => $path,
+        writable      => $writable,
+        journal_mode  => $journal,
+        synchronous   => $sync,
+        busy_timeout  => $busy,
+    };
 }
 
 # Placeholder: rigenerazione procedure/batch (compat con CLI)

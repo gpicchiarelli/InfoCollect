@@ -1,6 +1,19 @@
 % layout 'default';
 <h1 class="page-title">Dashboard</h1>
 
+<section class="card" aria-labelledby="crawler-status-title">
+  <h2 id="crawler-status-title" class="section-title">Stato Crawler</h2>
+  <div>
+    % my $all_stop = $effective->{CRAWLER_STOP} && $effective->{CRAWLER_STOP} == 1;
+    % my $rss_stop = $effective->{CRAWLER_RSS_STOP} && $effective->{CRAWLER_RSS_STOP} == 1;
+    % my $web_stop = $effective->{CRAWLER_WEB_STOP} && $effective->{CRAWLER_WEB_STOP} == 1;
+    <span class="badge" style="padding:6px 10px; border-radius:12px; background: <%= $all_stop ? '#ff3b30' : '#34c759' %>; color:#fff;">Tutti: <%= $all_stop ? 'STOP' : 'ATTIVO' %></span>
+    <span class="badge" style="padding:6px 10px; border-radius:12px; background: <%= $rss_stop ? '#ff3b30' : '#34c759' %>; color:#fff; margin-left:8px;">RSS: <%= $rss_stop ? 'STOP' : 'ATTIVO' %></span>
+    <span class="badge" style="padding:6px 10px; border-radius:12px; background: <%= $web_stop ? '#ff3b30' : '#34c759' %>; color:#fff; margin-left:8px;">Web: <%= $web_stop ? 'STOP' : 'ATTIVO' %></span>
+  </div>
+</section>
+
+
 <section class="card" aria-labelledby="crawler-actions-title">
   <h2 id="crawler-actions-title" class="section-title">Azioni Crawler</h2>
   <div class="actions">
