@@ -3,6 +3,7 @@ package rss;
 use strict;
 use warnings;
 use XML::RSS;
+use JSON qw(decode_json);
 
 sub send_notification {
     my ($channel, $message) = @_;

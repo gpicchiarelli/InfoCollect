@@ -9,6 +9,7 @@ use rss;
 use teams;
 use whatsapp;
 use Text::Template;
+use db;
 
 sub send_notification {
     my ($channel, $message, $template_name, $template_data) = @_;

@@ -3,6 +3,7 @@ package teams;
 use strict;
 use warnings;
 use LWP::UserAgent;
+use JSON qw(decode_json);
 
 sub send_notification {
     my ($channel, $message) = @_;

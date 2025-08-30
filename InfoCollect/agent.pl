@@ -56,7 +56,7 @@ my $tcp_port = $settings{TCP_SYNC_PORT} || 5001;
 
 # Avvia il discovery UDP e il server TCP utilizzando il modulo P2P
 p2p::start_udp_discovery($udp_port, $tcp_port);
-p2p::start_tcp_server($tcp_port, \&config_manager);
+p2p::start_tcp_server($tcp_port, 'config_manager');
 
 while (1) {
     eval {

@@ -29,6 +29,14 @@ sub riassumi_contenuto {
     my ($content) = @_;
     die "Errore: contenuto vuoto o non definito" unless $content;
 
+    # Fallback locale se il token non è configurato
+    if (!$api_token || $api_token eq 'YOUR_HUGGINGFACE_API_TOKEN') {
+        my $clean = $content;
+        $clean =~ s/\s+/ /g;
+        $clean = substr($clean, 0, 320);
+        return length($clean) ? $clean . '…' : 'Riassunto non disponibile';
+    }
+
     my $ua = LWP::UserAgent->new;
     my $response = $ua->post(
         $api_url,

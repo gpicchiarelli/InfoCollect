@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS pages (
     title TEXT,
     content TEXT,
     metadata TEXT,
+    summary TEXT,
     visited_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -105,3 +106,16 @@ CREATE TABLE IF NOT EXISTS latency_monitor (
 );
 
 CREATE INDEX IF NOT EXISTS idx_latency_monitor_host ON latency_monitor (host);
+
+-- Tabelle per gestione peer P2P
+CREATE TABLE IF NOT EXISTS peer_requests (
+    peer_id TEXT PRIMARY KEY,
+    public_key TEXT NOT NULL,
+    requested_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS accepted_peers (
+    peer_id TEXT PRIMARY KEY,
+    public_key TEXT NOT NULL,
+    accepted_at TEXT DEFAULT CURRENT_TIMESTAMP
+);

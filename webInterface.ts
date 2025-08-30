@@ -1,5 +1,5 @@
 import express from 'express';
-import { NetworkMonitor } from './networkMonitor';
+import { NetworkMonitor, ClientState } from './networkMonitor';
 
 const app = express();
 const monitor = new NetworkMonitor();
@@ -19,4 +19,4 @@ app.listen(3000, () => {
 // Esempio di aggiornamento dati
 monitor.updateHostData('host1', 120);
 monitor.updateHostData('host2', 85);
-monitor.setClientState('Syncing');
+monitor.setClientState(ClientState.SYNCING);

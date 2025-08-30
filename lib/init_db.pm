@@ -57,6 +57,7 @@ sub createDB {
             title TEXT,
             content TEXT,
             metadata TEXT,
+            summary TEXT,
             visited_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     });
@@ -155,6 +156,23 @@ sub createDB {
         )
     });
     $dbh->do(q{CREATE INDEX IF NOT EXISTS idx_latency_monitor_host ON latency_monitor (host)});
+
+    # Tabelle per gestione peer P2P
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS peer_requests (
+            peer_id TEXT PRIMARY KEY,
+            public_key TEXT NOT NULL,
+            requested_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS accepted_peers (
+            peer_id TEXT PRIMARY KEY,
+            public_key TEXT NOT NULL,
+            accepted_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    });
 
     print "Database inizializzato correttamente.\n";
 

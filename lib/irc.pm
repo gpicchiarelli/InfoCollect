@@ -3,6 +3,7 @@ package irc;
 use strict;
 use warnings;
 use Net::IRC;
+use JSON qw(decode_json);
 
 sub send_notification {
     my ($channel, $message) = @_;

@@ -5,6 +5,7 @@ use warnings;
 use Email::Sender::Simple qw(sendmail);
 use Email::Simple;
 use Email::Simple::Creator;
+use JSON qw(decode_json);
 
 sub send_notification {
     my ($channel, $message) = @_;

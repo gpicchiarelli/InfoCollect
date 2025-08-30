@@ -10,6 +10,7 @@ use threads;
 use DBI;
 use Time::HiRes qw(gettimeofday tv_interval);
 use db;
+use config_manager;
 
 # Variabili globali
 my $rsa = Crypt::PK::RSA->new();
@@ -38,7 +39,7 @@ sub start_udp_discovery {
 
 # Funzione per avviare il server TCP
 sub start_tcp_server {
-    my ($tcp_port, $config_manager) = @_;
+    my ($tcp_port, $config_module) = @_;
     threads->create(sub {
         my $server = IO::Socket::INET->new(
             LocalPort => $tcp_port,
@@ -59,8 +60,8 @@ sub start_tcp_server {
                 # Verifica dell'identità del peer
                 if (verify_peer($peer_id, $peer_public_key)) {
                     if (is_peer_accepted($peer_id)) {
-                        # Invia solo le impostazioni locali crittografate
-                        my %local_settings = $config_manager->get_all_settings();
+                        # Invia solo le impostazioni locali (cifratura applicata)
+                        my %local_settings = $config_module->get_all_settings();
                         my $settings = join("\n", map { "$_=$local_settings{$_}" } keys %local_settings);
                         my $encrypted_settings = encrypt_with_public_key($settings, $peer_public_key);
                         print $client "SYNC_RESPONSE\n$encrypted_settings\n";
@@ -71,7 +72,7 @@ sub start_tcp_server {
             } elsif ($data =~ /^SYNC_RESPONSE\n(.+)/s) {
                 my $encrypted_settings = $1;
                 my $received_settings = decrypt_with_private_key($encrypted_settings);
-                $config_manager->apply_delta($received_settings);
+                $config_module->apply_delta($received_settings);
             } elsif ($data =~ /^PEER_REQUEST:(.+):(.+)/) {
                 my ($peer_id, $peer_public_key) = ($1, $2);
                 add_peer_request($peer_id, $peer_public_key);
@@ -112,7 +113,6 @@ sub verify_peer {
 # Funzione per crittografare i dati con la chiave pubblica
 sub encrypt_with_public_key {
     my ($data, $public_key) = @_;
-    my $encryption_key = config_manager::get_setting("INFOCOLLECT_ENCRYPTION_KEY");
     my $encrypted_data = db::encrypt_data($data);
     return $encrypted_data;
 }
@@ -120,7 +120,6 @@ sub encrypt_with_public_key {
 # Funzione per decrittografare i dati con la chiave privata
 sub decrypt_with_private_key {
     my ($data) = @_;
-    my $encryption_key = config_manager::get_setting("INFOCOLLECT_ENCRYPTION_KEY");
     my $decrypted_data = db::decrypt_data($data);
     return $decrypted_data;
 }
@@ -221,6 +220,14 @@ sub get_peer_requests {
     $sth->finish();
     $dbh->disconnect();
     return \@requests;
+}
+
+# Funzione per sincronizzazione semplice usata dal daemon
+sub sync_data {
+    my ($client) = @_;
+    my %local_settings = config_manager::get_all_settings();
+    my $settings = join("\n", map { "$_=$local_settings{$_}" } keys %local_settings);
+    print $client "SYNC_RESPONSE\n$settings\n";
 }
 
 # Funzione per inviare un task a un peer

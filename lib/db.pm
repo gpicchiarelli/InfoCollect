@@ -8,6 +8,7 @@ use Time::HiRes qw(gettimeofday);
 use Crypt::AuthEnc::GCM;
 use Digest::SHA qw(sha256);
 use init_db;
+use config_manager; # accesso alle impostazioni per la chiave di cifratura
 
 # Nome del database SQLite
 my $db_file = 'infocollect.db';
@@ -43,10 +44,10 @@ sub encrypt_data {
     my $key = sha256($encryption_key); # Chiave a 256 bit
     my $iv = substr(sha256(time . $$), 0, 12); # IV unico per ogni crittografia
     my $cipher = Crypt::AuthEnc::GCM->new('AES', $key, $iv);
-    $cipher->aad(""); # Nessun dato aggiuntivo
+    # Nessun AAD
     my $ciphertext = $cipher->encrypt_add($data);
-    $ciphertext .= $cipher->encrypt_done();
-    return unpack("H*", $iv . $ciphertext . $cipher->tag());
+    my $tag = $cipher->encrypt_done();
+    return unpack("H*", $iv . $ciphertext . $tag);
 }
 
 # Funzione per decrittografare i dati
@@ -59,10 +60,10 @@ sub decrypt_data {
     my $tag = substr($binary_data, -16); # Estrai tag
     my $ciphertext = substr($binary_data, 12, -16); # Estrai testo cifrato
     my $cipher = Crypt::AuthEnc::GCM->new('AES', $key, $iv);
-    $cipher->aad(""); # Nessun dato aggiuntivo
-    $cipher->decrypt_add($ciphertext);
+    # Nessun AAD
+    my $plaintext = $cipher->decrypt_add($ciphertext);
     die "Errore nella decrittografia: tag non valido\n" unless $cipher->decrypt_done($tag);
-    return $cipher->decrypt_add($ciphertext);
+    return $plaintext;
 }
 
 # Funzione per aggiungere un feed RSS
@@ -204,6 +205,12 @@ sub add_or_update_setting {
     my ($key, $value) = @_;
     my $dbh = connect_db();
     $dbh->do("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?", undef, $key, $value, $value);
+}
+
+# Alias compatibile per set_setting (usato in alcune interfacce)
+sub set_setting {
+    my ($key, $value) = @_;
+    return add_or_update_setting($key, $value);
 }
 
 # Funzione per ottenere tutte le impostazioni
