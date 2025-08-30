@@ -17,6 +17,12 @@ Connettori supportati (built‑in)
   - Richiesti: `webhook_url`
 - WhatsApp: invio via API
   - Richiesti: `api_url`, `phone`
+- Slack: Incoming Webhook
+  - Richiesti: `webhook_url`
+- Telegram: Bot API (sendMessage)
+  - Richiesti: `bot_token`, `chat_id` (opzionale `api_url`)
+- Discord: Webhook
+  - Richiesti: `webhook_url`
 
 Pannelli Web
 ------------
@@ -44,3 +50,4 @@ Sicurezza
 Estensioni
 ----------
 - Per aggiungere un connettore, creare un modulo in `lib/` con una funzione `send_notification($channel, $message)` e registrarlo in `lib/notification.pm::supported_connectors`.
+ - I form in `/senders` offrono un pulsante "Riempi config" che precompila un JSON di esempio corretto per il tipo selezionato.

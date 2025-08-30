@@ -8,6 +8,9 @@ use mail;
 use rss;
 use teams;
 use whatsapp;
+use slack;
+use telegram;
+use discord;
 use Text::Template;
 use db;
 use JSON qw(decode_json encode_json);
@@ -36,6 +39,12 @@ sub send_notification {
         teams::send_notification($channel, $message);
     } elsif ($channel->{type} eq 'WhatsApp') {
         whatsapp::send_notification($channel, $message);
+    } elsif ($channel->{type} eq 'Slack') {
+        slack::send_notification($channel, $message);
+    } elsif ($channel->{type} eq 'Telegram') {
+        telegram::send_notification($channel, $message);
+    } elsif ($channel->{type} eq 'Discord') {
+        discord::send_notification($channel, $message);
     } else {
         warn "Tipo di canale non supportato: $channel->{type}\n";
     }
@@ -48,6 +57,9 @@ sub supported_connectors {
         { type => 'RSS',      required => [qw(title link description item_title item_link output_file)], desc => 'Scrive feed RSS su file' },
         { type => 'Teams',    required => [qw(webhook_url)], desc => 'Microsoft Teams webhook' },
         { type => 'WhatsApp', required => [qw(api_url phone)], desc => 'Invio messaggi via API WhatsApp' },
+        { type => 'Slack',    required => [qw(webhook_url)], desc => 'Slack Incoming Webhook' },
+        { type => 'Telegram', required => [qw(bot_token chat_id)], desc => 'Telegram Bot API (sendMessage)' },
+        { type => 'Discord',  required => [qw(webhook_url)], desc => 'Discord Webhook' },
     ];
 }
 
