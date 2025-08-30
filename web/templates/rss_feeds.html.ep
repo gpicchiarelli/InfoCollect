@@ -5,7 +5,7 @@
 % }
 <section class="card" aria-labelledby="add-feed">
   <h2 id="add-feed" class="section-title">Aggiungi Feed</h2>
-  <form method="POST" action="/rss_feeds">
+  <form method="POST" action="/rss_feeds" class="form-grid">
       <input type="text" name="title" placeholder="Titolo" required>
       <input type="url" name="url" placeholder="URL" required>
       <button type="submit" class="btn btn-primary">Aggiungi</button>
@@ -16,11 +16,19 @@
   <h2 id="list-feed" class="section-title">Elenco Feed</h2>
   <ul>
       % for my $feed (@$feeds) {
-          <li><strong><%= $feed->{title} %></strong> — <a href="<%= $feed->{url} %>" target="_blank"><%= $feed->{url} %></a>
-            <form method="POST" action="/rss_feeds/<%= $feed->{id} %>/delete" class="inline ml-10">
-              <button type="submit" class="btn">Elimina</button>
-            </form>
-          </li>
+        <li>
+          <div class="row">
+            <div class="row-main">
+              <strong><%= $feed->{title} %></strong> — 
+              <a href="<%= $feed->{url} %>" target="_blank"><%= $feed->{url} %></a>
+            </div>
+            <div class="row-actions">
+              <form method="POST" action="/rss_feeds/<%= $feed->{id} %>/delete">
+                <button type="submit" class="btn btn-sm">Elimina</button>
+              </form>
+            </div>
+          </div>
+        </li>
       % }
   </ul>
 </section>

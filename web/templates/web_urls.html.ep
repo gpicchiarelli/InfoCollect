@@ -2,10 +2,10 @@
 <h1 class="page-title">URL Web</h1>
 <section class="card" aria-labelledby="add-url">
   <h2 id="add-url" class="section-title">Aggiungi URL</h2>
-  <form method="POST" action="/web_urls">
+  <form method="POST" action="/web_urls" class="form-grid">
       <input type="url" name="url" placeholder="https://esempio.com" required>
       <button type="submit" class="btn btn-primary">Aggiungi</button>
-      <p class="hint" style="grid-column: 1/-1; color: var(--muted); margin: 0;">Gli URL attivi verranno visitati dal crawler.</p>
+      <p class="hint" style="grid-column: 1/-1;">Gli URL attivi verranno visitati dal crawler.</p>
   </form>
 </section>
 
@@ -13,15 +13,22 @@
   <h2 id="list-url" class="section-title">Elenco URL</h2>
   <ul>
     % for my $u (@$urls) {
-      <li><a href="<%= $u->{url} %>" target="_blank"><%= $u->{url} %>
-</a> — <%= $u->{attivo} ? 'attivo' : 'inattivo' %>
-        <form method="POST" action="/web_urls/<%= $u->{id} %>/toggle" class="inline ml-10">
-          <input type="hidden" name="status" value="<%= $u->{attivo} ? 0 : 1 %>">
-          <button type="submit" class="btn"><%= $u->{attivo} ? 'Disattiva' : 'Attiva' %></button>
-        </form>
-        <form method="POST" action="/web_urls/<%= $u->{id} %>/delete" class="inline ml-10">
-          <button type="submit" class="btn">Elimina</button>
-        </form>
+      <li>
+        <div class="row">
+          <div class="row-main">
+            <a href="<%= $u->{url} %>" target="_blank"><%= $u->{url} %></a>
+            — <span class="muted"><%= $u->{attivo} ? 'attivo' : 'inattivo' %></span>
+          </div>
+          <div class="row-actions">
+            <form method="POST" action="/web_urls/<%= $u->{id} %>/toggle">
+              <input type="hidden" name="status" value="<%= $u->{attivo} ? 0 : 1 %>">
+              <button type="submit" class="btn btn-sm"><%= $u->{attivo} ? 'Disattiva' : 'Attiva' %></button>
+            </form>
+            <form method="POST" action="/web_urls/<%= $u->{id} %>/delete">
+              <button type="submit" class="btn btn-sm">Elimina</button>
+            </form>
+          </div>
+        </div>
       </li>
     % }
   </ul>

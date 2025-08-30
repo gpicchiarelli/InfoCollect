@@ -4,14 +4,20 @@
   <ul>
     % for my $a (@$articles) {
       <li>
-        <strong><%= $a->{title} // '(senza titolo)' %></strong>
-        — <a href="<%= $a->{url} %>" target="_blank">link</a>
-        % if ($a->{published_at}) {
-          <small style="color:var(--muted);">(<%= $a->{published_at} %>)</small>
-        % }
-        <form method="POST" action="/articles/<%= $a->{id} %>/delete" class="inline ml-10">
-          <button type="submit" class="btn">Elimina</button>
-        </form>
+        <div class="row">
+          <div class="row-main">
+            <strong><%= $a->{title} // '(senza titolo)' %></strong>
+            — <a href="<%= $a->{url} %>" target="_blank">link</a>
+            % if ($a->{published_at}) {
+              <small class="muted">(<%= $a->{published_at} %>)</small>
+            % }
+          </div>
+          <div class="row-actions">
+            <form method="POST" action="/articles/<%= $a->{id} %>/delete">
+              <button type="submit" class="btn btn-sm">Elimina</button>
+            </form>
+          </div>
+        </div>
       </li>
     % }
   </ul>

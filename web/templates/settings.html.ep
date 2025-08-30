@@ -2,7 +2,7 @@
 <h1 class="page-title">Impostazioni</h1>
 <section class="card" aria-labelledby="set-config">
   <h2 id="set-config" class="section-title">Aggiungi/Aggiorna</h2>
-  <form method="POST" action="/settings">
+  <form method="POST" action="/settings" class="form-grid">
       <input type="text" name="key" placeholder="Chiave" required>
       <input type="text" name="value" placeholder="Valore" required>
       <button type="submit" class="btn btn-primary">Salva</button>

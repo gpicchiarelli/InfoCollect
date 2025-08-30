@@ -4,11 +4,17 @@
   <ul>
     % for my $p (@$pages) {
       <li>
-        <strong><%= $p->{title} // '(senza titolo)' %></strong>
-        — <a href="<%= $p->{url} %>" target="_blank">link</a>
-        <form method="POST" action="/pages/<%= $p->{id} %>/delete" style="display:inline-block; margin-left:10px;">
-          <button type="submit" class="btn">Elimina</button>
-        </form>
+        <div class="row">
+          <div class="row-main">
+            <strong><%= $p->{title} // '(senza titolo)' %></strong>
+            — <a href="<%= $p->{url} %>" target="_blank">link</a>
+          </div>
+          <div class="row-actions">
+            <form method="POST" action="/pages/<%= $p->{id} %>/delete">
+              <button type="submit" class="btn btn-sm">Elimina</button>
+            </form>
+          </div>
+        </div>
       </li>
     % }
   </ul>
