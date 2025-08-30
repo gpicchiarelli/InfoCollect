@@ -87,14 +87,15 @@ sub esegui_crawler_web {
         $ssl{SSL_verify_mode} = 0x00; # no verify
     }
     my $ua = LWP::UserAgent->new(timeout => $timeout, ssl_opts => \%ssl);
-    my $pm = Parallel::ForkManager->new($max_processes);
+    my $use_fork = ($max_processes && $max_processes > 1) ? 1 : 0;
+    my $pm = $use_fork ? Parallel::ForkManager->new($max_processes) : undef;
 
     while (my $row = $sth->fetchrow_hashref) {
         # Stop se richiesto (generale o solo WEB)
         %config = config_manager::get_all_settings();
         last if ($config{CRAWLER_STOP} && $config{CRAWLER_STOP} == 1)
              || ($config{CRAWLER_WEB_STOP} && $config{CRAWLER_WEB_STOP} == 1);
-        $pm->start and next;
+        if ($use_fork) { $pm->start and next; }
 
         eval {
             my $url = $row->{url};
@@ -138,10 +139,10 @@ sub esegui_crawler_web {
             eval { db::add_log('ERROR', $err) };
         }
 
-        $pm->finish;
+        if ($use_fork) { $pm->finish; }
     }
 
-    $pm->wait_all_children;
+    $pm->wait_all_children if $use_fork;
     $sth->finish();
     my $dt = sprintf('%.2f', time() - $t0);
     eval { db::add_log('INFO', "WEB: crawler completato in ${dt}s per $urls_count URL attivi") };

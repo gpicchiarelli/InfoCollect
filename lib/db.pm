@@ -190,8 +190,11 @@ sub connect_db {
         if ($same_pid && $alive) {
             return $dbh_global;
         }
-        # Handle non valido: prova a chiudere silenziosamente e ricrea
-        eval { $dbh_global->disconnect if $dbh_global }; # ignora errori
+        # Handle non valido: non disconnettere per evitare warning su statement attivi
+        eval {
+            $dbh_global->{InactiveDestroy}    = 1;
+            $dbh_global->{AutoInactiveDestroy} = 1;
+        } if $dbh_global;
         undef $dbh_global;
     }
 
@@ -203,6 +206,7 @@ sub connect_db {
     # Applica PRAGMA per concorrenza e stabilità
     eval {
         $dbh->{sqlite_busy_timeout} = 5000; # 5s
+        $dbh->{AutoInactiveDestroy} = 1;    # sicuro post-fork su macOS
         $dbh->do('PRAGMA journal_mode=WAL');
         $dbh->do('PRAGMA synchronous=NORMAL');
         $pragmas_applied = 1;

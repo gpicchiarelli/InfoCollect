@@ -79,14 +79,15 @@ sub esegui_crawler_rss {
     }
     my $ua = LWP::UserAgent->new(timeout => $timeout, ssl_opts => \%ssl);
     $ua->agent('InfoCollectRSS/1.0');
-    my $pm = Parallel::ForkManager->new($max_processes);
+    my $use_fork = ($max_processes && $max_processes > 1) ? 1 : 0;
+    my $pm = $use_fork ? Parallel::ForkManager->new($max_processes) : undef;
 
     while (my $feed = $sth->fetchrow_hashref) {
         # Stop se richiesto (generale o solo RSS)
         %config = config_manager::get_all_settings();
         last if ($config{CRAWLER_STOP} && $config{CRAWLER_STOP} == 1)
              || ($config{CRAWLER_RSS_STOP} && $config{CRAWLER_RSS_STOP} == 1);
-        $pm->start and next;
+        if ($use_fork) { $pm->start and next; }
 
         eval {
             print "Elaborazione del feed RSS: $feed->{url}\n";
@@ -191,10 +192,10 @@ sub esegui_crawler_rss {
             eval { db::add_log('ERROR', $err) };
         }
 
-        $pm->finish;
+        if ($use_fork) { $pm->finish; }
     }
 
-    $pm->wait_all_children;
+    $pm->wait_all_children if $use_fork;
 
     # Chiude il cursore (lascia la connessione del padre attiva)
     $sth->finish();
