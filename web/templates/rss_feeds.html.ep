@@ -1,5 +1,8 @@
 % layout 'default';
 <h1 class="page-title">Feed RSS</h1>
+% if (my $n = flash 'notice') {
+  <section class="card"><div class="alert alert-info"><%= $n %></div></section>
+% }
 <section class="card" aria-labelledby="add-feed">
   <h2 id="add-feed" class="section-title">Aggiungi Feed</h2>
   <form method="POST" action="/rss_feeds">
@@ -20,4 +23,14 @@
           </li>
       % }
   </ul>
+</section>
+
+<section class="card" aria-labelledby="opml-section">
+  <h2 id="opml-section" class="section-title">Importa/Esporta OPML</h2>
+  <form method="POST" action="/opml/import" enctype="multipart/form-data">
+    <input type="file" name="opml" accept=".opml,application/xml,text/xml" required style="grid-column:1/-1;">
+    <button type="submit" class="btn">Importa OPML</button>
+    <a href="/opml/export" class="btn">Esporta OPML</a>
+    <p class="muted" style="grid-column:1/-1; margin:0;">Importa file OPML compatibili (outline xmlUrl). L'esportazione scarica l'elenco attuale dei feed.</p>
+  </form>
 </section>

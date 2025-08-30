@@ -8,6 +8,8 @@ use web_crawler;
 use opml;
 use p2p;
 use Mojo::File qw(path);
+use File::Temp qw(tempfile);
+use XML::Simple;
 use JSON ();
 use FindBin;
 use config_manager;
@@ -184,6 +186,45 @@ post '/rss_feeds/:id/delete' => sub {
     eval { db::delete_rss_feed($id) };
     $c->flash(notice => $@ ? "Errore eliminazione feed: $@" : 'Feed eliminato');
     $c->redirect_to('/rss_feeds');
+};
+
+# Import OPML (upload via form)
+post '/opml/import' => sub {
+    my $c = shift;
+    my $upload = $c->req->upload('opml');
+    unless ($upload) {
+        $c->flash(notice => 'Nessun file OPML selezionato');
+        return $c->redirect_to('/rss_feeds');
+    }
+    my ($fh, $tmp) = tempfile(SUFFIX => '.opml');
+    close $fh;
+    $upload->move_to($tmp);
+    my ($count, $err);
+    eval {
+        my $inserted = opml::import_opml($tmp);
+        $count = scalar(@$inserted);
+    };
+    if ($@) {
+        $c->flash(notice => "Errore import OPML: $@");
+    } else {
+        $c->flash(notice => "Import OPML completato: $count feed aggiunti");
+    }
+    $c->redirect_to('/rss_feeds');
+};
+
+# Export OPML (download)
+get '/opml/export' => sub {
+    my $c = shift;
+    my $feeds = db::get_all_rss_feeds();
+    my $opml_structure = {
+        head => { title => 'Esportazione Feed RSS' },
+        body => { outline => [ map { { title => $_->{title}, xmlUrl => $_->{url} } } @$feeds ] },
+    };
+    my $xml = XML::Simple->new(NoAttr => 1, RootName => 'opml');
+    my $output = $xml->XMLout($opml_structure);
+    $c->res->headers->content_type('application/xml; charset=utf-8');
+    $c->res->headers->content_disposition('attachment; filename="feeds.opml"');
+    $c->render(text => $output);
 };
 
 # Gestione URL web
