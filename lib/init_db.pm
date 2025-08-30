@@ -70,6 +70,21 @@ sub createDB {
         )
     });
 
+    # Imposta una chiave di cifratura di default se assente (ambiente dev)
+    eval {
+        my $sth_chk = $dbh->prepare('SELECT value FROM settings WHERE key = ?');
+        $sth_chk->execute('INFOCOLLECT_ENCRYPTION_KEY');
+        my ($val) = $sth_chk->fetchrow_array;
+        $sth_chk->finish();
+        if (!defined $val) {
+            require Digest::SHA;
+            my $rnd = Digest::SHA::sha256_hex(time . rand() . $$);
+            my $sth_ins = $dbh->prepare('INSERT INTO settings (key, value) VALUES (?, ?)');
+            $sth_ins->execute('INFOCOLLECT_ENCRYPTION_KEY', $rnd);
+            $sth_ins->finish();
+        }
+    };
+
     $dbh->do(q{
         CREATE TABLE IF NOT EXISTS summaries (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

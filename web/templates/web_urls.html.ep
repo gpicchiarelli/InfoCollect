@@ -1,0 +1,14 @@
+% layout 'default';
+<h1>Gestione URL Web</h1>
+<form method="POST" action="/web_urls">
+    <input type="url" name="url" placeholder="URL" required>
+    <button type="submit">Aggiungi URL</button>
+    <p class="hint">Gli URL attivi verranno visitati dal crawler.</p>
+    </form>
+<ul>
+    % for my $u (@$urls) {
+        <li><%= $u->{url} %> — <%= $u->{attivo} ? 'attivo' : 'inattivo' %></li>
+    % }
+</ul>
+<a href="/">Torna alla Dashboard</a>
+

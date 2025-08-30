@@ -6,6 +6,7 @@ use db;
 use rss_crawler;
 use web_crawler;
 use opml;
+use p2p;
 
 # Pagina principale
 get '/' => sub {
@@ -113,6 +114,37 @@ post '/crawler/web' => sub {
     my $c = shift;
     web_crawler::esegui_crawler_web();
     $c->redirect_to('/');
+};
+
+# API: invio task a peer
+post '/api/send_task' => sub {
+    my $c = shift;
+    my $peer_id   = $c->req->json // {};
+    my $peer      = $peer_id->{peer_id};
+    my $task_data = $peer_id->{task_data};
+    eval { p2p::send_task($peer, $task_data) };
+    if ($@) {
+        return $c->render(json => { success => 0, error => "$@" }, status => 500);
+    }
+    $c->render(json => { success => 1 });
+};
+
+# API: import OPML
+post '/api/import_opml' => sub {
+    my $c = shift;
+    my $file_path = $c->param('file_path');
+    eval { opml::import_opml($file_path) };
+    if ($@) {
+        return $c->render(json => { success => 0, error => "$@" }, status => 500);
+    }
+    $c->render(json => { success => 1 });
+};
+
+# API: elenco pagine
+get '/api/pages' => sub {
+    my $c = shift;
+    my $pages = db::get_all_web_data();
+    $c->render(json => $pages);
 };
 
 app->start;

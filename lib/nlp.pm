@@ -8,7 +8,7 @@ use JSON;
 use Lingua::Identify qw/langof/;
 use Lingua::Stem::It; # Sostituito Lingua::IT::Stemmer
 use Lingua::EN::Tagger;
-use Text::Extract::Word;
+use Text::Extract::Words;
 use Encode qw(decode);
 use Exporter 'import';
 

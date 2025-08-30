@@ -3,6 +3,7 @@ package p2p;
 use strict;
 use warnings;
 use IO::Socket::INET;
+use Socket qw(inet_aton sockaddr_in);
 use Crypt::PK::RSA;
 use Digest::SHA qw(sha256_hex);
 use Sys::Hostname;

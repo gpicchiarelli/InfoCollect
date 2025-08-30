@@ -1,0 +1,13 @@
+% layout 'default';
+<h1>Riassunti</h1>
+% if (stash('summaries') && scalar @{stash('summaries')}) {
+<ul>
+    % for my $s (@$summaries) {
+        <li>Pagina #<%= $s->{page_id} %>: <%= $s->{summary} %> (<%= $s->{created_at} %>)</li>
+    % }
+    </ul>
+% } else {
+    <p>Nessun riassunto disponibile.</p>
+% }
+<a href="/">Torna alla Dashboard</a>
+

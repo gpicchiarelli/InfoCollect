@@ -7,6 +7,11 @@ use lib './lib';
 use p2p;
 
 my $port = 5001;
+
+if (@ARGV && $ARGV[0] eq '--help') {
+    print "Daemon in ascolto sulla porta $port...\n";
+    exit 0;
+}
 my $server = IO::Socket::INET->new(
     LocalPort => $port,
     Proto     => 'tcp',
