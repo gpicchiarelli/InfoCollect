@@ -644,6 +644,13 @@ sub get_template_by_name {
     return $row ? $row->{content} : undef;
 }
 
+# Placeholder: rigenerazione procedure/batch (compat con CLI)
+sub regenerate_procedures {
+    # Nessuna procedura da rigenerare nello schema corrente.
+    # Mantenuto per compatibilità con la CLI.
+    return 1;
+}
+
 1;
 
 # Licenza BSD

@@ -31,103 +31,13 @@ Cross-reference: docs/REFERENCE.md (CLI interattiva).
 
 =cut
 
-=head1 FUNCTIONS
+=head1 USAGE & COMMANDS
 
-=over 4
+Per la lista completa dei comandi, sintassi dettagliata ed esempi pratici,
+consulta:
 
-=item avvia_cli()
-
-Avvia il REPL interattivo e gestisce i comandi dell'utente.
-
-=item mostra_aiuto()
-
-Mostra l'elenco dei comandi disponibili e il loro utilizzo.
-
-=item aggiungi_feed_rss($title, $url)
-
-Aggiunge un feed RSS.
-
-=item lista_feed_rss()
-
-Elenca i feed RSS.
-
-=item esegui_crawler_rss()
-
-Esegue il crawler RSS una volta.
-
-=item rilancia_rss()
-
-Rilancia operazioni RSS (wrapper di utilità).
-
-=item aggiungi_url_web($url)
-
-Aggiunge un URL web.
-
-=item lista_url_web()
-
-Elenca URL web.
-
-=item esegui_crawler_web()
-
-Esegue il crawler Web una volta.
-
-=item rilancia_web()
-
-Rilancia operazioni Web (wrapper di utilità).
-
-=item mostra_configurazione()
-
-Mostra le impostazioni correnti.
-
-=item imposta_configurazione($chiave, $valore)
-
-Imposta/aggiorna una impostazione.
-
-=item lista_riassunti()
-
-Elenca i riassunti.
-
-=item aggiungi_riassunto($page_id, $summary)
-
-Aggiunge un riassunto per una pagina.
-
-=item condividi_riassunto($summary_id, $recipient)
-
-Condivide un riassunto con un destinatario.
-
-=item aggiungi_mittente($name,$type,$config)
-
-Aggiunge un mittente di notifica.
-
-=item lista_mittenti()
-
-Elenca i mittenti.
-
-=item aggiorna_mittente($id,$name,$type,$config,$active)
-
-Aggiorna un mittente esistente.
-
-=item elimina_mittente($id)
-
-Elimina un mittente.
-
-=item rigenera_procedure()
-
-Placeholder per rigenerare procedure o batch.
-
-=item aggiungi_setting($chiave,$valore)
-
-Wrapper per aggiungere/aggiornare una impostazione.
-
-=item rimuovi_setting($chiave)
-
-Rimuove una impostazione.
-
-=item modifica_setting($chiave,$nuovo_valore)
-
-Aggiorna una impostazione.
-
-=back
+- docs/CLI.md — guida estesa alla console interattiva
+- docs/REFERENCE.md — mappa rapida delle funzioni
 
 =cut
 

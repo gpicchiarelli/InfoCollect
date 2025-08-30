@@ -76,7 +76,8 @@ Documentazione
 - API Web: vedi `web/api_server.pl`
 - P2P: vedi `lib/p2p.pm`
 - DB e funzioni: vedi `lib/db.pm`
- - Riferimenti cross‑reference: `docs/REFERENCE.md`
+- Riferimenti cross‑reference: `docs/REFERENCE.md`
+ - Console interattiva (comandi): `docs/CLI.md`
 
 Cross-reference funzioni (principali)
 -------------------------------------
