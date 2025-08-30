@@ -1,24 +1,15 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagine</title>
-</head>
-<body>
-    <h1>Gestione Pagine</h1>
-    <ul id="page-list">
-        <!-- Le pagine saranno caricate dinamicamente -->
-    </ul>
-    <script>
-        async function loadPages() {
-            const response = await fetch('/api/pages');
-            const pages = await response.json();
-            const pageList = document.getElementById('page-list');
-            pageList.innerHTML = pages.map(page => `<li>${page.title} - <a href="${page.url}" target="_blank">${page.url}</a></li>`).join('');
-        }
-
-        loadPages();
-    </script>
-</body>
-</html>
+% layout 'default';
+<h1 class="page-title">Pagine</h1>
+<section class="card">
+  <ul>
+    % for my $p (@$pages) {
+      <li>
+        <strong><%= $p->{title} // '(senza titolo)' %></strong>
+        — <a href="<%= $p->{url} %>" target="_blank">link</a>
+        <form method="POST" action="/pages/<%= $p->{id} %>/delete" style="display:inline-block; margin-left:10px;">
+          <button type="submit" class="btn">Elimina</button>
+        </form>
+      </li>
+    % }
+  </ul>
+</section>

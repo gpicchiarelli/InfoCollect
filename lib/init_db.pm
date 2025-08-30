@@ -5,9 +5,13 @@ use strict;
 use warnings;
 use DBI;
 use File::Spec;
+use File::Basename qw(dirname);
 
 sub createDB {
-    my $db_file = File::Spec->catfile(File::Spec->curdir(), "infocollect.db");
+    # Fissa il percorso del DB alla root del progetto (una cartella sopra lib/)
+    my $lib_dir = dirname(__FILE__);
+    my $root_dir = File::Spec->catdir($lib_dir, '..');
+    my $db_file = File::Spec->catfile($root_dir, "infocollect.db");
 
     if (-e $db_file) {
         print "Il database '$db_file' esiste già. Nessuna modifica effettuata.\n";

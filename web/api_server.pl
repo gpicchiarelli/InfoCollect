@@ -113,6 +113,7 @@ post '/rss_feeds' => sub {
     my $title = $c->param('title');
     my $url = $c->param('url');
     db::add_rss_feed($title, $url);
+    $c->flash(notice => 'Feed aggiunto');
     $c->redirect_to('/rss_feeds');
 };
 
@@ -136,6 +137,7 @@ post '/web_urls' => sub {
     my $c = shift;
     my $url = $c->param('url');
     db::add_web_url($url);
+    $c->flash(notice => 'URL aggiunto');
     $c->redirect_to('/web_urls');
 };
 
@@ -181,6 +183,23 @@ get '/summaries' => sub {
 };
 
 
+
+
+# Pagine web
+get '/pages' => sub {
+    my $c = shift;
+    my $pages = db::get_all_web_data();
+    $c->stash(pages => $pages);
+    $c->render(template => 'pages');
+};
+
+post '/pages/:id/delete' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    eval { db::delete_page($id) };
+    $c->flash(notice => $@ ? "Errore eliminazione pagina: $@" : 'Pagina eliminata');
+    $c->redirect_to('/pages');
+};
 # Logs viewer
 get '/logs' => sub {
     my $c = shift;
@@ -194,6 +213,23 @@ get '/logs.json' => sub {
     $c->render(json => db::get_logs());
 };
 
+
+
+# Articoli RSS
+get '/articles' => sub {
+    my $c = shift;
+    my $articles = db::get_all_rss_articles();
+    $c->stash(articles => $articles);
+    $c->render(template => 'articles');
+};
+
+post '/articles/:id/delete' => sub {
+    my $c = shift;
+    my $id = $c->param('id');
+    eval { db::delete_rss_article($id) };
+    $c->flash(notice => $@ ? "Errore eliminazione articolo: $@" : 'Articolo eliminato');
+    $c->redirect_to('/articles');
+};
 # Gestione canali di notifica
 get '/notifications' => sub {
     my $c = shift;

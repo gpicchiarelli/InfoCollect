@@ -1,0 +1,16 @@
+% layout 'default';
+<h1 class="page-title">Articoli RSS</h1>
+<section class="card">
+  <ul>
+    % for my $a (@$articles) {
+      <li>
+        <strong><%= $a->{title} // '(senza titolo)' %></strong>
+        — <a href="<%= $a->{url} %>" target="_blank">link</a>
+        % if ($a->{published_at}) { <small style="color:var(--muted);">(<%= $a->{published_at} %>)</small> % }
+        <form method="POST" action="/articles/<%= $a->{id} %>/delete" style="display:inline-block; margin-left:10px;">
+          <button type="submit" class="btn">Elimina</button>
+        </form>
+      </li>
+    % }
+  </ul>
+</section>

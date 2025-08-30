@@ -281,6 +281,9 @@ sub get_all_rss_data {
     return $data;
 }
 
+# Alias più esplicito
+sub get_all_rss_articles { return get_all_rss_data(); }
+
 # Funzione per aggiungere un URL web
 sub add_web_url {
     my ($url) = @_;
@@ -334,6 +337,25 @@ sub get_all_web_data {
     my $data = $sth->fetchall_arrayref({});
     $sth->finish();
     return $data;
+
+
+# Elimina un articolo RSS
+sub delete_rss_article {
+    my ($id) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare('DELETE FROM rss_articles WHERE id = ?');
+    $sth->execute($id);
+    $sth->finish();
+}
+
+# Elimina una pagina
+sub delete_page {
+    my ($id) = @_;
+    my $dbh = connect_db();
+    my $sth = $dbh->prepare('DELETE FROM pages WHERE id = ?');
+    $sth->execute($id);
+    $sth->finish();
+}
 }
 
 # Funzione per aggiornare lo stato di un URL web (attivo/inattivo)
