@@ -102,7 +102,10 @@
             <div class="row-actions">
               <form method="POST" action="/senders/<%= $s->{id} %>/check">
                 <input type="hidden" name="id" value="<%= $s->{id} %>">
-                <button type="submit" class="btn btn-sm">Verifica</button>
+                <button type="submit" class="btn btn-sm">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.2l-3.5-3.5-1.4 1.4L9 19l11-11-1.4-1.4z"/></svg>
+                  Verifica
+                </button>
               </form>
               <form method="POST" action="/senders/<%= $s->{id} %>/delete">
                 <button type="submit" class="btn btn-sm">Elimina</button>
@@ -112,7 +115,10 @@
           <form method="POST" action="/senders/<%= $s->{id} %>/test_form" class="form-grid" style="margin-top:8px;">
             <input type="hidden" name="id" value="<%= $s->{id} %>">
             <input type="text" name="message" placeholder="Messaggio di test" value="Messaggio di test da InfoCollect">
-            <button type="submit" class="btn btn-primary">Invia test</button>
+              <button type="submit" class="btn btn-primary">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+                Invia test
+              </button>
           </form>
         </li>
       % }

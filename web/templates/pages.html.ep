@@ -1,21 +1,26 @@
 % layout 'default';
 <h1 class="page-title">Pagine</h1>
 <section class="card">
-  <ul>
+  <style> .pages-table { --table-cols: 2fr 3fr auto; } </style>
+  <div class="table pages-table">
+    <div class="table-header">
+      <div>Titolo</div>
+      <div>URL</div>
+      <div>Azioni</div>
+    </div>
     % for my $p (@$pages) {
-      <li>
-        <div class="row">
-          <div class="row-main">
-            <strong><%= $p->{title} // '(senza titolo)' %></strong>
-            — <a href="<%= $p->{url} %>" target="_blank">link</a>
-          </div>
-          <div class="row-actions">
-            <form method="POST" action="/pages/<%= $p->{id} %>/delete">
-              <button type="submit" class="btn btn-sm">Elimina</button>
-            </form>
-          </div>
+      <div class="tr">
+        <div class="td"><strong><%= $p->{title} // '(senza titolo)' %></strong></div>
+        <div class="td"><a href="<%= $p->{url} %>" target="_blank"><%= $p->{url} %></a></div>
+        <div class="td">
+          <form method="POST" action="/pages/<%= $p->{id} %>/delete">
+            <button type="submit" class="btn btn-sm">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 7h2v8h-2v-8zm4 0h2v8h-2v-8zM8 10h2v8H8v-8z"/></svg>
+              Elimina
+            </button>
+          </form>
         </div>
-      </li>
+      </div>
     % }
-  </ul>
+  </div>
 </section>

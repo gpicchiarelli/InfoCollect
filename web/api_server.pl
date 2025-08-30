@@ -23,6 +23,22 @@ app->secrets([ $s{MOJO_SECRET} || 'infocollect_dev_secret' ]);
 # Con richieste come /static/style.css cerchiamo in "$FindBin::Bin/static/style.css"
 app->static->paths->[0] = $FindBin::Bin;
 
+# Log su DB: cattura i messaggi del logger Mojolicious e i warn perl
+eval {
+    app->log->on(message => sub {
+        my ($log, $level, @lines) = @_;
+        my $msg = join('', @lines);
+        eval { db::add_log(uc($level), $msg) };
+    });
+    $SIG{__WARN__} = sub {
+        my $m = join('', @_);
+        eval { db::add_log('WARN', $m) };
+        CORE::warn($m);
+    };
+    my $st = db::get_db_status();
+    db::add_log('INFO', 'Web server avviato. DB: ' . ($st->{path}//''));
+};
+
 # Health and version endpoints
 get '/healthz' => sub {
     my $c = shift;
@@ -429,12 +445,14 @@ post '/senders' => sub {
 # Avvio dei crawler
 post '/crawler/rss' => sub {
     my $c = shift;
+    eval { db::add_log('INFO', 'Avvio crawler RSS richiesto da UI') };
     rss_crawler::esegui_crawler_rss();
     $c->redirect_to('/');
 };
 
 post '/crawler/web' => sub {
     my $c = shift;
+    eval { db::add_log('INFO', 'Avvio crawler Web richiesto da UI') };
     web_crawler::esegui_crawler_web();
     $c->redirect_to('/');
 };

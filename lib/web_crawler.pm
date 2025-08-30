@@ -115,12 +115,17 @@ sub esegui_crawler_web {
                 my $dbh_worker = db::connect_db();
                 my $insert_sth = $dbh_worker->prepare("INSERT INTO pages (url, title, content, summary) VALUES (?, ?, ?, ?)");
                 $insert_sth->execute($url, $title, $content, $summary);
+                eval { db::add_log('INFO', "WEB: pagina aggiunta '$title' ($url)") };
             } else {
-                warn "Errore durante il download dell'URL $url: " . $res->status_line;
+                my $err = "Errore durante il download dell'URL $url: " . $res->status_line;
+                warn $err;
+                eval { db::add_log('ERROR', $err) };
             }
         };
         if ($@) {
-            warn "Errore durante l'elaborazione dell'URL: $@";
+            my $err = "Errore durante l'elaborazione dell'URL: $@";
+            warn $err;
+            eval { db::add_log('ERROR', $err) };
         }
 
         $pm->finish;

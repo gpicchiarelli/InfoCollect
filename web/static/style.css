@@ -25,6 +25,10 @@
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+  --fs-base: 16px;
+  --fs-small: 13px;
+  --fs-title: clamp(22px, 2.2vw + 8px, 32px);
+  --fs-section: clamp(16px, 1.2vw + 6px, 20px);
 }
 
 html, body {
@@ -35,6 +39,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
     "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--fs-base);
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
@@ -81,12 +86,12 @@ body {
 }
 
 .page-title {
-  font-size: 28px; /* scala tipografica */
+  font-size: var(--fs-title);
   font-weight: 700;
   margin: var(--space-2) 0 var(--space-4);
 }
 .section-title {
-  font-size: 18px;
+  font-size: var(--fs-section);
   font-weight: 600;
   margin: 0 0 var(--space-3);
 }
@@ -109,7 +114,7 @@ body {
 /* Forms */
 .form-grid { display: grid; grid-template-columns: 1fr auto; gap: var(--space-3); align-items: center; }
 .field { display: contents; }
-label { font-size: 12px; color: var(--muted); }
+label { font-size: var(--fs-small); color: var(--muted); }
 input[type="text"], input[type="url"], input[type="number"], input[type="email"], input[type="password"], textarea, select {
   width: 100%;
   height: var(--control-h);
@@ -137,6 +142,9 @@ input:focus, textarea:focus {
 .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
 .btn-sm { height: 32px; line-height: 30px; padding: 0 var(--space-3); border-radius: var(--radius-sm); }
 
+/* Icons */
+.icon { width: 16px; height: 16px; vertical-align: -2px; margin-right: 6px; fill: currentColor; }
+
 /* Lists */
 ul { list-style: none; padding: 0; margin: 0; }
 li { padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
@@ -153,6 +161,24 @@ a { color: var(--accent); text-decoration: none; }
   .form-grid { grid-template-columns: 1fr; }
   .row { flex-direction: column; align-items: flex-start; }
   .row-actions { margin-top: var(--space-2); }
+}
+
+/* Grid helpers */
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-3); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--space-3); }
+@media (max-width: 900px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* Table-like layouts for wide screens */
+.table { display: grid; gap: 0; }
+.table-header { display: none; }
+.tr { display: block; padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
+.td { display: block; }
+@media (min-width: 900px) {
+  .table-header { display: grid; grid-template-columns: var(--table-cols); font-weight: 600; color: var(--muted); padding: var(--space-2) 0; border-bottom: 1px solid var(--border); }
+  .tr { display: grid; grid-template-columns: var(--table-cols); align-items: center; padding: var(--space-3) 0; }
+  .td { padding-right: var(--space-4); }
 }
 
 .app-footer { border-top: 1px solid var(--border); }

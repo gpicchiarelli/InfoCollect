@@ -22,10 +22,19 @@
           <div class="row-actions">
             <form method="POST" action="/web_urls/<%= $u->{id} %>/toggle">
               <input type="hidden" name="status" value="<%= $u->{attivo} ? 0 : 1 %>">
-              <button type="submit" class="btn btn-sm"><%= $u->{attivo} ? 'Disattiva' : 'Attiva' %></button>
+              <button type="submit" class="btn btn-sm">
+                % if ($u->{attivo}) {
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12l5 5L22 7l-2-2-8 8-3-3z"/></svg>Disattiva
+                % } else {
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a8 8 0 100 16 8 8 0 000-16zm1 4v3h3v2h-3v3h-2v-3H8v-2h3V8h2z"/></svg>Attiva
+                % }
+              </button>
             </form>
             <form method="POST" action="/web_urls/<%= $u->{id} %>/delete">
-              <button type="submit" class="btn btn-sm">Elimina</button>
+              <button type="submit" class="btn btn-sm">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 7h2v8h-2v-8zm4 0h2v8h-2v-8zM8 10h2v8H8v-8z"/></svg>
+                Elimina
+              </button>
             </form>
           </div>
         </div>
