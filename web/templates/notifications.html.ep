@@ -1,15 +1,19 @@
 % layout 'default';
-<h1>Canali di Notifica</h1>
-<form method="POST" action="/notifications">
-    <input type="text" name="name" placeholder="Nome" required>
-    <input type="text" name="type" placeholder="Tipo (IRC/Mail/RSS/Teams/WhatsApp)" required>
-    <textarea name="config" placeholder='Config JSON' required></textarea>
-    <button type="submit">Aggiungi</button>
-</form>
-<ul>
-    % for my $c (@$channels) {
-        <li><strong><%= $c->{name} %></strong> — <%= $c->{type} %></li>
-    % }
-</ul>
-<a href="/">Torna alla Dashboard</a>
-
+<h1 class="page-title">Canali di Notifica</h1>
+<section class="card" aria-labelledby="add-channel">
+  <h2 id="add-channel" class="section-title">Aggiungi Canale</h2>
+  <form method="POST" action="/notifications">
+      <input type="text" name="name" placeholder="Nome" required>
+      <input type="text" name="type" placeholder="Tipo (IRC/Mail/RSS/Teams/WhatsApp)" required>
+      <textarea name="config" placeholder='Config JSON' required></textarea>
+      <button type="submit" class="btn btn-primary">Aggiungi</button>
+  </form>
+</section>
+<section class="card" aria-labelledby="list-channel">
+  <h2 id="list-channel" class="section-title">Elenco Canali</h2>
+  <ul>
+      % for my $c (@$channels) {
+          <li><strong><%= $c->{name} %></strong> — <%= $c->{type} %></li>
+      % }
+  </ul>
+</section>

@@ -1,14 +1,18 @@
 % layout 'default';
-<h1>Impostazioni</h1>
-<form method="POST" action="/settings">
-    <input type="text" name="key" placeholder="Chiave" required>
-    <input type="text" name="value" placeholder="Valore" required>
-    <button type="submit">Salva</button>
-</form>
-<ul>
-    % for my $k (sort keys %$settings) {
-        <li><strong><%= $k %></strong> = <%= $settings->{$k} %></li>
-    % }
-</ul>
-<a href="/">Torna alla Dashboard</a>
-
+<h1 class="page-title">Impostazioni</h1>
+<section class="card" aria-labelledby="set-config">
+  <h2 id="set-config" class="section-title">Aggiungi/Aggiorna</h2>
+  <form method="POST" action="/settings">
+      <input type="text" name="key" placeholder="Chiave" required>
+      <input type="text" name="value" placeholder="Valore" required>
+      <button type="submit" class="btn btn-primary">Salva</button>
+  </form>
+</section>
+<section class="card" aria-labelledby="list-config">
+  <h2 id="list-config" class="section-title">Tutte le impostazioni</h2>
+  <ul>
+      % for my $k (sort keys %$settings) {
+          <li><strong><%= $k %></strong> = <%= $settings->{$k} %></li>
+      % }
+  </ul>
+</section>

@@ -1,14 +1,19 @@
 % layout 'default';
-<h1>Gestione URL Web</h1>
-<form method="POST" action="/web_urls">
-    <input type="url" name="url" placeholder="URL" required>
-    <button type="submit">Aggiungi URL</button>
-    <p class="hint">Gli URL attivi verranno visitati dal crawler.</p>
-    </form>
-<ul>
-    % for my $u (@$urls) {
-        <li><%= $u->{url} %> — <%= $u->{attivo} ? 'attivo' : 'inattivo' %></li>
-    % }
-</ul>
-<a href="/">Torna alla Dashboard</a>
+<h1 class="page-title">URL Web</h1>
+<section class="card" aria-labelledby="add-url">
+  <h2 id="add-url" class="section-title">Aggiungi URL</h2>
+  <form method="POST" action="/web_urls">
+      <input type="url" name="url" placeholder="https://esempio.com" required>
+      <button type="submit" class="btn btn-primary">Aggiungi</button>
+      <p class="hint" style="grid-column: 1/-1; color: var(--muted); margin: 0;">Gli URL attivi verranno visitati dal crawler.</p>
+  </form>
+</section>
 
+<section class="card" aria-labelledby="list-url">
+  <h2 id="list-url" class="section-title">Elenco URL</h2>
+  <ul>
+    % for my $u (@$urls) {
+      <li><a href="<%= $u->{url} %>" target="_blank"><%= $u->{url} %></a> — <%= $u->{attivo} ? 'attivo' : 'inattivo' %></li>
+    % }
+  </ul>
+</section>
