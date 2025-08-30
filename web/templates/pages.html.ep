@@ -8,7 +8,7 @@
       <div>URL</div>
       <div>Azioni</div>
     </div>
-    % for my $p (@$pages) {
+    % for my $p (@$rows) {
       <div class="tr">
         <div class="td"><strong><%= $p->{title} // '(senza titolo)' %></strong></div>
         <div class="td"><a href="<%= $p->{url} %>" target="_blank"><%= $p->{url} %></a></div>
@@ -23,12 +23,12 @@
       </div>
     % }
   </div>
-  % if (($pages // 1) > 1) {
+  % if ((stash('total_pages') // 1) > 1) {
     <nav class="pagination">
-      % my $p = $page // 1; my $pp = $per // 20;
-      % my $prev = $p > 1 ? $p-1 : 1; my $next = $p < $pages ? $p+1 : $pages;
+      % my $p = $page // 1; my $pp = $per // 20; my $tp = stash('total_pages') // 1;
+      % my $prev = $p > 1 ? $p-1 : 1; my $next = $p < $tp ? $p+1 : $tp;
       <a href="/pages?page=<%= $prev %>&per=<%= $pp %>">« Prev</a>
-      % for my $i (1..$pages) {
+      % for my $i (1..$tp) {
         % if ($i == $p) {
           <span class="current"><%= $i %></span>
         % } else {

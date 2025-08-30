@@ -314,9 +314,9 @@ get '/summaries' => sub {
 get '/pages' => sub {
     my $c = shift;
     my $page = $c->param('page') // 1; my $per = $c->param('per') // 20;
-    my ($pages_rows,$total) = db::get_pages_paginated($page,$per);
-    my $pages = int(($total + $per - 1)/$per) || 1;
-    $c->stash(pages => $pages_rows, page=>$page+0, per=>$per+0, total=>$total+0, pages=>$pages+0);
+    my ($rows,$total) = db::get_pages_paginated($page,$per);
+    my $total_pages = int(($total + $per - 1)/$per) || 1;
+    $c->stash(rows => $rows, page=>$page+0, per=>$per+0, total=>$total+0, total_pages=>$total_pages+0);
     $c->render(template => 'pages');
 };
 

@@ -14,7 +14,7 @@ use Digest::SHA qw(sha256_hex);
 use Sys::Hostname;
 use p2p;
 use config_manager;
-use DBI;
+use db; # usa lo stesso DB centralizzato
 
 =pod
 
@@ -33,14 +33,13 @@ Condivide DB e impostazioni con API web e console CLI.
 my $intervallo = shift @ARGV || 30; # default ogni 30 minuti
 
 if ($ARGV[0] && $ARGV[0] eq 'show-latency') {
-    my $dbh = DBI->connect("dbi:SQLite:dbname=infocollect.db", "", "", { RaiseError => 1, AutoCommit => 1 });
+    my $dbh = db::connect_db();
     my $sth = $dbh->prepare("SELECT host, latency_ms, last_updated FROM latency_monitor ORDER BY last_updated DESC");
     $sth->execute();
     while (my $row = $sth->fetchrow_hashref) {
         print "Host: $row->{host}, Latenza: $row->{latency_ms} ms, Ultimo aggiornamento: $row->{last_updated}\n";
     }
     $sth->finish();
-    $dbh->disconnect();
     exit;
 }
 

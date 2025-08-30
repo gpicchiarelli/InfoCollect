@@ -33,3 +33,12 @@ inc/
 /MANIFEST.bak
 /pm_to_blib
 /*.zip
+
+# Runtime database files
+/infocollect.db
+/var/*.db
+/var/*.db-wal
+/var/*.db-shm
+/*.db
+/*.db-wal
+/*.db-shm
